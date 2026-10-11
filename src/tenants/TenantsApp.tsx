@@ -3,6 +3,7 @@ import type { ApiClient, Session } from '../contract';
 import { tenantStatuses, type TenantStatus } from '../data/tenants';
 import { messages } from '../messages';
 import { tenantMessages as text } from './messages';
+import { RegisterTenantScreen } from './RegisterTenantScreen';
 import { useTenantList } from './useTenantList';
 import './operator.css';
 
@@ -16,11 +17,14 @@ export interface TenantsAppProps {
 
 // The role check hides the screen; the service refuses anyone else anyway (RN-IDA-PT-09).
 export function TenantsApp({ apiClient, session }: TenantsAppProps) {
+  // A tiny view state instead of a router: the container owns the real routes.
+  const [view, setView] = useState<'list' | 'register'>('list');
   if (!session.roles.includes(PLATFORM_ADMINISTRATOR)) return null;
-  return <TenantList apiClient={apiClient} />;
+  if (view === 'register') return <RegisterTenantScreen apiClient={apiClient} onBack={() => setView('list')} />;
+  return <TenantList apiClient={apiClient} onRegister={() => setView('register')} />;
 }
 
-function TenantList({ apiClient }: { apiClient: ApiClient }) {
+function TenantList({ apiClient, onRegister }: { apiClient: ApiClient; onRegister: () => void }) {
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState<TenantStatus | undefined>();
   const { state, retry } = useTenantList(apiClient, { page, limit: LIMIT, status });
@@ -30,6 +34,9 @@ function TenantList({ apiClient }: { apiClient: ApiClient }) {
       <header className="operator-topbar">
         <p className="operator-eyebrow">{text.eyebrow}</p>
         <h1>{text.title}</h1>
+        <button type="button" className="operator-outline" onClick={onRegister}>
+          {text.register.action}
+        </button>
       </header>
       <section className="operator-panel">
         <div className="operator-panel-head">
