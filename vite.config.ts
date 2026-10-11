@@ -11,5 +11,7 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['src/test-setup.ts'],
+    // Lets the theme test read theme.css as text; other CSS stays unprocessed.
+    css: { include: [/\.css\?raw$/] },
   },
 });

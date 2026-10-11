@@ -13,3 +13,10 @@ export interface MountProps {
   apiClient: ApiClient;
   session: Session;
 }
+
+// Shape of the error the container's client rejects with (outline of ADR-006 F4, spec gap G-2).
+export interface ApiError {
+  status?: number;
+  code?: string;
+  traceId?: string;
+}
