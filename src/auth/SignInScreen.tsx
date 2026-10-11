@@ -17,9 +17,11 @@ export interface SignInScreenProps {
   notice?: string;
   // Called after a good answer was handed to the session, so the caller can re-read its access mark.
   onSignedIn?: () => void;
+  // When given, the 'Crear cuenta' link calls it instead of navigating (the container owns real routes).
+  onCreateAccount?: () => void;
 }
 
-export function SignInScreen({ identifier, apiClient, session, notice, onSignedIn }: SignInScreenProps) {
+export function SignInScreen({ identifier, apiClient, session, notice, onSignedIn, onCreateAccount }: SignInScreenProps) {
   const platform = identifier === undefined;
   const { sending, failure, submit } = useSignIn(identifier, apiClient, session);
   const [email, setEmail] = useState('');
@@ -92,7 +94,16 @@ export function SignInScreen({ identifier, apiClient, session, notice, onSignedI
         <>
           <div className="auth-divider" />
           <p className="auth-footer">
-            {messages.signIn.noAccount} <a href={signUpHref}>{messages.signIn.createAccount}</a>
+            {messages.signIn.noAccount} <a
+              href={signUpHref}
+              onClick={(e) => {
+                if (!onCreateAccount) return;
+                e.preventDefault();
+                onCreateAccount();
+              }}
+            >
+              {messages.signIn.createAccount}
+            </a>
           </p>
         </>
       )}
