@@ -39,3 +39,26 @@ export function signIn(
 export function changeOwnPassword(client: ApiClient, newPassword: string, signal: AbortSignal): Promise<void> {
   return client.request<void>('/api/v1/security/sessions/password', { method: 'PUT', body: { newPassword }, signal });
 }
+
+export interface CreateCustomerRequest {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  password: string;
+  passwordConfirmation: string;
+}
+
+export function createCustomerPath(_identifier: string): string {
+  return '';
+}
+
+export function createCustomerAccount(
+  _client: ApiClient,
+  _identifier: string,
+  _body: CreateCustomerRequest,
+  _key: string,
+  _signal: AbortSignal,
+): Promise<void> {
+  return Promise.resolve();
+}
