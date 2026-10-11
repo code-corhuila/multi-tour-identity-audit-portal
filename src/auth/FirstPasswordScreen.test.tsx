@@ -45,7 +45,7 @@ describe('FirstPasswordScreen', () => {
     save();
     expect(request).not.toHaveBeenCalled();
     const field = screen.getByLabelText('Nueva contraseña');
-    expect(field.getAttribute('aria-describedby')).toBe(screen.getByText('Ingresa tu nueva contraseña.').id);
+    expect(field.getAttribute('aria-describedby')).toContain(screen.getByText('Ingresa tu nueva contraseña.').id);
   });
 
   it('sends only the new password to the own-password route', async () => {
@@ -65,7 +65,7 @@ describe('FirstPasswordScreen', () => {
     fill('password', 'password');
     save();
     const text = await screen.findByText(POLICY);
-    expect(screen.getByLabelText('Nueva contraseña').getAttribute('aria-describedby')).toBe(text.id);
+    expect(screen.getByLabelText('Nueva contraseña').getAttribute('aria-describedby')).toContain(text.id);
     expect(screen.queryByText('password is too common')).not.toBeInTheDocument();
   });
 
@@ -86,11 +86,15 @@ describe('FirstPasswordScreen', () => {
   });
 
   it('expired_temporary_credential_shows_its_notice', async () => {
-    const { onSaved } = setup(vi.fn().mockRejectedValue(failure(401, 'token expired')));
+    const { onSaved, session } = setup(vi.fn().mockRejectedValue(failure(401, 'token expired')));
     fill('Abcdef1!x', 'Abcdef1!x');
     save();
     expect(await screen.findByText(EXPIRED)).toBeInTheDocument();
     expect(onSaved).not.toHaveBeenCalled();
+    expect(screen.queryByRole('button', { name: 'Guardar contraseña' })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Nueva contraseña')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Volver al inicio de sesión' }));
+    expect(session.close).toHaveBeenCalledTimes(1);
   });
 
   it('disables the button while sending', async () => {
@@ -107,5 +111,56 @@ describe('FirstPasswordScreen', () => {
     fill('Abcdef1!x', 'Abcdef1!x');
     save();
     expect(await screen.findByText(/No pudimos completar la solicitud/)).toHaveTextContent('trace-9');
+  });
+
+  it('describes the new password field with the requirements group', () => {
+    setup(vi.fn());
+    const group = screen.getByRole('group', { name: 'La contraseña debe contener:' });
+    expect(screen.getByLabelText('Nueva contraseña').getAttribute('aria-describedby')).toContain(group.id);
+  });
+
+  it('moves focus to the first invalid field after a failed check', () => {
+    setup(vi.fn());
+    fill('Abcdef1!x', 'Abcdef1!y');
+    save();
+    expect(screen.getByLabelText('Confirmar contraseña')).toHaveFocus();
+  });
+
+  it('moves focus to the new password after the service refuses the policy', async () => {
+    setup(vi.fn().mockRejectedValue(failure(400, 'policy')));
+    fill('password', 'password');
+    save();
+    await screen.findByText(POLICY);
+    expect(screen.getByLabelText('Nueva contraseña')).toHaveFocus();
+  });
+
+  it('shows the policy refusal and the mismatch together', async () => {
+    setup(vi.fn().mockRejectedValue(failure(400, 'policy')));
+    fill('password', 'password');
+    save();
+    await screen.findByText(POLICY);
+    fill('password', 'other');
+    save();
+    expect(screen.getByText(POLICY)).toBeInTheDocument();
+    expect(screen.getByText('Las contraseñas no coinciden.')).toBeInTheDocument();
+  });
+
+  it('a newer request replaces the older one', async () => {
+    const calls: { signal: AbortSignal; resolve: (value: unknown) => void }[] = [];
+    const request = vi.fn((_path: string, init?: { signal?: AbortSignal }) => {
+      return new Promise((resolve) => calls.push({ signal: init!.signal!, resolve }));
+    });
+    const { onSaved } = setup(request as unknown as ApiClient['request']);
+    fill('Abcdef1!x', 'Abcdef1!x');
+    save();
+    await waitFor(() => expect(calls).toHaveLength(1));
+    fill('Abcdef1!z', 'Abcdef1!z');
+    fireEvent.submit(screen.getByRole('button', { name: 'Guardando…' }).closest('form')!);
+    await waitFor(() => expect(calls).toHaveLength(2));
+    expect(calls[0].signal.aborted).toBe(true);
+    await act(async () => calls[0].resolve(undefined));
+    expect(onSaved).not.toHaveBeenCalled();
+    await act(async () => calls[1].resolve(undefined));
+    expect(onSaved).toHaveBeenCalledTimes(1);
   });
 });

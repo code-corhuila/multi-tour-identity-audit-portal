@@ -55,4 +55,31 @@ describe('mount routes by the access mark', () => {
     expect(await screen.findByRole('heading', { name: 'Bienvenido de nuevo' })).toBeInTheDocument();
     expect(screen.getByText('Contraseña guardada. Inicia sesión con ella.')).toBeInTheDocument();
   });
+
+  it('unknown_access_fails_closed: only an absent mark shows the sign-in', async () => {
+    await show({ identifier: 'acme', access: 'bogus' as never });
+    expect(screen.getByText(/La empresa está inactiva/)).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Bienvenido de nuevo' })).not.toBeInTheDocument();
+  });
+
+  it.each(['restricted', 'password-change'] as const)(
+    'invalid_identifier_shows_not_found_before_the_%s branch',
+    async (access) => {
+      await show({ identifier: 'Bad/Id', access });
+      expect(screen.getByRole('heading', { name: 'Página no encontrada' })).toBeInTheDocument();
+      expect(screen.queryByText(/La empresa está inactiva/)).not.toBeInTheDocument();
+      expect(screen.queryByLabelText('Nueva contraseña')).not.toBeInTheDocument();
+    },
+  );
+
+  it('re_reads_the_access_after_a_good_sign_in', async () => {
+    const { session } = await show({ identifier: 'acme' });
+    session.open = vi.fn(() => {
+      session.access = 'password-change';
+    });
+    fireEvent.change(screen.getByLabelText('Correo electrónico'), { target: { value: 'ana@acme.co' } });
+    fireEvent.change(screen.getByLabelText('Contraseña'), { target: { value: 'Temp-pass1!' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Iniciar sesión' }));
+    expect(await screen.findByRole('heading', { name: 'Definir nueva contraseña' })).toBeInTheDocument();
+  });
 });
