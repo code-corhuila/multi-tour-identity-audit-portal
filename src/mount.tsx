@@ -7,6 +7,7 @@ import { SignInScreen } from './auth/SignInScreen';
 import type { MountProps } from './contract';
 import { isValidIdentifier } from './data/security';
 import { messages } from './messages';
+import { PLATFORM_ADMINISTRATOR, TenantsApp } from './tenants/TenantsApp';
 import { AuthCard } from './ui/AuthCard';
 
 // The access mark of the session decides the screen (RN-SEC-PT-05, -08). It fails closed: only an absent mark
@@ -36,6 +37,10 @@ export function AccessRoutes({ apiClient, session, identifier }: MountProps) {
     );
   }
   if (access !== undefined) return <RestrictedNotice session={session} />;
+  // No company link and a signed-in Platform Administrator: the platform screens replace the sign-in.
+  if (identifier === undefined && session.roles.includes(PLATFORM_ADMINISTRATOR)) {
+    return <TenantsApp apiClient={apiClient} session={session} />;
+  }
   if (view === 'sign-up' && identifier !== undefined) {
     return (
       <RegisterScreen
