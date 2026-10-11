@@ -12,9 +12,11 @@ export interface SignInScreenProps {
   identifier?: string;
   apiClient: ApiClient;
   session: Session;
+  // Shown as a success line, e.g. after the first password was saved.
+  notice?: string;
 }
 
-export function SignInScreen({ identifier, apiClient, session }: SignInScreenProps) {
+export function SignInScreen({ identifier, apiClient, session, notice }: SignInScreenProps) {
   const platform = identifier === undefined;
   const { sending, failure, submit } = useSignIn(identifier, apiClient, session);
   const [email, setEmail] = useState('');
@@ -64,8 +66,8 @@ export function SignInScreen({ identifier, apiClient, session }: SignInScreenPro
           error={errors.password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        <p className={failure ? 'auth-feedback is-error' : 'auth-feedback'} aria-live="polite">
-          {failure}
+        <p className={failure ? 'auth-feedback is-error' : 'auth-feedback is-success'} aria-live="polite">
+          {failure ?? notice}
         </p>
         <button className="auth-submit" type="submit" disabled={sending}>
           {sending ? messages.sending : text.submit}
