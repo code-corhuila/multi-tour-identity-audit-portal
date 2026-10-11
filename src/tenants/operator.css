@@ -1,0 +1,32 @@
+/* Platform layout tokens from the Mockup (main.css 20260901-3, `platform-*`); the sidebar belongs to the container. */
+.operator-content {
+  width: min(100%, 1380px);
+  padding: 44px clamp(24px, 5vw, 76px) 70px;
+  background: #f7f5ef;
+  color: #1c2326;
+  font-family: "Manrope", sans-serif;
+}
+.operator-content, .operator-content *, .operator-content *::before, .operator-content *::after { box-sizing: border-box; }
+.operator-topbar { margin-bottom: 36px; }
+.operator-topbar h1, .operator-panel h2 { margin: 4px 0 0; color: #172426; letter-spacing: -0.045em; }
+.operator-topbar h1 { font-size: clamp(1.8rem, 1.45rem + 0.9vw, 2.35rem); line-height: 1.12; }
+.operator-eyebrow { margin: 0; color: #667579; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.09em; text-transform: uppercase; }
+.operator-panel { padding: 26px; border: 1px solid #dce5df; border-radius: 16px; background: #fffefb; }
+.operator-panel h2 { font-size: 1.18rem; }
+.operator-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+.operator-filter { display: grid; gap: 6px; font-size: 0.82rem; font-weight: 700; color: #243238; }
+.operator-filter select { min-height: 40px; padding: 0 10px; border: 1px solid #dfe3e1; border-radius: 10px; background: #fffefb; font: inherit; }
+.operator-table-wrap { overflow-x: auto; }
+.operator-table { width: 100%; border-collapse: collapse; min-width: 600px; text-align: left; }
+.operator-table th { padding: 0 12px 12px; color: #5f6b6e; font-size: 0.71rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.operator-table td { padding: 16px 12px; border-top: 1px solid #e3e8e4; color: #48575b; font-size: 0.88rem; vertical-align: middle; }
+.operator-table strong { color: #213034; }
+.operator-status { display: inline-flex; padding: 6px 9px; border-radius: 999px; background: #eceeed; color: #48575b; font-size: 0.74rem; font-weight: 800; }
+.operator-status.is-active { background: #ddf0e7; color: #16675d; }
+.operator-status.is-inactive { background: #f5e7df; color: #9d4c36; }
+.operator-status.is-failed { background: #f7dedb; color: #9d3d34; }
+.operator-outline { min-height: 40px; padding: 0 16px; border: 1px solid #bcd4ca; border-radius: 10px; background: #f5faf7; color: #0e756c; font: inherit; font-weight: 800; cursor: pointer; }
+.operator-outline:disabled { border-color: #eef3f0; background: #eef3f0; color: #93a29d; cursor: not-allowed; }
+.operator-pages { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 20px; color: #48575b; }
+.operator-error { display: grid; gap: 12px; justify-items: start; color: #b34a4a; }
+.operator-error p { margin: 0; }
