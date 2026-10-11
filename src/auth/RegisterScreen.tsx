@@ -33,7 +33,8 @@ export function RegisterScreen({ identifier, apiClient, onDone, onSignIn }: Regi
   const [values, setValues] = useState({ firstName: '', lastName: '', email: '', phone: '', password: '', passwordConfirmation: '' });
   const [local, setLocal] = useState<Partial<Record<RegisterField, string>>>({});
   const set = (field: RegisterField) => (e: { target: { value: string } }) => setValues({ ...values, [field]: e.target.value });
-  const errors = { ...failure?.fields, ...local };
+  // `local` holds explicit undefined values, so each field is read on its own instead of spreading.
+  const errors = Object.fromEntries(order.map((f) => [f, local[f] ?? failure?.fields[f]])) as Partial<Record<RegisterField, string>>;
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
