@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { ApiClient, Session } from '../contract';
 import { SignInScreen } from './SignInScreen';
 
-const REFUSED = 'Correo o contraseÃ±a incorrectos';
+const REFUSED = 'Correo o contraseña incorrectos';
 const answer = { accessToken: 'a.b.c', tokenType: 'Bearer', expiresIn: 900 };
 
 function setup(identifier: string | undefined, request: ApiClient['request']) {
@@ -14,11 +14,11 @@ function setup(identifier: string | undefined, request: ApiClient['request']) {
 }
 
 function fill(email: string, password: string) {
-  fireEvent.change(screen.getByLabelText('Correo electrÃ³nico'), { target: { value: email } });
-  fireEvent.change(screen.getByLabelText('ContraseÃ±a'), { target: { value: password } });
+  fireEvent.change(screen.getByLabelText('Correo electrónico'), { target: { value: email } });
+  fireEvent.change(screen.getByLabelText('Contraseña'), { target: { value: password } });
 }
 
-const submit = (name = 'Iniciar sesiÃ³n') => fireEvent.click(screen.getByRole('button', { name }));
+const submit = (name = 'Iniciar sesión') => fireEvent.click(screen.getByRole('button', { name }));
 const refusal = (status: number, message: string) => Object.assign(new Error(message), { status, message });
 
 describe('SignInScreen at a company', () => {
@@ -34,10 +34,10 @@ describe('SignInScreen at a company', () => {
     setup('acme', request);
     submit();
     expect(request).not.toHaveBeenCalled();
-    const email = screen.getByLabelText('Correo electrÃ³nico');
-    const password = screen.getByLabelText('ContraseÃ±a');
-    expect(email.getAttribute('aria-describedby')).toBe(screen.getByText('Ingresa tu correo electrÃ³nico.').id);
-    expect(password.getAttribute('aria-describedby')).toBe(screen.getByText('Ingresa tu contraseÃ±a.').id);
+    const email = screen.getByLabelText('Correo electrónico');
+    const password = screen.getByLabelText('Contraseña');
+    expect(email.getAttribute('aria-describedby')).toBe(screen.getByText('Ingresa tu correo electrónico.').id);
+    expect(password.getAttribute('aria-describedby')).toBe(screen.getByText('Ingresa tu contraseña.').id);
   });
 
   it('tenant_form_uses_the_identifier_of_the_link', async () => {
@@ -68,7 +68,7 @@ describe('SignInScreen at a company', () => {
     setup('acme', request as unknown as ApiClient['request']);
     fill('ana@acme.co', 'secret-pass');
     submit();
-    const sending = await screen.findByRole('button', { name: 'Ingresandoâ€¦' });
+    const sending = await screen.findByRole('button', { name: 'Ingresando…' });
     expect(sending).toBeDisabled();
     await act(async () => resolve(answer));
   });
@@ -85,7 +85,7 @@ describe('SignInScreen at a company', () => {
     submit();
     expect(await screen.findByText(REFUSED)).toBeInTheDocument();
     expect(screen.queryByText(serviceMessage)).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Iniciar sesiÃ³n' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Iniciar sesión' })).toBeEnabled();
   });
 
   it('answer_message_is_not_shown: a 400 gets the same fixed text', async () => {
