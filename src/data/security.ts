@@ -39,3 +39,33 @@ export function signIn(
 export function changeOwnPassword(client: ApiClient, newPassword: string, signal: AbortSignal): Promise<void> {
   return client.request<void>('/api/v1/security/sessions/password', { method: 'PUT', body: { newPassword }, signal });
 }
+
+export interface CreateCustomerRequest {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  password: string;
+  passwordConfirmation: string;
+}
+
+export function createCustomerPath(identifier: string): string {
+  if (!isValidIdentifier(identifier)) throw new Error('Invalid company identifier');
+  return `/api/v1/security/public/tenants/${identifier}/accounts`;
+}
+
+// 201 and 200 (a repeat of the same key) both mean the account exists; the answer carries nothing the screen needs.
+export function createCustomerAccount(
+  client: ApiClient,
+  identifier: string,
+  body: CreateCustomerRequest,
+  key: string,
+  signal: AbortSignal,
+): Promise<void> {
+  return client.request<void>(createCustomerPath(identifier), {
+    method: 'POST',
+    body,
+    headers: { 'Idempotency-Key': key },
+    signal,
+  });
+}

@@ -1,6 +1,6 @@
 // Stub of the container's contract (ADR-006 F4). Replaced by the type the container publishes once it exists.
 export interface ApiClient {
-  request<T>(path: string, init?: { method?: string; body?: unknown; signal?: AbortSignal }): Promise<T>;
+  request<T>(path: string, init?: { method?: string; body?: unknown; headers?: Record<string, string>; signal?: AbortSignal }): Promise<T>;
 }
 
 export interface Session {
@@ -24,4 +24,6 @@ export interface ApiError {
   status?: number;
   code?: string;
   traceId?: string;
+  // Field-level problems of a 400 (the shared error envelope); the container's client must pass them through.
+  details?: { field: string; message: string }[];
 }

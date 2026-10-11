@@ -82,4 +82,28 @@ describe('mount routes by the access mark', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Iniciar sesión' }));
     expect(await screen.findByRole('heading', { name: 'Definir nueva contraseña' })).toBeInTheDocument();
   });
+
+  it('create_account_link_opens_the_form_and_back_returns_to_sign_in', async () => {
+    await show({ identifier: 'acme' });
+    fireEvent.click(screen.getByRole('link', { name: 'Crear cuenta' }));
+    expect(screen.getByRole('heading', { name: 'Crear cuenta' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Inicia sesión' }));
+    expect(screen.getByRole('heading', { name: 'Bienvenido de nuevo' })).toBeInTheDocument();
+  });
+
+  it('created_account_goes_to_sign_in_with_notice', async () => {
+    const request = vi.fn().mockResolvedValue({ id: 'a1' });
+    await show({ identifier: 'acme', apiClient: { request } });
+    fireEvent.click(screen.getByRole('link', { name: 'Crear cuenta' }));
+    const type = (label: string, value: string) => fireEvent.change(screen.getByLabelText(label), { target: { value } });
+    type('Nombre', 'Laura');
+    type('Apellido', 'Pérez');
+    type('Correo electrónico', 'laura@example.com');
+    type('Número de teléfono', '3001234567');
+    type('Contraseña', 'Viaje-2026!');
+    type('Confirmar contraseña', 'Viaje-2026!');
+    fireEvent.click(screen.getByRole('button', { name: 'Registrarse' }));
+    expect(await screen.findByRole('heading', { name: 'Bienvenido de nuevo' })).toBeInTheDocument();
+    expect(screen.getByText('Cuenta creada. Inicia sesión.')).toBeInTheDocument();
+  });
 });

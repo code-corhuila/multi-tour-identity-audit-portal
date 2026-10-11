@@ -100,3 +100,5 @@ body[data-theme='travesia-natural'] { --accent: #146b5d; --accent-strong: #0f564
 .auth-policy p { margin: 0 0 6px; font-weight: 700; }
 .auth-policy ul { margin: 0; padding-left: 18px; }
 button.auth-link { border: 0; background: none; cursor: pointer; font: inherit; }
+.auth-name-group { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 520px) { .auth-name-group { grid-template-columns: 1fr; } }
