@@ -34,3 +34,8 @@ export function signIn(
 ): Promise<SessionAnswer> {
   return client.request<SessionAnswer>(signInPath(identifier), { method: 'POST', body: credentials, signal });
 }
+
+// The token of the temporary credential is attached by the container's client; the confirmation is never sent.
+export function changeOwnPassword(client: ApiClient, newPassword: string, signal: AbortSignal): Promise<void> {
+  return client.request<void>('/api/v1/security/sessions/password', { method: 'PUT', body: { newPassword }, signal });
+}
