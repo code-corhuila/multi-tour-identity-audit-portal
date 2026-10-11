@@ -5,6 +5,7 @@ import { AuthCard } from '../ui/AuthCard';
 import { Field } from '../ui/Field';
 import { PasswordField } from '../ui/PasswordField';
 import { isValidIdentifier } from '../data/security';
+import { focusField } from '../ui/focus';
 import { useSignIn } from './useSignIn';
 
 export interface SignInScreenProps {
@@ -14,9 +15,11 @@ export interface SignInScreenProps {
   session: Session;
   // Shown as a success line, e.g. after the first password was saved.
   notice?: string;
+  // Called after a good answer was handed to the session, so the caller can re-read its access mark.
+  onSignedIn?: () => void;
 }
 
-export function SignInScreen({ identifier, apiClient, session, notice }: SignInScreenProps) {
+export function SignInScreen({ identifier, apiClient, session, notice, onSignedIn }: SignInScreenProps) {
   const platform = identifier === undefined;
   const { sending, failure, submit } = useSignIn(identifier, apiClient, session);
   const [email, setEmail] = useState('');
@@ -30,8 +33,14 @@ export function SignInScreen({ identifier, apiClient, session, notice }: SignInS
       password: password ? undefined : messages.errors.passwordRequired,
     };
     setErrors(found);
-    if (found.email || found.password) return;
-    if (await submit({ email: email.trim(), password })) setPassword('');
+    if (found.email || found.password) {
+      focusField(found.email ? 'signin-email' : 'signin-password');
+      return;
+    }
+    if (await submit({ email: email.trim(), password })) {
+      setPassword('');
+      onSignedIn?.();
+    }
   }
 
   // An empty or malformed identifier is never sent anywhere (hooks above run in every case).
@@ -66,7 +75,7 @@ export function SignInScreen({ identifier, apiClient, session, notice }: SignInS
           error={errors.password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        <p className={failure ? 'auth-feedback is-error' : 'auth-feedback is-success'} aria-live="polite">
+        <p className={failure ? 'auth-feedback is-error' : 'auth-feedback is-success'} aria-live="polite" role={!failure && notice ? 'status' : undefined}>
           {failure ?? notice}
         </p>
         <button className="auth-submit" type="submit" disabled={sending}>

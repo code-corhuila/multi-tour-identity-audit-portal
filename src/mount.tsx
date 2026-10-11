@@ -4,13 +4,21 @@ import { FirstPasswordScreen } from './auth/FirstPasswordScreen';
 import { RestrictedNotice } from './auth/RestrictedNotice';
 import { SignInScreen } from './auth/SignInScreen';
 import type { MountProps } from './contract';
+import { isValidIdentifier } from './data/security';
 import { messages } from './messages';
+import { AuthCard } from './ui/AuthCard';
 
-// The access mark of the session decides the screen (RN-SEC-PT-05, -08); nothing else opens with that credential.
+// The access mark of the session decides the screen (RN-SEC-PT-05, -08). It fails closed: only an absent mark
+// shows the normal sign-in, and an unknown value is treated as restricted.
 export function AccessRoutes({ apiClient, session, identifier }: MountProps) {
   const [saved, setSaved] = useState(false);
-  if (!saved && session.access === 'restricted') return <RestrictedNotice session={session} />;
-  if (!saved && session.access === 'password-change') {
+  // Re-render after a good sign-in so the access mark of the new session is read again.
+  const [, setReads] = useState(0);
+  if (identifier !== undefined && !isValidIdentifier(identifier)) {
+    return <AuthCard title={messages.notFound.title} subtitle={messages.notFound.subtitle}>{null}</AuthCard>;
+  }
+  const access = saved ? undefined : session.access;
+  if (access === 'password-change') {
     return (
       <FirstPasswordScreen
         apiClient={apiClient}
@@ -23,12 +31,17 @@ export function AccessRoutes({ apiClient, session, identifier }: MountProps) {
       />
     );
   }
+  if (access !== undefined) return <RestrictedNotice session={session} />;
   return (
     <SignInScreen
       identifier={identifier}
       apiClient={apiClient}
       session={session}
       notice={saved ? messages.firstPassword.saved : undefined}
+      onSignedIn={() => {
+        setSaved(false);
+        setReads((n) => n + 1);
+      }}
     />
   );
 }

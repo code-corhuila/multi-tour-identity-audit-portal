@@ -6,13 +6,14 @@ export interface ApiClient {
 export interface Session {
   roles: string[];
   // Mark of the current token (G-2): a temporary credential or a restricted access; absent for a normal one.
+  // The container's session must provide it and update it when a session opens or closes.
   access?: 'password-change' | 'restricted';
   open(answer: unknown): void;
   close(): void;
 }
 
 export interface MountProps {
-  // Identifier of the company link; absent means the platform sign-in. Resolved by the container.
+  // Identifier of the company link; absent means the platform sign-in. The container must provide it.
   identifier?: string;
   apiClient: ApiClient;
   session: Session;

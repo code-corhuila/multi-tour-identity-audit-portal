@@ -1,7 +1,8 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import type { ApiClient, Session } from '../contract';
 import { messages } from '../messages';
 import { AuthCard } from '../ui/AuthCard';
+import { focusField } from '../ui/focus';
 import { PasswordField } from '../ui/PasswordField';
 import { useChooseOwnPassword } from './useChooseOwnPassword';
 
@@ -27,7 +28,10 @@ export function FirstPasswordScreen({ apiClient, session, onSaved }: FirstPasswo
       confirmation: password && password !== confirmation ? text.mismatch : undefined,
     };
     setError(found);
-    if (found.password || found.confirmation) return;
+    if (found.password || found.confirmation) {
+      focusField(found.password ? 'first-password' : 'first-password-confirm');
+      return;
+    }
     const attempt = password;
     // Cleared as soon as they are sent; never kept (RN-SEC-PT-06).
     setPassword('');
@@ -35,8 +39,26 @@ export function FirstPasswordScreen({ apiClient, session, onSaved }: FirstPasswo
     if (await submit(attempt)) onSaved();
   }
 
+  useEffect(() => {
+    if (failure?.kind === 'policy') focusField('first-password');
+  }, [failure]);
+
+  // A credential that is no longer valid cannot be fixed here: leave the form, do not offer to resubmit.
+  if (failure?.kind === 'expired') {
+    return (
+      <AuthCard title={text.title}>
+        <p className="auth-feedback is-error" role="alert">
+          {failure.text}
+        </p>
+        <button className="auth-submit" type="button" onClick={() => session.close()}>
+          {text.backToSignIn}
+        </button>
+      </AuthCard>
+    );
+  }
+
   const policyError = failure?.kind === 'policy' ? failure.text : undefined;
-  const line = failure && failure.kind !== 'policy' ? failure.text : null;
+  const line = failure ? (failure.kind === 'policy' ? null : failure.text) : null;
   return (
     <AuthCard title={text.title} subtitle={text.subtitle}>
       <form className="auth-form" onSubmit={onSubmit} noValidate>
@@ -46,6 +68,7 @@ export function FirstPasswordScreen({ apiClient, session, onSaved }: FirstPasswo
           autoComplete="new-password"
           value={password}
           error={error.password ?? policyError}
+          aria-describedby="first-password-policy"
           onChange={(e) => setPassword(e.target.value)}
         />
         <PasswordField
@@ -56,8 +79,8 @@ export function FirstPasswordScreen({ apiClient, session, onSaved }: FirstPasswo
           error={error.confirmation}
           onChange={(e) => setConfirmation(e.target.value)}
         />
-        <div className="auth-policy" aria-label={text.policyTitle}>
-          <p>{text.policyTitle}</p>
+        <div className="auth-policy" id="first-password-policy" role="group" aria-labelledby="first-password-policy-title">
+          <p id="first-password-policy-title">{text.policyTitle}</p>
           <ul>
             {text.policy.map((rule) => (
               <li key={rule}>{rule}</li>
