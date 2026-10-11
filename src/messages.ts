@@ -15,6 +15,10 @@ export const messages = {
     submit: 'Ingresar a plataforma',
     back: 'Volver al acceso general',
   },
+  notFound: {
+    title: 'Página no encontrada',
+    subtitle: 'El enlace que abriste no existe o ya no está disponible.',
+  },
   fields: {
     email: 'Correo electrónico',
     emailPlaceholder: 'correo@ejemplo.com',

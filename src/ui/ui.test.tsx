@@ -51,8 +51,10 @@ describe('AuthCard', () => {
 
 describe('theme.css', () => {
   it('accent_comes_from_the_theme_variable: accent colours are variables with the Mockup values as defaults', () => {
-    expect(themeCss).toMatch(/--accent:\s*#1e6f69/);
-    expect(themeCss).toMatch(/--accent-strong:\s*#184f4d/);
+    // No default --accent in :root, so the submit button shows the Mockup #197d75 unless a theme sets the variable.
+    expect(themeCss).not.toMatch(/:root\s*{[^}]*--accent:/);
+    expect(themeCss).toMatch(/data-theme='travesia-natural'\]\s*{[^}]*--accent:\s*#146b5d/);
+    expect(themeCss).toMatch(/var\(--accent-strong,\s*#184f4d\)/);
     expect(themeCss).toMatch(/\.auth-submit\s*{[^}]*var\(--accent,\s*#197d75\)/);
     expect(themeCss).toMatch(/font-family:\s*"Manrope",\s*sans-serif/);
   });

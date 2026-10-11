@@ -13,6 +13,10 @@ export interface SessionAnswer {
   expiresIn: number;
 }
 
+export function isValidIdentifier(_identifier: string): boolean {
+  return true;
+}
+
 // The company comes only from the link (RN-SEC-PT-03); no identifier means the platform route.
 export function signInPath(identifier?: string): string {
   const base = '/api/v1/security/public';
