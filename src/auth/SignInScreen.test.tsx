@@ -129,3 +129,17 @@ describe('SignInScreen of the platform', () => {
     expect(request.mock.calls[0][0]).toBe('/api/v1/security/public/platform/sessions');
   });
 });
+
+describe('SignInScreen details', () => {
+  it('moves focus to the first empty field', () => {
+    setup('acme', vi.fn());
+    submit();
+    expect(screen.getByLabelText('Correo electrónico')).toHaveFocus();
+  });
+
+  it('announces the notice as a status', () => {
+    const session: Session = { roles: [], open: vi.fn(), close: vi.fn() };
+    render(<SignInScreen identifier="acme" apiClient={{ request: vi.fn() }} session={session} notice="Listo" />);
+    expect(screen.getByRole('status')).toHaveTextContent('Listo');
+  });
+});

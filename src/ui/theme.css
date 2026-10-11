@@ -96,3 +96,7 @@ body[data-theme='travesia-natural'] { --accent: #146b5d; --accent-strong: #0f564
 .auth-divider { height: 1px; margin: 30px 0 16px; background: #e7e7e2; }
 .auth-footer { margin: 0; color: #5f6b70; text-align: center; line-height: 1.6; }
 .auth-back { margin: 18px 0 0; text-align: center; }
+.auth-policy { padding: 14px 16px; border: 1px solid #d4e5e2; border-radius: 14px; background: linear-gradient(#f8fcfb, #eef7f5); color: #243238; }
+.auth-policy p { margin: 0 0 6px; font-weight: 700; }
+.auth-policy ul { margin: 0; padding-left: 18px; }
+button.auth-link { border: 0; background: none; cursor: pointer; font: inherit; }
