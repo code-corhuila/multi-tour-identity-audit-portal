@@ -21,7 +21,7 @@ export interface SignInScreenProps {
   onCreateAccount?: () => void;
 }
 
-export function SignInScreen({ identifier, apiClient, session, notice, onSignedIn }: SignInScreenProps) {
+export function SignInScreen({ identifier, apiClient, session, notice, onSignedIn, onCreateAccount }: SignInScreenProps) {
   const platform = identifier === undefined;
   const { sending, failure, submit } = useSignIn(identifier, apiClient, session);
   const [email, setEmail] = useState('');
@@ -94,7 +94,16 @@ export function SignInScreen({ identifier, apiClient, session, notice, onSignedI
         <>
           <div className="auth-divider" />
           <p className="auth-footer">
-            {messages.signIn.noAccount} <a href={signUpHref}>{messages.signIn.createAccount}</a>
+            {messages.signIn.noAccount} <a
+              href={signUpHref}
+              onClick={(e) => {
+                if (!onCreateAccount) return;
+                e.preventDefault();
+                onCreateAccount();
+              }}
+            >
+              {messages.signIn.createAccount}
+            </a>
           </p>
         </>
       )}

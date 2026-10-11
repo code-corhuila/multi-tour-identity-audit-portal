@@ -49,16 +49,23 @@ export interface CreateCustomerRequest {
   passwordConfirmation: string;
 }
 
-export function createCustomerPath(_identifier: string): string {
-  return '';
+export function createCustomerPath(identifier: string): string {
+  if (!isValidIdentifier(identifier)) throw new Error('Invalid company identifier');
+  return `/api/v1/security/public/tenants/${identifier}/accounts`;
 }
 
+// 201 and 200 (a repeat of the same key) both mean the account exists; the answer carries nothing the screen needs.
 export function createCustomerAccount(
-  _client: ApiClient,
-  _identifier: string,
-  _body: CreateCustomerRequest,
-  _key: string,
-  _signal: AbortSignal,
+  client: ApiClient,
+  identifier: string,
+  body: CreateCustomerRequest,
+  key: string,
+  signal: AbortSignal,
 ): Promise<void> {
-  return Promise.resolve();
+  return client.request<void>(createCustomerPath(identifier), {
+    method: 'POST',
+    body,
+    headers: { 'Idempotency-Key': key },
+    signal,
+  });
 }

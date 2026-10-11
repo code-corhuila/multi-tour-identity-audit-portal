@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { FirstPasswordScreen } from './auth/FirstPasswordScreen';
+import { RegisterScreen } from './auth/RegisterScreen';
 import { RestrictedNotice } from './auth/RestrictedNotice';
 import { SignInScreen } from './auth/SignInScreen';
 import type { MountProps } from './contract';
@@ -12,6 +13,9 @@ import { AuthCard } from './ui/AuthCard';
 // shows the normal sign-in, and an unknown value is treated as restricted.
 export function AccessRoutes({ apiClient, session, identifier }: MountProps) {
   const [saved, setSaved] = useState(false);
+  // A tiny view state instead of a router: the container owns the real routes (the link is only a hint).
+  const [view, setView] = useState<'sign-in' | 'sign-up'>('sign-in');
+  const [created, setCreated] = useState(false);
   // Re-render after a good sign-in so the access mark of the new session is read again.
   const [, setReads] = useState(0);
   if (identifier !== undefined && !isValidIdentifier(identifier)) {
@@ -32,14 +36,32 @@ export function AccessRoutes({ apiClient, session, identifier }: MountProps) {
     );
   }
   if (access !== undefined) return <RestrictedNotice session={session} />;
+  if (view === 'sign-up' && identifier !== undefined) {
+    return (
+      <RegisterScreen
+        identifier={identifier}
+        apiClient={apiClient}
+        onDone={() => {
+          setCreated(true);
+          setView('sign-in');
+        }}
+        onSignIn={() => setView('sign-in')}
+      />
+    );
+  }
   return (
     <SignInScreen
       identifier={identifier}
       apiClient={apiClient}
       session={session}
-      notice={saved ? messages.firstPassword.saved : undefined}
+      notice={saved ? messages.firstPassword.saved : created ? messages.signUp.created : undefined}
+      onCreateAccount={() => {
+        setCreated(false);
+        setView('sign-up');
+      }}
       onSignedIn={() => {
         setSaved(false);
+        setCreated(false);
         setReads((n) => n + 1);
       }}
     />
