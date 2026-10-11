@@ -1,13 +1,54 @@
+import { useState } from 'react';
 import { createRoot } from 'react-dom/client';
+import { FirstPasswordScreen } from './auth/FirstPasswordScreen';
+import { RestrictedNotice } from './auth/RestrictedNotice';
+import { SignInScreen } from './auth/SignInScreen';
 import type { MountProps } from './contract';
+import { isValidIdentifier } from './data/security';
+import { messages } from './messages';
+import { AuthCard } from './ui/AuthCard';
 
-export function Placeholder() {
-  return <p>Identity and audit portal</p>;
+// The access mark of the session decides the screen (RN-SEC-PT-05, -08). It fails closed: only an absent mark
+// shows the normal sign-in, and an unknown value is treated as restricted.
+export function AccessRoutes({ apiClient, session, identifier }: MountProps) {
+  const [saved, setSaved] = useState(false);
+  // Re-render after a good sign-in so the access mark of the new session is read again.
+  const [, setReads] = useState(0);
+  if (identifier !== undefined && !isValidIdentifier(identifier)) {
+    return <AuthCard title={messages.notFound.title} subtitle={messages.notFound.subtitle}>{null}</AuthCard>;
+  }
+  const access = saved ? undefined : session.access;
+  if (access === 'password-change') {
+    return (
+      <FirstPasswordScreen
+        apiClient={apiClient}
+        session={session}
+        onSaved={() => {
+          // The service cut the older sessions: sign in again (D-07).
+          session.close();
+          setSaved(true);
+        }}
+      />
+    );
+  }
+  if (access !== undefined) return <RestrictedNotice session={session} />;
+  return (
+    <SignInScreen
+      identifier={identifier}
+      apiClient={apiClient}
+      session={session}
+      notice={saved ? messages.firstPassword.saved : undefined}
+      onSignedIn={() => {
+        setSaved(false);
+        setReads((n) => n + 1);
+      }}
+    />
+  );
 }
 
 // The container calls this with its own client and session; the portal never creates either (Annex H).
-export function mount(element: HTMLElement, _props: MountProps): () => void {
+export function mount(element: HTMLElement, props: MountProps): () => void {
   const root = createRoot(element);
-  root.render(<Placeholder />);
+  root.render(<AccessRoutes {...props} />);
   return () => root.unmount();
 }

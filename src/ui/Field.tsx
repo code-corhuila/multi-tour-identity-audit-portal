@@ -9,8 +9,9 @@ export type FieldProps = InputHTMLAttributes<HTMLInputElement> & {
 };
 
 // One label per field; its error sits beside it and is referenced by aria-describedby (Annex H).
-export function Field({ id, label, error, adornment, ...input }: FieldProps) {
+export function Field({ id, label, error, adornment, 'aria-describedby': extra, ...input }: FieldProps) {
   const errorId = `${id}-error`;
+  const describedBy = [error ? errorId : undefined, extra].filter(Boolean).join(' ') || undefined;
   return (
     <div className="auth-field">
       <label htmlFor={id}>{label}</label>
@@ -18,7 +19,7 @@ export function Field({ id, label, error, adornment, ...input }: FieldProps) {
         <input
           id={id}
           aria-invalid={error ? true : undefined}
-          aria-describedby={error ? errorId : undefined}
+          aria-describedby={describedBy}
           {...input}
         />
         {adornment}
