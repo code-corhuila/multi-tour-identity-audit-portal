@@ -4,6 +4,7 @@ import { messages } from '../messages';
 import { AuthCard } from '../ui/AuthCard';
 import { Field } from '../ui/Field';
 import { PasswordField } from '../ui/PasswordField';
+import { isValidIdentifier } from '../data/security';
 import { useSignIn } from './useSignIn';
 
 export interface SignInScreenProps {
@@ -20,16 +21,23 @@ export function SignInScreen({ identifier, apiClient, session }: SignInScreenPro
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
-  function onSubmit(event: FormEvent) {
+  async function onSubmit(event: FormEvent) {
     event.preventDefault();
     const found = {
       email: email.trim() ? undefined : messages.errors.emailRequired,
       password: password ? undefined : messages.errors.passwordRequired,
     };
     setErrors(found);
-    if (!found.email && !found.password) void submit({ email: email.trim(), password });
+    if (found.email || found.password) return;
+    if (await submit({ email: email.trim(), password })) setPassword('');
   }
 
+  // An empty or malformed identifier is never sent anywhere (hooks above run in every case).
+  if (identifier !== undefined && !isValidIdentifier(identifier)) {
+    return <AuthCard title={messages.notFound.title} subtitle={messages.notFound.subtitle}>{null}</AuthCard>;
+  }
+
+  const signUpHref = identifier === undefined ? undefined : `/t/${identifier}/sign-up`;
   const text = platform ? messages.platform : messages.signIn;
   return (
     <AuthCard
@@ -63,7 +71,7 @@ export function SignInScreen({ identifier, apiClient, session }: SignInScreenPro
           {sending ? messages.sending : text.submit}
         </button>
       </form>
-      {identifier === undefined ? (
+      {signUpHref === undefined ? (
         <p className="auth-back">
           <a className="auth-link" href="/">
             {messages.platform.back}
@@ -73,7 +81,7 @@ export function SignInScreen({ identifier, apiClient, session }: SignInScreenPro
         <>
           <div className="auth-divider" />
           <p className="auth-footer">
-            {messages.signIn.noAccount} <a href={`/t/${encodeURIComponent(identifier)}/sign-up`}>{messages.signIn.createAccount}</a>
+            {messages.signIn.noAccount} <a href={signUpHref}>{messages.signIn.createAccount}</a>
           </p>
         </>
       )}

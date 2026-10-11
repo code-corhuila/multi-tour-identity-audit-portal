@@ -18,7 +18,8 @@ export function useSignIn(identifier: string | undefined, apiClient: ApiClient, 
 
   useEffect(() => () => current.current?.abort(), []);
 
-  async function submit(credentials: SignInRequest) {
+  // Resolves true when the session was opened.
+  async function submit(credentials: SignInRequest): Promise<boolean> {
     current.current?.abort();
     const controller = new AbortController();
     current.current = controller;
@@ -26,9 +27,12 @@ export function useSignIn(identifier: string | undefined, apiClient: ApiClient, 
     setFailure(null);
     try {
       const answer = await signIn(apiClient, identifier, credentials, controller.signal);
-      if (!controller.signal.aborted) session.open(answer);
+      if (controller.signal.aborted) return false;
+      session.open(answer);
+      return true;
     } catch (error) {
       if (!controller.signal.aborted) setFailure(describeFailure(error));
+      return false;
     } finally {
       if (!controller.signal.aborted) setSending(false);
     }

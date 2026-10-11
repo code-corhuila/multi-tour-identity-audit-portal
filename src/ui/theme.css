@@ -1,5 +1,6 @@
 /* Mockup tokens (main.css 20260901-3). The container sets data-theme on body; only variables change per tenant. */
-:root { --accent: #1e6f69; --accent-strong: #184f4d; --text: #1d2c38; --text-soft: #62707d; }
+/* No default --accent: the submit button is #197d75 as in the Mockup until a theme sets the variable. */
+:root { --text: #1d2c38; --text-soft: #62707d; }
 body[data-theme='travesia-natural'] { --accent: #146b5d; --accent-strong: #0f564b; }
 
 .auth-shell {
@@ -77,7 +78,7 @@ body[data-theme='travesia-natural'] { --accent: #146b5d; --accent-strong: #0f564
 
 .auth-field-error, .auth-feedback { margin: 0; min-height: 24px; color: var(--text-soft); }
 .auth-field-error, .auth-feedback.is-error { color: #b34a4a; }
-.auth-feedback.is-success { color: var(--accent-strong); }
+.auth-feedback.is-success { color: var(--accent-strong, #184f4d); }
 .auth-submit {
   min-height: 56px;
   margin-top: 8px;

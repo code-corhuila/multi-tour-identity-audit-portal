@@ -13,14 +13,17 @@ export interface SessionAnswer {
   expiresIn: number;
 }
 
-export function isValidIdentifier(_identifier: string): boolean {
-  return true;
+// Slug pattern of the company link; also keeps '.', '..' and '/' out of the route.
+export function isValidIdentifier(identifier: string): boolean {
+  return /^[a-z0-9-]+$/.test(identifier);
 }
 
 // The company comes only from the link (RN-SEC-PT-03); no identifier means the platform route.
 export function signInPath(identifier?: string): string {
   const base = '/api/v1/security/public';
-  return identifier ? `${base}/tenants/${encodeURIComponent(identifier)}/sessions` : `${base}/platform/sessions`;
+  if (identifier === undefined) return `${base}/platform/sessions`;
+  if (!isValidIdentifier(identifier)) throw new Error('Invalid company identifier');
+  return `${base}/tenants/${identifier}/sessions`;
 }
 
 export function signIn(
