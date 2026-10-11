@@ -1,2 +1,2 @@
 export { mount } from './mount';
-export type { ApiClient, MountProps, Session } from './contract';
+export type { ApiClient, ApiError, MountProps, Session } from './contract';
