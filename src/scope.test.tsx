@@ -3,6 +3,7 @@ import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { ApiClient, MountProps, Session } from './contract';
 import { mount } from './mount';
+import { containerSession } from './shell/testkit';
 
 let unmount = () => {};
 afterEach(async () => {
@@ -14,11 +15,8 @@ const answer = { accessToken: 'a.b.c', tokenType: 'Bearer', expiresIn: 900 };
 
 async function show(props: Partial<MountProps>, request: ApiClient['request'] = vi.fn().mockResolvedValue(answer), roles: string[] = []) {
   const element = document.body.appendChild(document.createElement('div'));
-  const session: Session = { roles: [], open: vi.fn(), close: vi.fn() };
-  // Like the container's session: opening it sets the roles of the token.
-  session.open = vi.fn(() => {
-    session.roles = roles;
-  });
+  // Like the container's session: in the general scope `open` throws without the company.
+  const session = containerSession(props.scope, roles);
   const navigate = vi.fn();
   const all: MountProps = { apiClient: { request }, session, navigate, ...props } as MountProps;
   await act(async () => {
@@ -44,6 +42,20 @@ describe("scope 'general': the company is typed", () => {
     signInWith();
     await waitFor(() => expect(navigate).toHaveBeenCalledWith('/t/sierra-azul'));
     expect(request.mock.calls[0][0]).toBe('/api/v1/security/public/tenants/sierra-azul/sessions');
+  });
+
+  it('opens the session with the answer and the typed company, as the container requires', async () => {
+    const { session } = await show({ scope: 'general' });
+    signInWith('acme');
+    await waitFor(() => expect(session.open).toHaveBeenCalledWith(answer, 'acme'));
+  });
+
+  it('a container that refuses to open without the company is never reached with a missing one', async () => {
+    const request = vi.fn().mockResolvedValue(answer);
+    const { session } = await show({ scope: 'general' }, request);
+    signInWith('');
+    expect(request).not.toHaveBeenCalled();
+    expect(session.open).not.toHaveBeenCalled();
   });
 
   it('flags a company that is not kebab-case of 3 to 40 beside the field and sends nothing', async () => {
@@ -117,6 +129,17 @@ describe("scope 'tenant' and 'platform'", () => {
     expect(screen.queryByLabelText('Empresa')).not.toBeInTheDocument();
     expect(fireEvent.click(screen.getByRole('link', { name: 'Volver al acceso general' }))).toBe(false);
     expect(navigate).toHaveBeenLastCalledWith('/ingresar');
+  });
+
+  it('tenant and platform sign-ins open the session with the answer only', async () => {
+    const tenant = await show({ scope: 'tenant', identifier: 'acme' });
+    signInWith(null);
+    await waitFor(() => expect(tenant.session.open).toHaveBeenCalledWith(answer));
+    await act(async () => unmount());
+    document.body.innerHTML = '';
+    const platform = await show({ scope: 'platform' });
+    signInWith(null);
+    await waitFor(() => expect(platform.session.open).toHaveBeenCalledWith(answer));
   });
 
   it('no navigate: the anchors keep their default behavior', async () => {
