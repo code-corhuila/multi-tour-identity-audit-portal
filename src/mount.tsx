@@ -7,7 +7,10 @@ import { SignInScreen } from './auth/SignInScreen';
 import type { MountProps } from './contract';
 import { isValidIdentifier } from './data/security';
 import { messages } from './messages';
-import { PLATFORM_ADMINISTRATOR, TenantsApp } from './tenants/TenantsApp';
+import { CustomerHome } from './shell/CustomerHome';
+import { FINAL_CUSTOMER, isStaff, PLATFORM_ADMINISTRATOR } from './shell/roles';
+import { StaffHome } from './shell/StaffHome';
+import { TenantsApp } from './tenants/TenantsApp';
 import { AuthCard } from './ui/AuthCard';
 import { ensureStylesheet } from './ui/stylesheet';
 
@@ -41,6 +44,15 @@ export function AccessRoutes({ apiClient, session, identifier }: MountProps) {
   // No company link and a signed-in Platform Administrator: the platform screens replace the sign-in.
   if (identifier === undefined && session.roles.includes(PLATFORM_ADMINISTRATOR)) {
     return <TenantsApp apiClient={apiClient} session={session} />;
+  }
+  // A signed-in person of a company goes to their own screen; signing out drops the roles and shows the sign-in again.
+  if (identifier !== undefined) {
+    const signOut = () => {
+      session.close();
+      setReads((n) => n + 1);
+    };
+    if (isStaff(session.roles)) return <StaffHome identifier={identifier} onSignOut={signOut} />;
+    if (session.roles.includes(FINAL_CUSTOMER)) return <CustomerHome identifier={identifier} onSignOut={signOut} />;
   }
   if (view === 'sign-up' && identifier !== undefined) {
     return (
