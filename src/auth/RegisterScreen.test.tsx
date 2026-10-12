@@ -166,6 +166,11 @@ describe('RegisterScreen', () => {
     expect(keys[2]).not.toBe(keys[0]);
   });
 
+  it('uses the wide sign-up card of the Mockup', () => {
+    setup(vi.fn());
+    expect(document.querySelector('.auth-card--wide')).not.toBeNull();
+  });
+
   it('the footer link goes back to sign-in', () => {
     const { onSignIn } = setup(vi.fn());
     fireEvent.click(screen.getByRole('button', { name: 'Inicia sesión' }));
