@@ -67,6 +67,10 @@ describe('theme.css', () => {
     expect(themeCss).toMatch(/\.auth-feedback\.is-success\s*{[^}]*var\(--accent,\s*#147D73\)/);
   });
 
+  it('the tokens are declared for the operator screens too, which reuse the form classes', () => {
+    expect(themeCss).toMatch(/\.auth-shell,\s*\.operator-content\s*{[^}]*--mt-line:/);
+  });
+
   it('carries the editorial tokens of the Mockup login (feat/operator-landing-sync)', () => {
     expect(themeCss).toMatch(/--mt-ink:\s*#102A32/);
     expect(themeCss).toMatch(/--mt-coral:\s*#E9785D/);
