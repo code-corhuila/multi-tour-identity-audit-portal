@@ -2,12 +2,12 @@ import { useState } from 'react';
 import type { ApiClient, Session } from '../contract';
 import { tenantStatuses, type TenantStatus } from '../data/tenants';
 import { messages } from '../messages';
+import { PLATFORM_ADMINISTRATOR } from '../shell/roles';
 import { tenantMessages as text } from './messages';
 import { RegisterTenantScreen } from './RegisterTenantScreen';
 import { useTenantList } from './useTenantList';
 import './operator.css';
 
-export const PLATFORM_ADMINISTRATOR = 'PLATFORM_ADMINISTRATOR';
 const LIMIT = 20;
 
 export interface TenantsAppProps {
