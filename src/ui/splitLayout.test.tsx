@@ -69,6 +69,14 @@ describe('SignInScreen tabs and links of the Mockup', () => {
     expect(request.mock.calls[0][0]).toBe('/api/v1/security/public/tenants/acme/sessions');
   });
 
+  it('the operator tab hides the sign-up link and shows the access note, as the Mockup does', () => {
+    signIn('acme');
+    expect(screen.getByRole('link', { name: 'Crear cuenta' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Equipo del operador' }));
+    expect(screen.queryByRole('link', { name: 'Crear cuenta' })).not.toBeInTheDocument();
+    expect(screen.getByText(/Solicítalo a un administrador del operador/)).toBeInTheDocument();
+  });
+
   it('?tab=operador preselects the operator tab', () => {
     window.history.replaceState(null, '', '/t/acme/ingresar?tab=operador');
     signIn('acme');
