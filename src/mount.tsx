@@ -10,7 +10,7 @@ import { messages } from './messages';
 import { CustomerHome } from './shell/CustomerHome';
 import { FINAL_CUSTOMER, isStaff, PLATFORM_ADMINISTRATOR } from './shell/roles';
 import { StaffHome } from './shell/StaffHome';
-import { TenantsApp } from './tenants/TenantsApp';
+import { PlatformShell } from './shell/PlatformShell';
 import { AuthCard } from './ui/AuthCard';
 import { ensureStylesheet } from './ui/stylesheet';
 
@@ -23,6 +23,12 @@ export function AccessRoutes({ apiClient, session, identifier }: MountProps) {
   const [created, setCreated] = useState(false);
   // Re-render after a good sign-in so the access mark of the new session is read again.
   const [, setReads] = useState(0);
+  // Every sign-out closes the session and re-reads it, so the sign-in shows again (the container's session drops the
+  // roles and the access mark when it closes).
+  const signOut = () => {
+    session.close();
+    setReads((n) => n + 1);
+  };
   if (identifier !== undefined && !isValidIdentifier(identifier)) {
     return <AuthCard title={messages.notFound.title} subtitle={messages.notFound.subtitle}>{null}</AuthCard>;
   }
@@ -32,6 +38,7 @@ export function AccessRoutes({ apiClient, session, identifier }: MountProps) {
       <FirstPasswordScreen
         apiClient={apiClient}
         session={session}
+        onSignOut={signOut}
         onSaved={() => {
           // The service cut the older sessions: sign in again (D-07).
           session.close();
@@ -40,17 +47,13 @@ export function AccessRoutes({ apiClient, session, identifier }: MountProps) {
       />
     );
   }
-  if (access !== undefined) return <RestrictedNotice session={session} />;
-  // No company link and a signed-in Platform Administrator: the platform screens replace the sign-in.
+  if (access !== undefined) return <RestrictedNotice session={session} onSignOut={signOut} />;
+  // No company link and a signed-in Platform Administrator: the platform shell replaces the sign-in.
   if (identifier === undefined && session.roles.includes(PLATFORM_ADMINISTRATOR)) {
-    return <TenantsApp apiClient={apiClient} session={session} />;
+    return <PlatformShell apiClient={apiClient} session={session} onSignOut={signOut} />;
   }
-  // A signed-in person of a company goes to their own screen; signing out drops the roles and shows the sign-in again.
+  // A signed-in person of a company goes to their own screen.
   if (identifier !== undefined) {
-    const signOut = () => {
-      session.close();
-      setReads((n) => n + 1);
-    };
     if (isStaff(session.roles)) return <StaffHome identifier={identifier} onSignOut={signOut} />;
     if (session.roles.includes(FINAL_CUSTOMER)) return <CustomerHome identifier={identifier} onSignOut={signOut} />;
   }
