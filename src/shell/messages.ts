@@ -2,6 +2,19 @@
 export const shellMessages = {
   signOut: 'Cerrar sesión',
   soon: 'Próximamente',
+  platform: {
+    role: 'Administrador de plataforma',
+    navLabel: 'Navegación de plataforma',
+    nav: { summary: 'Resumen', list: 'Operadores', register: 'Crear operador' },
+    eyebrow: 'Control de plataforma',
+    title: 'Operadores bajo control',
+    intro: 'La plataforma conecta operadores, sin mezclar su operación.',
+    total: 'Total de operadores',
+    active: 'Operadores activos',
+    inactive: 'Operadores inactivos',
+    loading: 'Cargando…',
+    retry: 'Reintentar',
+  },
   staff: {
     role: 'Equipo del operador',
     eyebrow: 'Multitour',

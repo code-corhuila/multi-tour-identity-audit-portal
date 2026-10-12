@@ -10,18 +10,27 @@ import './operator.css';
 
 const LIMIT = 20;
 
+export type TenantsView = 'list' | 'register';
+
 export interface TenantsAppProps {
   apiClient: ApiClient;
   session: Session;
+  // The shell that hosts this screen chooses the first view and is told when the person changes it.
+  initialView?: TenantsView;
+  onViewChange?: (view: TenantsView) => void;
 }
 
 // The role check hides the screen; the service refuses anyone else anyway (RN-IDA-PT-09).
-export function TenantsApp({ apiClient, session }: TenantsAppProps) {
+export function TenantsApp({ apiClient, session, initialView = 'list', onViewChange }: TenantsAppProps) {
   // A tiny view state instead of a router: the container owns the real routes.
-  const [view, setView] = useState<'list' | 'register'>('list');
+  const [view, setView] = useState<TenantsView>(initialView);
   if (!session.roles.includes(PLATFORM_ADMINISTRATOR)) return null;
-  if (view === 'register') return <RegisterTenantScreen apiClient={apiClient} onBack={() => setView('list')} />;
-  return <TenantList apiClient={apiClient} onRegister={() => setView('register')} />;
+  const go = (next: TenantsView) => {
+    setView(next);
+    onViewChange?.(next);
+  };
+  if (view === 'register') return <RegisterTenantScreen apiClient={apiClient} onBack={() => go('list')} />;
+  return <TenantList apiClient={apiClient} onRegister={() => go('register')} />;
 }
 
 function TenantList({ apiClient, onRegister }: { apiClient: ApiClient; onRegister: () => void }) {
