@@ -125,8 +125,10 @@ describe('mount shows the tenants to the Platform Administrator', () => {
     });
   };
 
-  it('a signed-in Platform Administrator on the platform link sees the list instead of the sign-in', async () => {
+  it('a signed-in Platform Administrator on the platform link sees the shell, whose first page is the summary', async () => {
     await show(admin);
+    expect(await screen.findByRole('heading', { name: 'Operadores bajo control' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Operadores' }));
     expect(await screen.findByText('Travesia Natural')).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Acceso de plataforma' })).not.toBeInTheDocument();
   });
