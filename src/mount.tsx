@@ -9,6 +9,7 @@ import { isValidIdentifier } from './data/security';
 import { messages } from './messages';
 import { PLATFORM_ADMINISTRATOR, TenantsApp } from './tenants/TenantsApp';
 import { AuthCard } from './ui/AuthCard';
+import { ensureStylesheet } from './ui/stylesheet';
 
 // The access mark of the session decides the screen (RN-SEC-PT-05, -08). It fails closed: only an absent mark
 // shows the normal sign-in, and an unknown value is treated as restricted.
@@ -75,6 +76,7 @@ export function AccessRoutes({ apiClient, session, identifier }: MountProps) {
 
 // The container calls this with its own client and session; the portal never creates either (Annex H).
 export function mount(element: HTMLElement, props: MountProps): () => void {
+  ensureStylesheet();
   const root = createRoot(element);
   root.render(<AccessRoutes {...props} />);
   return () => root.unmount();
