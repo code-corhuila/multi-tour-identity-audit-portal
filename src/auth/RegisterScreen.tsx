@@ -64,7 +64,7 @@ export function RegisterScreen({ identifier, apiClient, onDone, onSignIn }: Regi
   }, [failure]);
 
   return (
-    <AuthCard title={text.title} subtitle={text.subtitle} wide>
+    <AuthCard title={text.title} subtitle={text.subtitle} wide eyebrow={messages.signIn.kicker} homeHref={`/t/${identifier}`} visualTitle={text.visual}>
       <form className="auth-form" onSubmit={onSubmit} noValidate>
         <div className="auth-name-group">
           <Field id={ids.firstName} label={text.firstName} autoComplete="given-name" placeholder={text.firstNamePlaceholder} value={values.firstName} error={errors.firstName} onChange={set('firstName')} />
