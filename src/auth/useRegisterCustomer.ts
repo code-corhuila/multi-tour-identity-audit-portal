@@ -3,7 +3,7 @@ import type { ApiClient } from '../contract';
 import { createCustomerAccount, type CreateCustomerRequest } from '../data/security';
 import { mapRegisterError, type RegisterFailure } from './registerErrors';
 
-export function useRegisterCustomer(identifier: string, apiClient: ApiClient) {
+export function useRegisterCustomer(identifier: string | undefined, apiClient: ApiClient) {
   const [sending, setSending] = useState(false);
   const [failure, setFailure] = useState<RegisterFailure | null>(null);
   const current = useRef<AbortController | null>(null);
@@ -14,16 +14,17 @@ export function useRegisterCustomer(identifier: string, apiClient: ApiClient) {
   useEffect(() => () => current.current?.abort(), []);
 
   // Resolves true when the account exists.
-  async function submit(body: CreateCustomerRequest): Promise<boolean> {
+  async function submit(body: CreateCustomerRequest, company = identifier): Promise<boolean> {
+    if (company === undefined) return false;
     current.current?.abort();
     const controller = new AbortController();
     current.current = controller;
-    const data = JSON.stringify([body.firstName, body.lastName, body.email, body.phone]);
+    const data = JSON.stringify([company, body.firstName, body.lastName, body.email, body.phone]);
     if (attempt.current?.data !== data) attempt.current = { data, key: crypto.randomUUID() };
     setSending(true);
     setFailure(null);
     try {
-      await createCustomerAccount(apiClient, identifier, body, attempt.current.key, controller.signal);
+      await createCustomerAccount(apiClient, company, body, attempt.current.key, controller.signal);
       if (controller.signal.aborted) return false;
       attempt.current = null;
       return true;

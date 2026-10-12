@@ -1,50 +1,62 @@
 import { useState, type FormEvent } from 'react';
-import type { ApiClient, Session } from '../contract';
+import type { ApiClient, Scope, Session } from '../contract';
 import { messages } from '../messages';
 import { AuthCard } from '../ui/AuthCard';
 import { Field } from '../ui/Field';
 import { PasswordField } from '../ui/PasswordField';
-import { isValidIdentifier } from '../data/security';
+import { isCompanyIdentifier, isValidIdentifier } from '../data/security';
 import { focusField } from '../ui/focus';
+import { NavLink } from '../ui/navigation';
 import { useSignIn } from './useSignIn';
 
 export interface SignInScreenProps {
-  // Identifier of the company link; absent means the platform sign-in.
+  // Identifier of the company link; absent means the platform sign-in (or the general one, by `scope`).
   identifier?: string;
+  // 'general' asks for the company; absent keeps the older rule (no identifier means platform).
+  scope?: Scope;
   apiClient: ApiClient;
   session: Session;
   // Shown as a success line, e.g. after the first password was saved.
   notice?: string;
-  // Called after a good answer was handed to the session, so the caller can re-read its access mark.
-  onSignedIn?: () => void;
+  // Company typed before, e.g. when the person comes back from the sign-up.
+  initialCompany?: string;
+  // Called after a good answer was handed to the session, with the company it was for (typed or from the link).
+  onSignedIn?: (company?: string) => void;
   // When given, the 'Crear cuenta' link calls it instead of navigating (the container owns real routes).
-  onCreateAccount?: () => void;
+  onCreateAccount?: (company?: string) => void;
 }
 
-export function SignInScreen({ identifier, apiClient, session, notice, onSignedIn, onCreateAccount }: SignInScreenProps) {
-  const platform = identifier === undefined;
-  const { sending, failure, submit } = useSignIn(identifier, apiClient, session);
+export function SignInScreen({ identifier, scope, apiClient, session, notice, initialCompany = '', onSignedIn, onCreateAccount }: SignInScreenProps) {
+  const effective: Scope = scope ?? (identifier === undefined ? 'platform' : 'tenant');
+  const general = effective === 'general';
+  const platform = effective === 'platform';
+  const { sending, failure, submit } = useSignIn(identifier, apiClient, session, general);
+  const [company, setCompany] = useState(initialCompany);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{ company?: string; email?: string; password?: string }>({});
   // The tab only changes the copy: both call the same company session endpoint (Mockup login.html). `?tab=operador`
   // preselects it.
   const [operator, setOperator] = useState(() => new URLSearchParams(window.location.search).get('tab') === 'operador');
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
+    const typed = company.trim();
     const found = {
+      company: !general ? undefined : !typed ? messages.errors.companyRequired : isCompanyIdentifier(typed) ? undefined : messages.errors.companyShape,
       email: email.trim() ? undefined : messages.errors.emailRequired,
       password: password ? undefined : messages.errors.passwordRequired,
     };
     setErrors(found);
-    if (found.email || found.password) {
-      focusField(found.email ? 'signin-email' : 'signin-password');
+    const first = found.company ? 'signin-company' : found.email ? 'signin-email' : found.password ? 'signin-password' : null;
+    if (first) {
+      focusField(first);
       return;
     }
-    if (await submit({ email: email.trim(), password })) {
+    const target = general ? typed : identifier;
+    if (await submit({ email: email.trim(), password }, target)) {
       setPassword('');
-      onSignedIn?.();
+      onSignedIn?.(target);
     }
   }
 
@@ -53,14 +65,14 @@ export function SignInScreen({ identifier, apiClient, session, notice, onSignedI
     return <AuthCard title={messages.notFound.title} subtitle={messages.notFound.subtitle}>{null}</AuthCard>;
   }
 
-  const signUpHref = identifier === undefined ? undefined : `/t/${identifier}/sign-up`;
+  const signUpHref = platform ? undefined : general ? '/ingresar' : `/t/${identifier}/sign-up`;
   const text = platform ? messages.platform : messages.signIn;
   const tabs = messages.signIn.tabs;
   return (
     <AuthCard
       kicker={platform ? messages.platform.kicker : undefined}
       eyebrow={platform ? undefined : messages.signIn.kicker}
-      homeHref={platform ? undefined : `/t/${identifier}`}
+      homeHref={platform ? undefined : general ? '/' : `/t/${identifier}`}
       title={text.title}
       subtitle={!platform && operator ? messages.signIn.operatorSubtitle : text.subtitle}
     >
@@ -75,6 +87,17 @@ export function SignInScreen({ identifier, apiClient, session, notice, onSignedI
         </div>
       )}
       <form className="auth-form" onSubmit={onSubmit} noValidate>
+        {general && (
+          <Field
+            id="signin-company"
+            label={messages.errors.companyLabel}
+            autoComplete="organization"
+            placeholder={messages.errors.companyPlaceholder}
+            value={company}
+            error={errors.company}
+            onChange={(e) => setCompany(e.target.value)}
+          />
+        )}
         <Field
           id="signin-email"
           label={messages.fields.email}
@@ -102,30 +125,32 @@ export function SignInScreen({ identifier, apiClient, session, notice, onSignedI
       </form>
       {signUpHref === undefined ? (
         <p className="auth-back">
-          <a className="auth-link" href="/">
+          <NavLink className="auth-link" href="/ingresar">
             {messages.platform.back}
-          </a>
+          </NavLink>
         </p>
       ) : (
         <>
           <p className="auth-platform-entry">
-            <a href="/platform">{messages.signIn.platformEntry}</a>
+            <NavLink href="/platform">{messages.signIn.platformEntry}</NavLink>
           </p>
           {operator ? (
             <p className="auth-footer">{messages.signIn.staffAccess}</p>
           ) : (
-          <p className="auth-footer">
-            {messages.signIn.noAccount} <a
-              href={signUpHref}
-              onClick={(e) => {
-                if (!onCreateAccount) return;
-                e.preventDefault();
-                onCreateAccount();
-              }}
-            >
-              {messages.signIn.createAccount}
-            </a>
-          </p>
+            <p className="auth-footer">
+              {messages.signIn.noAccount}{' '}
+              <a
+                href={signUpHref}
+                onClick={(e) => {
+                  if (!onCreateAccount) return;
+                  e.preventDefault();
+                  const typed = company.trim();
+                  onCreateAccount(general && isCompanyIdentifier(typed) ? typed : undefined);
+                }}
+              >
+                {messages.signIn.createAccount}
+              </a>
+            </p>
           )}
         </>
       )}

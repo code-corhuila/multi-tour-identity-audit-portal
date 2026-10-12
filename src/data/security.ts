@@ -18,7 +18,12 @@ export function isValidIdentifier(identifier: string): boolean {
   return /^[a-z0-9-]+$/.test(identifier);
 }
 
-// The company comes only from the link (RN-SEC-PT-03); no identifier means the platform route.
+// The company a person types in the general sign-in: kebab-case of 3 to 40 (`TenantIdentifier` of identity-audit.yaml).
+export function isCompanyIdentifier(value: string): boolean {
+  return value.length >= 3 && value.length <= 40 && /^[a-z0-9]+(-[a-z0-9]+)*$/.test(value);
+}
+
+// The company comes only from the link or the typed field (RN-SEC-PT-03); no identifier means the platform route.
 export function signInPath(identifier?: string): string {
   const base = '/api/v1/security/public';
   if (identifier === undefined) return `${base}/platform/sessions`;

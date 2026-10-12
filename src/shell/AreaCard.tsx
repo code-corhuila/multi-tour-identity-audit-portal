@@ -1,3 +1,4 @@
+import { NavLink } from '../ui/navigation';
 import { shellMessages } from './messages';
 import './shell.css';
 
@@ -11,10 +12,10 @@ export interface AreaCardProps {
 export function AreaCard({ title, body, href }: AreaCardProps) {
   if (href) {
     return (
-      <a className="shell-card" href={href}>
+      <NavLink className="shell-card" href={href}>
         <strong>{title}</strong>
         <span>{body}</span>
-      </a>
+      </NavLink>
     );
   }
   return (
