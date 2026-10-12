@@ -1,3 +1,5 @@
+// @vitest-environment node
+// The configuration is read as a module: esbuild does not work under jsdom.
 import { describe, expect, it } from 'vitest';
 import config from '../vite.config';
 
