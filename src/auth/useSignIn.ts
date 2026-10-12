@@ -32,7 +32,9 @@ export function useSignIn(identifier: string | undefined, apiClient: ApiClient, 
     try {
       const answer = await signIn(apiClient, company, credentials, controller.signal);
       if (controller.signal.aborted) return false;
-      session.open(answer);
+      // The general scope needs to know which company the session belongs to; the other scopes open it as before.
+      if (general) session.open(answer, company);
+      else session.open(answer);
       return true;
     } catch (error) {
       if (!controller.signal.aborted) setFailure(describeFailure(error, general));
