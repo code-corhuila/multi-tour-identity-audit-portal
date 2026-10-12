@@ -1,0 +1,23 @@
+/* Top bar and cards of the signed-in shells: tokens of the platform design of the Mockup (main.css, as operator.css).
+   The dark bar plays the role of the Mockup sidebar, which belongs to the container's own shell. */
+.shell { min-height: 100vh; background: #f5f7f7; font-family: "Manrope", sans-serif; }
+.shell, .shell *, .shell *::before, .shell *::after { box-sizing: border-box; }
+.shell-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; padding: 14px clamp(24px, 5vw, 76px); background: linear-gradient(190deg, #12251f 0%, #0c1a16 100%); color: #d7e5df; }
+.shell-brand { color: #f3f8f6; font-size: 1.05rem; font-weight: 800; letter-spacing: 0.14em; }
+.shell-brand span { color: #e9a23b; }
+.shell-role { font-size: 0.82rem; opacity: 0.85; }
+.shell-nav { display: flex; flex: 1; flex-wrap: wrap; gap: 8px; }
+.shell-signout { min-height: 40px; padding: 0 14px; border: 1px solid rgba(215, 229, 223, 0.4); border-radius: 10px; background: transparent; color: #f3f8f6; font: inherit; font-weight: 700; cursor: pointer; }
+.shell-signout:hover { background: rgba(255, 255, 255, 0.08); }
+.shell-signout:focus-visible { outline: 3px solid #e9a23b; outline-offset: 2px; }
+.shell-tenant { margin: 0; color: #5a6b70; }
+.shell-tenant strong { color: #17252b; }
+.shell-intro { margin: 0 0 24px; color: #5a6b70; }
+.shell-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+.shell-card { display: grid; gap: 8px; align-content: start; min-height: 130px; padding: 22px; border: 1px solid #d7e0de; border-radius: 16px; background: #ffffff; color: #17252b; text-decoration: none; }
+.shell-card strong { font-size: 1.1rem; }
+.shell-card span { color: #5a6b70; font-size: 0.9rem; }
+a.shell-card:hover { border-color: #2f6b57; box-shadow: 0 6px 16px rgba(23, 37, 43, 0.05); }
+a.shell-card:focus-visible { outline: 3px solid #1f4d3d; outline-offset: 2px; }
+.shell-card.is-disabled { background: #eef2f1; color: #5a6b70; cursor: not-allowed; }
+.shell-tag { width: max-content; padding: 4px 10px; border-radius: 999px; background: #ffffff; color: #5a6b70; font-size: 0.74rem; font-style: normal; font-weight: 800; }
