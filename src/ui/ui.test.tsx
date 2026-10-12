@@ -45,7 +45,8 @@ describe('AuthCard', () => {
     expect(screen.getByText('Interno')).toBeInTheDocument();
     expect(screen.getByText('Subtitulo')).toBeInTheDocument();
     expect(screen.getByText('contenido')).toBeInTheDocument();
-    expect(screen.getByText('Multitour')).toBeInTheDocument();
+    // The wordmark appears on the visual panel and in the header of the form column.
+    expect(screen.getAllByText('Multi Tour')).toHaveLength(2);
   });
 });
 
