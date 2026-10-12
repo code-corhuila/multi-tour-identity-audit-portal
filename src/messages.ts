@@ -1,9 +1,23 @@
 // Interface texts, in Spanish as in the Mockup (spec gap G-1). Code, tests and comments stay in English.
 export const messages = {
-  brand: 'Multitour',
+  brand: 'Multi Tour',
+  // Visual panel of the split screen (Mockup login.html, admin-login.html). The photo is served by the container.
+  visual: {
+    photo: '/assets/mountain-hero.jpg',
+    photoAlt: 'Cordillera iluminada por la luz dorada del atardecer, vista desde un sendero de montaña',
+    customer: 'Gestiona operadores, reservas y experiencias en un solo lugar.',
+    platform: 'Administra operadores y tenants de Multi Tour de forma centralizada.',
+    chip: 'Entorno interno',
+    home: 'Volver al inicio',
+  },
   signIn: {
+    kicker: 'Multi Tour',
     title: 'Bienvenido de nuevo',
     subtitle: 'Ingresa a tu cuenta para gestionar tus viajes.',
+    operatorSubtitle: 'Ingresa a tu cuenta para gestionar la operación.',
+    tabs: { customer: 'Cliente', operator: 'Equipo del operador', label: 'Tipo de acceso' },
+    platformEntry: 'Administración de plataforma',
+    staffAccess: '¿Necesitas acceso al equipo? Solicítalo a un administrador del operador.',
     submit: 'Iniciar sesión',
     noAccount: '¿No tienes una cuenta?',
     createAccount: 'Crear cuenta',
@@ -62,6 +76,7 @@ export const messages = {
   },
   signUp: {
     title: 'Crear cuenta',
+    visual: 'Crea tu cuenta y empieza a planear tu próxima experiencia.',
     subtitle: 'Únete a la plataforma y crea tu acceso para comenzar.',
     firstName: 'Nombre',
     firstNamePlaceholder: 'Ej. Juan',

@@ -27,6 +27,9 @@ export function SignInScreen({ identifier, apiClient, session, notice, onSignedI
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  // The tab only changes the copy: both call the same company session endpoint (Mockup login.html). `?tab=operador`
+  // preselects it.
+  const [operator, setOperator] = useState(() => new URLSearchParams(window.location.search).get('tab') === 'operador');
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
@@ -52,12 +55,25 @@ export function SignInScreen({ identifier, apiClient, session, notice, onSignedI
 
   const signUpHref = identifier === undefined ? undefined : `/t/${identifier}/sign-up`;
   const text = platform ? messages.platform : messages.signIn;
+  const tabs = messages.signIn.tabs;
   return (
     <AuthCard
       kicker={platform ? messages.platform.kicker : undefined}
+      eyebrow={platform ? undefined : messages.signIn.kicker}
+      homeHref={platform ? undefined : `/t/${identifier}`}
       title={text.title}
-      subtitle={text.subtitle}
+      subtitle={!platform && operator ? messages.signIn.operatorSubtitle : text.subtitle}
     >
+      {!platform && (
+        <div className="auth-tabs" role="group" aria-label={tabs.label}>
+          <button type="button" className="auth-tab" aria-pressed={!operator} onClick={() => setOperator(false)}>
+            {tabs.customer}
+          </button>
+          <button type="button" className="auth-tab" aria-pressed={operator} onClick={() => setOperator(true)}>
+            {tabs.operator}
+          </button>
+        </div>
+      )}
       <form className="auth-form" onSubmit={onSubmit} noValidate>
         <Field
           id="signin-email"
@@ -80,7 +96,7 @@ export function SignInScreen({ identifier, apiClient, session, notice, onSignedI
         <p className={failure ? 'auth-feedback is-error' : 'auth-feedback is-success'} aria-live="polite" role={!failure && notice ? 'status' : undefined}>
           {failure ?? notice}
         </p>
-        <button className="auth-submit" type="submit" disabled={sending}>
+        <button className={platform ? 'auth-submit' : 'auth-submit auth-submit--arrow'} type="submit" disabled={sending}>
           {sending ? messages.sending : text.submit}
         </button>
       </form>
@@ -92,7 +108,12 @@ export function SignInScreen({ identifier, apiClient, session, notice, onSignedI
         </p>
       ) : (
         <>
-          <div className="auth-divider" />
+          <p className="auth-platform-entry">
+            <a href="/platform">{messages.signIn.platformEntry}</a>
+          </p>
+          {operator ? (
+            <p className="auth-footer">{messages.signIn.staffAccess}</p>
+          ) : (
           <p className="auth-footer">
             {messages.signIn.noAccount} <a
               href={signUpHref}
@@ -105,6 +126,7 @@ export function SignInScreen({ identifier, apiClient, session, notice, onSignedI
               {messages.signIn.createAccount}
             </a>
           </p>
+          )}
         </>
       )}
     </AuthCard>
