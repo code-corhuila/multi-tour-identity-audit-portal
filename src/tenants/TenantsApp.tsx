@@ -32,9 +32,11 @@ function TenantList({ apiClient, onRegister }: { apiClient: ApiClient; onRegiste
   return (
     <main className="operator-content">
       <header className="operator-topbar">
-        <p className="operator-eyebrow">{text.eyebrow}</p>
-        <h1>{text.title}</h1>
-        <button type="button" className="operator-outline" onClick={onRegister}>
+        <div>
+          <p className="operator-eyebrow">{text.eyebrow}</p>
+          <h1>{text.title}</h1>
+        </div>
+        <button type="button" className="operator-primary" onClick={onRegister}>
           {text.register.action}
         </button>
       </header>
