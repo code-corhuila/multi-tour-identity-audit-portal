@@ -155,7 +155,7 @@ export function RegisterTenantScreen({ apiClient, onBack, pollMs = 1500 }: Regis
               {text.refresh}
             </button>
           )}
-          <button className="auth-submit" type="submit" disabled={sending}>
+          <button className="operator-primary" type="submit" disabled={sending}>
             {sending ? text.sending : text.submit}
           </button>
         </form>
