@@ -22,6 +22,8 @@ describe('operator.css', () => {
     expect(operatorCss).toMatch(/\.operator-primary\s*{[^}]*background:\s*var\(--op-accent-strong\)/);
     expect(operatorCss).toMatch(/\.operator-outline\s*{[^}]*border:\s*1px solid var\(--op-line-strong\)/);
     expect(operatorCss).toMatch(/\.operator-panel select[^{]*{[^}]*border-radius:\s*10px/);
+    // The focus indicator of the form fields stays visible over the border override.
+    expect(operatorCss).toMatch(/input:focus-visible\s*{[^}]*box-shadow:\s*0 0 0 3px/);
   });
 });
 
