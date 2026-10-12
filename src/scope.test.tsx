@@ -24,7 +24,7 @@ async function show(props: Partial<MountProps>, request: ApiClient['request'] = 
   await act(async () => {
     unmount = mount(element, all);
   });
-  return { session, navigate, request };
+  return { session, navigate, request: request as unknown as ReturnType<typeof vi.fn> };
 }
 
 const type = (label: string, value: string) => fireEvent.change(screen.getByLabelText(label), { target: { value } });
