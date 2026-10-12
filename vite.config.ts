@@ -4,6 +4,8 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   plugins: [react()],
+  // The container loads the module in a browser, where process does not exist.
+  define: { 'process.env.NODE_ENV': '"production"' },
   build: {
     lib: { entry: 'src/index.ts', formats: ['es'], fileName: 'portal' },
   },
