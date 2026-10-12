@@ -1,6 +1,14 @@
 /* Top bar and cards of the signed-in shells: tokens of the platform design of the Mockup (main.css, as operator.css).
    The dark bar plays the role of the Mockup sidebar, which belongs to the container's own shell. */
-.shell { min-height: 100vh; background: #f5f7f7; font-family: "Manrope", sans-serif; }
+/* Full-bleed: the shell paints the whole viewport; the content block is centred inside it. */
+.shell { width: 100%; min-height: 100vh; background: #f5f7f7; font-family: "Manrope", sans-serif; }
+.shell .operator-content { margin: 0 auto; background: transparent; }
+.shell-nav-items { display: flex; flex-wrap: wrap; gap: 8px; }
+.shell-nav-item { min-height: 40px; padding: 0 14px; border: 0; border-radius: 10px; background: transparent; color: #d7e5df; font: inherit; font-weight: 700; cursor: pointer; }
+.shell-nav-item:hover { background: rgba(255, 255, 255, 0.08); }
+.shell-nav-item[aria-current='page'] { background: #dceee6; color: #0b685f; }
+.shell-nav-item:focus-visible { outline: 3px solid #e9a23b; outline-offset: 2px; }
+.shell-metric { color: #14776f; font-size: 2.6rem; line-height: 1; }
 .shell, .shell *, .shell *::before, .shell *::after { box-sizing: border-box; }
 .shell-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; padding: 14px clamp(24px, 5vw, 76px); background: linear-gradient(190deg, #12251f 0%, #0c1a16 100%); color: #d7e5df; }
 .shell-brand { color: #f3f8f6; font-size: 1.05rem; font-weight: 800; letter-spacing: 0.14em; }

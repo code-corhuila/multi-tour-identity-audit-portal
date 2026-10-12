@@ -11,11 +11,14 @@ export interface FirstPasswordScreenProps {
   session: Session;
   // Called once the password is saved; the caller sends the person back to sign-in.
   onSaved: () => void;
+  // Signs the person out; the caller re-reads the session after it is closed. Without it the session is only closed.
+  onSignOut?: () => void;
 }
 
 const text = messages.firstPassword;
 
-export function FirstPasswordScreen({ apiClient, session, onSaved }: FirstPasswordScreenProps) {
+export function FirstPasswordScreen({ apiClient, session, onSaved, onSignOut }: FirstPasswordScreenProps) {
+  const signOut = () => (onSignOut ? onSignOut() : session.close());
   const { sending, failure, submit } = useChooseOwnPassword(apiClient);
   const [password, setPassword] = useState('');
   const [confirmation, setConfirmation] = useState('');
@@ -50,7 +53,7 @@ export function FirstPasswordScreen({ apiClient, session, onSaved }: FirstPasswo
         <p className="auth-feedback is-error" role="alert">
           {failure.text}
         </p>
-        <button className="auth-submit" type="button" onClick={() => session.close()}>
+        <button className="auth-submit" type="button" onClick={signOut}>
           {text.backToSignIn}
         </button>
       </AuthCard>
@@ -95,7 +98,7 @@ export function FirstPasswordScreen({ apiClient, session, onSaved }: FirstPasswo
         </button>
       </form>
       <p className="auth-back">
-        <button type="button" className="auth-link" onClick={() => session.close()}>
+        <button type="button" className="auth-link" onClick={signOut}>
           {text.backToSignIn}
         </button>
       </p>

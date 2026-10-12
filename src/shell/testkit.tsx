@@ -21,8 +21,10 @@ const listRequest = () =>
 export async function show(roles: string[], identifier?: string, access?: Session['access']) {
   const element = document.body.appendChild(document.createElement('div'));
   const session: Session = { roles, access, open: vi.fn(), close: vi.fn() };
+  // Like the container's session: closing it drops the roles and the access mark.
   session.close = vi.fn(() => {
     session.roles = [];
+    session.access = undefined;
   });
   const request = listRequest();
   await act(async () => {
