@@ -22,8 +22,19 @@ export interface MountProps {
   scope?: Scope;
   // SPA navigation owned by the container; absent (older container) leaves every link as a plain anchor.
   navigate?: (path: string) => void;
+  // Visual identity the container read from the public profile of the company; `null` means none was set. Both props
+  // are optional so an older container still works (portal spec 005, section 5).
+  visualIdentity?: VisualIdentity | null;
+  // Called after the colors were saved, so the container applies them to the whole page without a reload.
+  onVisualIdentityChange?: (visualIdentity: VisualIdentity) => void;
   apiClient: ApiClient;
   session: Session;
+}
+
+// `VisualIdentity` of identity-audit.yaml: the two colors of a company, written #RRGGBB.
+export interface VisualIdentity {
+  primaryColor: string;
+  secondaryColor: string;
 }
 
 export type Scope = 'general' | 'platform' | 'tenant';
