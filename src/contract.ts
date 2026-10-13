@@ -25,6 +25,8 @@ export interface MountProps {
   // Visual identity the container read from the public profile of the company; `null` means none was set. Both props
   // are optional so an older container still works (portal spec 005, section 5).
   visualIdentity?: VisualIdentity | null;
+  // Commercial name of the company, as the container read it; the visual identity screen shows it as read-only context.
+  commercialName?: string;
   // Called after the colors were saved, so the container applies them to the whole page without a reload.
   onVisualIdentityChange?: (visualIdentity: VisualIdentity) => void;
   apiClient: ApiClient;

@@ -17,7 +17,7 @@ import { ensureStylesheet } from './ui/stylesheet';
 
 // The access mark of the session decides the screen (RN-SEC-PT-05, -08). It fails closed: only an absent mark
 // shows the normal sign-in, and an unknown value is treated as restricted.
-export function AccessRoutes({ apiClient, session, identifier: link, scope, navigate }: MountProps) {
+export function AccessRoutes({ apiClient, session, identifier: link, scope, navigate, commercialName, visualIdentity, onVisualIdentityChange }: MountProps) {
   const [saved, setSaved] = useState(false);
   // Company typed in the general sign-in or sign-up; with a company link, the link wins.
   const [typedCompany, setTypedCompany] = useState<string | undefined>();
@@ -60,7 +60,19 @@ export function AccessRoutes({ apiClient, session, identifier: link, scope, navi
   }
   // A signed-in person of a company goes to their own screen (in the general scope, the company they typed).
   if (company !== undefined) {
-    if (isStaff(session.roles)) return <StaffHome identifier={company} onSignOut={signOut} />;
+    if (isStaff(session.roles)) {
+      return (
+        <StaffHome
+          identifier={company}
+          session={session}
+          apiClient={apiClient}
+          commercialName={commercialName}
+          visualIdentity={visualIdentity}
+          onVisualIdentityChange={onVisualIdentityChange}
+          onSignOut={signOut}
+        />
+      );
+    }
     if (session.roles.includes(FINAL_CUSTOMER)) return <CustomerHome identifier={company} onSignOut={signOut} />;
   }
   if (view === 'sign-up' && (identifier !== undefined || general)) {
