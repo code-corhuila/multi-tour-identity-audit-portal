@@ -82,6 +82,14 @@ describe('VisualIdentityScreen', () => {
     expect(container.querySelector('form')).toBeNull();
   });
 
+  it('fields_start_with_the_colors_that_arrive_after_loading, not with the defaults', () => {
+    const request = vi.fn();
+    const { rerender } = render(<VisualIdentityScreen apiClient={{ request }} session={admin} loading visualIdentity={undefined} />);
+    rerender(<VisualIdentityScreen apiClient={{ request }} session={admin} loading={false} visualIdentity={saved} />);
+    expect(screen.getByLabelText('Color principal')).toHaveValue('#146b5d');
+    expect(screen.queryByText('Tu empresa usa la identidad por defecto de Multitour.')).not.toBeInTheDocument();
+  });
+
   it('the picker and the text are kept in step', () => {
     const { container } = setup(vi.fn());
     const picker = container.querySelectorAll<HTMLInputElement>('input[type="color"]')[0];

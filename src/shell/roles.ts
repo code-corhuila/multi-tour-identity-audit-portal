@@ -2,6 +2,7 @@
 // for the role, so this only decides what to show.
 export const PLATFORM_ADMINISTRATOR = 'PLATFORM_ADMINISTRATOR';
 export const FINAL_CUSTOMER = 'FINAL_CUSTOMER';
+export const TENANT_ADMINISTRATOR = 'TENANT_ADMINISTRATOR';
 export const STAFF_ROLES = ['TENANT_ADMINISTRATOR', 'OPERATIONAL_COLLABORATOR', 'MANAGER', 'ACCOUNTANT', 'ANALYST'];
 
 export const isStaff = (roles: string[]): boolean => roles.some((r) => STAFF_ROLES.includes(r));
