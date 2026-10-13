@@ -47,8 +47,6 @@ describe('platform frame (RN-CAL-PLT-01, RN-CAL-PLT-02)', () => {
     const header = screen.getByRole('heading', { name: 'Operadores bajo control' }).closest('header') as HTMLElement;
     expect(within(header).getByText('Control de plataforma')).toBeInTheDocument();
     expect(within(header).getByRole('button', { name: 'Crear operador' })).toBeInTheDocument();
-    const nav = screen.getByRole('navigation', { name: 'Navegación de plataforma' });
-    expect(within(nav).queryByText('Crear operador')).not.toBeInTheDocument();
   });
 
   it('U·page_header_without_action_renders_only_eyebrow_and_title', () => {

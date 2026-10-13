@@ -35,7 +35,7 @@ export function PlatformFrame({ current, onNavigate, onSignOut, children }: Plat
           {text.signOut}
         </button>
       </aside>
-      <section className="platform-content">{children}</section>
+      <main className="platform-content">{children}</main>
     </div>
   );
 }
