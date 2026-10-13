@@ -25,7 +25,8 @@
 .shell-card { display: grid; gap: 8px; align-content: start; min-height: 130px; padding: 22px; border: 1px solid #d7e0de; border-radius: 16px; background: #ffffff; color: #17252b; text-decoration: none; }
 .shell-card strong { font-size: 1.1rem; }
 .shell-card span { color: #5a6b70; font-size: 0.9rem; }
-a.shell-card:hover { border-color: #2f6b57; box-shadow: 0 6px 16px rgba(23, 37, 43, 0.05); }
-a.shell-card:focus-visible { outline: 3px solid #1f4d3d; outline-offset: 2px; }
+button.shell-card { width: 100%; font: inherit; text-align: left; cursor: pointer; }
+a.shell-card:hover, button.shell-card:hover { border-color: #2f6b57; box-shadow: 0 6px 16px rgba(23, 37, 43, 0.05); }
+a.shell-card:focus-visible, button.shell-card:focus-visible { outline: 3px solid #1f4d3d; outline-offset: 2px; }
 .shell-card.is-disabled { background: #eef2f1; color: #5a6b70; cursor: not-allowed; }
 .shell-tag { width: max-content; padding: 4px 10px; border-radius: 999px; background: #ffffff; color: #5a6b70; font-size: 0.74rem; font-style: normal; font-weight: 800; }
