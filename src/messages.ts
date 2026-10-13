@@ -81,8 +81,26 @@ export const messages = {
     notice: 'La empresa está inactiva. Solo puedes atender las obligaciones pendientes.',
     signOut: 'Cerrar sesión',
   },
+  recover: {
+    title: 'Recuperar acceso',
+    notice: 'La recuperación de contraseña por autoservicio aún no está disponible en esta versión de Multi Tour.',
+    detail:
+      'Por ahora no podemos enviar un código de verificación ni procesar un cambio de contraseña desde aquí. Si perdiste el acceso a tu cuenta, vuelve a iniciar sesión con tus credenciales actuales o crea una cuenta nueva.',
+    backToSignIn: 'Volver al inicio de sesión',
+    createAccount: 'Crear una cuenta',
+  },
+  newPasswordNotice: {
+    title: 'Definir nueva contraseña',
+    notice:
+      'Este enlace de cambio de contraseña no corresponde a un proceso activo: la recuperación por autoservicio aún no está disponible en esta versión de Multi Tour.',
+    detail:
+      'No es posible guardar una nueva contraseña desde esta pantalla todavía. Vuelve a iniciar sesión con tus credenciales actuales o crea una cuenta nueva.',
+    backToSignIn: 'Volver al inicio de sesión',
+  },
   signUp: {
     title: 'Crear cuenta',
+    personalData: 'Datos personales',
+    security: 'Seguridad',
     visual: 'Crea tu cuenta y empieza a planear tu próxima experiencia.',
     subtitle: 'Únete a la plataforma y crea tu acceso para comenzar.',
     firstName: 'Nombre',
