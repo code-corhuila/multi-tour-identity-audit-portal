@@ -12,7 +12,9 @@ const apiClient = { request: vi.fn() };
 // Spec 006 PT-01: entry motion, hover transitions and the "no company field" rule of the calque of the Mockup.
 describe('calque of the Mockup: motion (RN-CAL-IDN-06)', () => {
   it('reduced_motion_removes_animation: every animation and every transition is switched off', () => {
-    const block = themeCss.match(/@media \(prefers-reduced-motion: reduce\)\s*{[^@]*}\s*}/)?.[0] ?? '';
+    const start = themeCss.indexOf('@media (prefers-reduced-motion: reduce)');
+    expect(start).toBeGreaterThanOrEqual(0);
+    const block = themeCss.slice(start);
     expect(block).toMatch(/\.auth-shell \*/);
     expect(block).toMatch(/animation:\s*none\s*!important/);
     expect(block).toMatch(/transition:\s*none\s*!important/);
