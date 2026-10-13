@@ -28,7 +28,7 @@ describe('"Mi perfil" view (spec 010, RN-CAL-PRF)', () => {
       expect(screen.getByLabelText(label)).toBeInTheDocument();
     }
     for (const row of ['Editar perfil', 'Cambiar contraseña', 'Volver al panel']) {
-      expect(screen.getByRole('button', { name: new RegExp(`^${row}`) })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: new RegExp(`^${row}$`) })).toBeInTheDocument();
     }
     expect(screen.getByRole('button', { name: 'Cerrar sesión' })).toBeInTheDocument();
   });
