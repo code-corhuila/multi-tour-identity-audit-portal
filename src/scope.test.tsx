@@ -40,7 +40,9 @@ describe("scope 'general': the company is typed", () => {
     const email = screen.getByLabelText('Correo electrónico');
     expect(company.compareDocumentPosition(email) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     signInWith();
-    await waitFor(() => expect(navigate).toHaveBeenCalledWith('/t/sierra-azul'));
+    // The route where the container mounts the portal for the company; the index of /t/<id> is its public landing.
+    await waitFor(() => expect(navigate).toHaveBeenCalledWith('/t/sierra-azul/ingresar'));
+    expect(navigate).not.toHaveBeenCalledWith('/t/sierra-azul');
     expect(request.mock.calls[0][0]).toBe('/api/v1/security/public/tenants/sierra-azul/sessions');
   });
 
@@ -164,6 +166,19 @@ describe("scope 'tenant' and 'platform'", () => {
     // jsdom reports the navigation from a timer, after the click returned.
     await new Promise((r) => setTimeout(r, 0));
     quiet.mockRestore();
+  });
+
+  it.each([
+    ['TENANT_ADMINISTRATOR', 'Control de la operación'],
+    ['FINAL_CUSTOMER', 'Hola'],
+  ])('tenant scope at /ingresar with an open %s session shows the panel, not the sign-in', async (role, heading) => {
+    const element = document.body.appendChild(document.createElement('div'));
+    const session: Session = { roles: [role], open: vi.fn(), close: vi.fn() };
+    await act(async () => {
+      unmount = mount(element, { apiClient: { request: vi.fn() }, session, identifier: 'sierra-azul', scope: 'tenant', navigate: vi.fn() });
+    });
+    expect(screen.getByRole('heading', { name: heading })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Bienvenido de nuevo' })).not.toBeInTheDocument();
   });
 
   it('area cards of the staff panel navigate through the container and keep their href', async () => {
