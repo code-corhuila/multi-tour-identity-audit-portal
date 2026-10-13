@@ -131,26 +131,35 @@ describe("scope 'tenant' and 'platform'", () => {
     expect(navigate).toHaveBeenLastCalledWith('/ingresar');
   });
 
-  it('tenant and platform sign-ins open the session with the answer only', async () => {
-    const tenant = await show({ scope: 'tenant', identifier: 'acme' });
+  it('a tenant sign-in opens the session with the answer only', async () => {
+    const { session } = await show({ scope: 'tenant', identifier: 'acme' });
     signInWith(null);
-    await waitFor(() => expect(tenant.session.open).toHaveBeenCalledWith(answer));
-    await act(async () => unmount());
-    document.body.innerHTML = '';
-    const platform = await show({ scope: 'platform' });
-    signInWith(null);
-    await waitFor(() => expect(platform.session.open).toHaveBeenCalledWith(answer));
+    await waitFor(() => expect(session.open).toHaveBeenCalledWith(answer));
   });
 
+  it('a platform sign-in opens the session with the answer only', async () => {
+    const { session } = await show({ scope: 'platform' });
+    type('Correo electrónico', 'root@multitour.co');
+    type('Contraseña', 'Viaje-2026!');
+    fireEvent.click(screen.getByRole('button', { name: 'Ingresar a plataforma' }));
+    await waitFor(() => expect(session.open).toHaveBeenCalledWith(answer));
+  });
+
+  // jsdom reports a real anchor navigation as "Not implemented: navigation" on console.error; the click is what is
+  // under test, so the noise is silenced in the two tests that let the browser handle it.
   it('no navigate: the anchors keep their default behavior', async () => {
+    const quiet = vi.spyOn(console, 'error').mockImplementation(() => {});
     await show({ scope: 'platform', navigate: undefined });
     expect(fireEvent.click(screen.getByRole('link', { name: 'Volver al acceso general' }))).toBe(true);
+    quiet.mockRestore();
   });
 
   it('a modified click (new tab) is left to the browser', async () => {
+    const quiet = vi.spyOn(console, 'error').mockImplementation(() => {});
     const { navigate } = await show({ scope: 'tenant', identifier: 'acme' });
     expect(fireEvent.click(screen.getByRole('link', { name: 'Volver al inicio' }), { ctrlKey: true })).toBe(true);
     expect(navigate).not.toHaveBeenCalled();
+    quiet.mockRestore();
   });
 
   it('area cards of the staff panel navigate through the container and keep their href', async () => {
