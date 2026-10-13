@@ -1,0 +1,31 @@
+/* Platform administrator panel: values of main.css of the Mockup (20260901-3), spec 007 section 4. */
+.platform-shell, .platform-shell *, .platform-shell *::before, .platform-shell *::after { box-sizing: border-box; }
+.platform-shell { --cta: #e9a23b; --accent-strong: #123c46; display: grid; grid-template-columns: 264px minmax(0, 1fr); min-height: 100vh; background: #f5f7f7; font-family: "Manrope", sans-serif; }
+.platform-sidebar { display: flex; flex-direction: column; padding: 30px 20px 26px; background: linear-gradient(190deg, #12251f, #0c1a16); color: #d7e5df; }
+.platform-brand { color: #f3f8f6; font-size: 1.05rem; font-weight: 800; letter-spacing: 0.14em; }
+.platform-brand span { color: var(--cta); }
+.platform-role { margin: 12px 0 40px; color: #7f978f; font-size: 0.74rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+.platform-nav { display: grid; gap: 4px; }
+.platform-nav button, .platform-signout { display: block; width: 100%; padding: 12px 14px; border: 0; border-left: 3px solid transparent; border-radius: 9px; background: transparent; color: #d7e5df; font: inherit; font-weight: 700; text-align: left; cursor: pointer; transition: background 140ms ease, border-color 140ms ease, color 140ms ease; }
+.platform-nav button:hover, .platform-nav button[aria-current='page'] { border-left-color: var(--cta); background: rgba(255, 255, 255, 0.06); color: #ffffff; }
+.platform-signout { margin-top: auto; padding-left: 14px; color: #8fa39c; }
+.platform-signout:hover { border-left-color: transparent; background: transparent; color: #f0b088; }
+.platform-nav button:focus-visible, .platform-signout:focus-visible { outline: 3px solid var(--cta); outline-offset: 2px; }
+.platform-content { width: min(100%, 1380px); padding: 44px clamp(24px, 5vw, 76px) 70px; }
+.mt-page-header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 18px; margin-bottom: 36px; }
+.mt-page-header-eyebrow { margin: 0; color: #6a7a7e; font-size: 0.74rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+.mt-page-header-title { margin: 4px 0 0; color: #172426; font-size: clamp(1.8rem, 1.45rem + 0.9vw, 2.35rem); letter-spacing: -0.045em; line-height: 1.12; }
+.platform-primary { display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px; border: 0; border-radius: 10px; background: var(--accent-strong); color: #ffffff; font: inherit; font-weight: 800; text-decoration: none; cursor: pointer; }
+.platform-primary:hover { background: #0a2a32; }
+.platform-danger { min-height: 46px; padding: 0 19px; border: 0; border-radius: 10px; background: #b94a3f; color: #ffffff; font: inherit; font-weight: 800; cursor: pointer; }
+.platform-danger:hover { background: #9d3d34; }
+.platform-panel { padding: 26px; border: 1px solid #dce3de; border-radius: 16px; background: rgba(255, 255, 252, 0.93); box-shadow: 0 14px 30px rgba(31, 48, 45, 0.035); }
+.platform-status { display: inline-flex; align-items: center; gap: 6px; width: max-content; padding: 6px 9px; border-radius: 999px; font-size: 0.74rem; font-weight: 800; }
+.platform-status.is-active { background: #ddf0e7; color: #16675d; }
+.platform-status.is-inactive { background: #f5e7df; color: #9d4c36; }
+.platform-table-wrap { overflow-x: auto; }
+.platform-table { width: 100%; min-width: 760px; border-collapse: collapse; text-align: left; }
+.platform-table th { padding: 0 12px 12px; color: #748084; font-size: 0.71rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.platform-table td { padding: 16px 12px; border-top: 1px solid #e3e8e4; color: #48575b; font-size: 0.88rem; vertical-align: middle; }
+.platform-band { padding: 28px 30px; border-radius: 16px; background: #1d3b3a; color: #f7fbf8; }
+@media (max-width: 760px) { .platform-shell { grid-template-columns: 1fr; } .platform-sidebar { padding-bottom: 18px; } }
