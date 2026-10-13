@@ -3,8 +3,10 @@ import type { ApiClient } from '../contract';
 import { Field } from '../ui/Field';
 import { focusField } from '../ui/focus';
 import { PasswordField } from '../ui/PasswordField';
+import { SelectField } from '../ui/SelectField';
 import { tenantMessages } from './messages';
 import type { OnboardField } from './onboardErrors';
+import { validateRegister } from './registerValidation';
 import { useOnboardTenant } from './useOnboardTenant';
 import './operator.css';
 
@@ -31,27 +33,8 @@ const ids: Record<FormField, string> = {
 };
 // Order of the form, to put the focus on the first field with an error.
 const order: FormField[] = ['identifier', 'commercialName', 'timeZone', 'country', 'initialStatus', 'fullName', 'email', 'password', 'passwordConfirmation'];
-// Same pattern and length as `TenantIdentifier` of identity-audit.yaml.
-const IDENTIFIER = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 // D-10: the zones come from the platform; the countries are a constant (Colombia only, spec section 6).
 const timeZones = Intl.supportedValuesOf('timeZone');
-
-function SelectField({ id, label, value, options, onChange }: { id: string; label: string; value: string; options: [string, string][]; onChange: (v: string) => void }) {
-  return (
-    <div className="auth-field">
-      <label htmlFor={id}>{label}</label>
-      <div className="auth-input-wrap">
-        <select id={id} value={value} onChange={(e) => onChange(e.target.value)}>
-          {options.map(([v, name]) => (
-            <option key={v} value={v}>
-              {name}
-            </option>
-          ))}
-        </select>
-      </div>
-    </div>
-  );
-}
 
 export function RegisterTenantScreen({ apiClient, onBack, pollMs = 1500 }: RegisterTenantScreenProps) {
   const { sending, failure, saga, submit, refresh } = useOnboardTenant(apiClient, pollMs);
@@ -73,14 +56,7 @@ export function RegisterTenantScreen({ apiClient, onBack, pollMs = 1500 }: Regis
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
     const identifier = values.identifier.trim();
-    const found: Partial<Record<FormField, string>> = {
-      identifier: !identifier ? text.identifierRequired : identifier.length < 3 || identifier.length > 40 || !IDENTIFIER.test(identifier) ? text.identifierShape : undefined,
-      commercialName: values.commercialName.trim() ? undefined : text.nameRequired,
-      fullName: values.fullName.trim() ? undefined : text.fullNameRequired,
-      email: values.email.trim() ? undefined : text.emailRequired,
-      password: values.password ? undefined : text.passwordRequired,
-      passwordConfirmation: values.password && values.password !== values.passwordConfirmation ? text.mismatch : undefined,
-    };
+    const found: Partial<Record<FormField, string>> = validateRegister(values);
     setLocal(found);
     const first = order.find((f) => found[f]);
     if (first) {
