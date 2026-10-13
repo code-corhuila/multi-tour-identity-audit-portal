@@ -20,10 +20,10 @@ describe('SummaryView (spec 007 PT-02, RN-CAL-PLT-03)', () => {
     expect(screen.getByText('Control de plataforma')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Crear operador' })).toBeInTheDocument();
     expect(screen.getByText('Vista transversal')).toBeInTheDocument();
-    const group = (name: string) => within(screen.getByRole('group', { name }));
-    expect(await group('Operadores activos').findByText('2')).toBeInTheDocument();
-    expect(group('Operadores inactivos').getByText('1')).toBeInTheDocument();
-    expect(screen.getByRole('group', { name: 'Altas este mes' })).toBeInTheDocument();
+    const group = async (name: string) => within(await screen.findByRole('group', { name }));
+    expect((await group('Operadores activos')).getByText('2')).toBeInTheDocument();
+    expect((await group('Operadores inactivos')).getByText('1')).toBeInTheDocument();
+    expect(await screen.findByRole('group', { name: 'Altas este mes' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Estado de tenants' })).toBeInTheDocument();
     expect(screen.getByText('Operadores recientes')).toBeInTheDocument();
     expect(await screen.findByText('Sierra Azul')).toBeInTheDocument();
@@ -33,14 +33,13 @@ describe('SummaryView (spec 007 PT-02, RN-CAL-PLT-03)', () => {
 
   it('U·signups_is_a_dash_when_the_service_has_no_answer_and_the_stub_flag_is_off', async () => {
     show(listClient(rows).apiClient);
-    await screen.findByText('Sierra Azul');
-    expect(within(screen.getByRole('group', { name: 'Altas este mes' })).getByText('—')).toBeInTheDocument();
+    expect(within(await screen.findByRole('group', { name: 'Altas este mes' })).getByText('—')).toBeInTheDocument();
   });
 
   it('U·signups_shows_labelled_test_data_when_the_stub_flag_is_on', async () => {
     vi.stubEnv('VITE_STUB', 'true');
     show(listClient(rows).apiClient);
-    const group = within(screen.getByRole('group', { name: 'Altas este mes' }));
+    const group = within(await screen.findByRole('group', { name: 'Altas este mes' }));
     expect(await group.findByText('Datos de prueba')).toBeInTheDocument();
     expect(group.queryByText('—')).not.toBeInTheDocument();
   });
