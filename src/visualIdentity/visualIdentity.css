@@ -1,0 +1,13 @@
+/* Visual identity screen: operator theme tokens (operator.css); the preview reads --accent and --accent-strong from
+   its own box, which the screen sets inline, so the rest of the page is untouched until the save succeeds. */
+.visual-identity-company { margin: 6px 0 0; color: var(--op-soft, #5a6b70); }
+.visual-identity-note { margin: 0 0 18px; padding: 10px 14px; border-radius: 10px; background: #eef2f1; color: var(--op-soft, #5a6b70); }
+.visual-identity-inputs { display: flex; align-items: center; gap: 12px; }
+.visual-identity-inputs input[type='color'] { width: 52px; height: 48px; padding: 2px; border: 1px solid var(--op-line-strong, #c3d0cc); border-radius: 10px; background: #ffffff; cursor: pointer; }
+.visual-identity-inputs .auth-input-wrap { flex: 1; }
+.visual-identity-preview { display: grid; gap: 12px; padding: 20px; border: 1px solid var(--op-line, #d7e0de); border-radius: 16px; background: #ffffff; }
+.visual-identity-preview h2 { margin: 0; color: var(--accent-strong); font-size: 1.2rem; }
+.visual-identity-preview-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.visual-identity-preview-primary, .visual-identity-preview-outline { display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px; border-radius: 10px; font-weight: 800; }
+.visual-identity-preview-primary { background: var(--accent); color: #ffffff; }
+.visual-identity-preview-outline { border: 2px solid var(--accent-strong); color: var(--accent-strong); }
