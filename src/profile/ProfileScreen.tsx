@@ -51,7 +51,7 @@ export function ProfileScreen({ session, backLabel, onBack, onSignOut }: Profile
         <h1>{t.title}</h1>
         <p className="shell-intro">{t.intro}</p>
         <div role="group" aria-label={t.identity} className="profile-card">
-          <span className="profile-avatar">{initialsOf(account.name, account.email)}</span>
+          <span className="profile-avatar" aria-hidden="true">{initialsOf(account.name, account.email)}</span>
           <div>
             <strong>{account.name ?? t.notRegistered}</strong>
             <span>{account.email ?? t.notRegistered}</span>
