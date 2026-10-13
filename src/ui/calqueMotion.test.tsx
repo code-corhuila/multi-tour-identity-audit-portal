@@ -16,6 +16,9 @@ describe('calque of the Mockup: motion (RN-CAL-IDN-06)', () => {
     expect(start).toBeGreaterThanOrEqual(0);
     const block = themeCss.slice(start);
     expect(block).toMatch(/\.auth-shell \*/);
+    // The operator screens reuse the auth form classes outside .auth-shell (theme.css header).
+    expect(block).toMatch(/\.operator-content \*/);
+    expect(block).toMatch(/\.operator-content \*::before/);
     expect(block).toMatch(/animation:\s*none\s*!important/);
     expect(block).toMatch(/transition:\s*none\s*!important/);
   });
@@ -25,7 +28,7 @@ describe('calque of the Mockup: motion (RN-CAL-IDN-06)', () => {
   });
 
   it('entry_parts_are_staggered_60_110_160_and_210ms', () => {
-    expect(themeCss).toMatch(/\.auth-copy \.auth-kicker\s*{[^}]*mthFadeUp 420ms[^}]*60ms/);
+    expect(themeCss).toMatch(/\.auth-copy \.auth-kicker\s*{[^}]*mthFadeUp 420ms[^}]*\) 60ms\b/);
     expect(themeCss).toMatch(/\.auth-copy h1\s*{[^}]*mthFadeUp 420ms[^}]*110ms/);
     expect(themeCss).toMatch(/\.auth-copy p:not\(\.auth-kicker\)\s*{[^}]*mthFadeUp 420ms[^}]*160ms/);
     expect(themeCss).toMatch(/\.auth-form\s*{[^}]*mthFadeUp 480ms[^}]*210ms/);
