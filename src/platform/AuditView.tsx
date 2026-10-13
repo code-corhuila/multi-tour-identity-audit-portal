@@ -45,7 +45,7 @@ export function AuditView({ source }: { source?: AuditSource }) {
       </section>
       <section className="platform-panel">
         {/* The rows come from the test source until the audit service exists (RN-CAL-AUD-04). */}
-        {!import.meta.env.PROD && <p className="platform-eyebrow">{text.testData}</p>}
+        {import.meta.env.DEV && <p className="platform-eyebrow">{text.testData}</p>}
         {state.kind === 'loading' && <p role="status">{text.loading}</p>}
         {state.kind === 'error' && (
           <div role="alert">

@@ -21,4 +21,4 @@ const TEST_EVENTS: AuditEvent[] = [
   { id: 'a3', occurredAt: '2026-10-09T16:48:00Z', action: 'Operador reactivado', operator: 'Sierra Azul', change: 'Inactivo → Activo', actor: 'admin@multitour.local', reason: 'Documentación al día' },
 ];
 
-export const stubAuditSource: AuditSource = async () => (import.meta.env.PROD ? [] : TEST_EVENTS);
+export const stubAuditSource: AuditSource = async () => (import.meta.env.DEV ? TEST_EVENTS : []);
