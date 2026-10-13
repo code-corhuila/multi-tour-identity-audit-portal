@@ -99,8 +99,9 @@ export function AccessRoutes({ apiClient, session, identifier: link, scope, navi
         setCreated(false);
         if (general) {
           setTypedCompany(signedCompany);
-          // The container shows the company panel and keeps the session across the navigation.
-          if (signedCompany) navigate?.(`/t/${signedCompany}`);
+          // The portal is mounted at the company's sign-in route (the index of /t/<id> is its public landing); with an
+          // open session the tenant scope shows the panel of the role. The container keeps the session across this.
+          if (signedCompany) navigate?.(`/t/${signedCompany}/ingresar`);
         }
         setReads((n) => n + 1);
       }}
