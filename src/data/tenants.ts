@@ -48,3 +48,14 @@ export function tenantsPath({ page, limit, status }: TenantQuery): string {
 export function listTenants(client: ApiClient, query: TenantQuery, signal: AbortSignal): Promise<TenantPage> {
   return client.request<TenantPage>(tenantsPath(query), { signal });
 }
+
+const tenantPath = (tenantId: string) => `/api/v1/identity-audit/tenants/${encodeURIComponent(tenantId)}`;
+
+export function getTenant(client: ApiClient, tenantId: string, signal: AbortSignal): Promise<TenantResponse> {
+  return client.request<TenantResponse>(tenantPath(tenantId), { signal });
+}
+
+// Inactivating cuts the tenant's sessions; the reason is required (1 to 500 characters, `TransitionReasonRequest`).
+export function inactivateTenant(client: ApiClient, tenantId: string, reason: string, signal?: AbortSignal): Promise<TenantResponse> {
+  return client.request<TenantResponse>(`${tenantPath(tenantId)}/inactivate`, { method: 'POST', body: { reason }, signal });
+}
