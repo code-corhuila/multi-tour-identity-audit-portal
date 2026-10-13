@@ -53,6 +53,8 @@ describe('calque of the Mockup: the sign-in view (RN-CAL-IDN-02, -03, -05)', () 
     fireEvent.click(screen.getByRole('button', { name: 'Iniciar sesión' }));
     await waitFor(() => expect(request).toHaveBeenCalledTimes(1));
     fireEvent.click(screen.getByRole('button', { name: 'Equipo del operador' }));
+    // The password is cleared once the sign-in went through.
+    fill();
     fireEvent.click(screen.getByRole('button', { name: 'Iniciar sesión' }));
     await waitFor(() => expect(request).toHaveBeenCalledTimes(2));
     expect(request.mock.calls[1]).toEqual(request.mock.calls[0]);
