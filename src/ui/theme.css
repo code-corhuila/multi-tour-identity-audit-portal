@@ -92,6 +92,11 @@ body[data-theme='travesia-natural'] { --accent: #146b5d; }
   color: var(--mt-slate); font: inherit; font-size: 0.88rem; font-weight: 600; cursor: pointer;
 }
 .auth-tab[aria-pressed='true'] { color: var(--mt-ink); border-bottom-color: var(--accent, #147D73); font-weight: 700; }
+/* "Rol en el equipo" (Mockup login.css): small label and two smaller tabs, no divider below. */
+.auth-subrole { display: grid; gap: 8px; margin: -8px 0 18px; }
+.auth-subrole-label { color: var(--mt-slate); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.auth-tabs--sub { gap: 20px; margin: 0; border-bottom: 0; animation: none; }
+.auth-tabs--sub .auth-tab { padding-bottom: 6px; font-size: 0.82rem; }
 .auth-tab:focus-visible { outline: 2px solid var(--accent, #147D73); outline-offset: 2px; }
 
 .auth-form { display: grid; gap: 16px; animation: mthFadeUp 480ms cubic-bezier(.16, 1, .3, 1) 210ms both; }

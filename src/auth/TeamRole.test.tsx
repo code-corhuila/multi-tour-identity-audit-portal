@@ -114,6 +114,24 @@ describe.each<Scope>(['tenant', 'general'])('team role selector, scope %s', (sco
   });
 });
 
+describe('team role selector, access marks', () => {
+  it.each(['password-change', 'restricted'] as const)('a %s token is not checked against the profile nor closed', async (access) => {
+    const session = containerSession('tenant', []);
+    const open = session.open;
+    session.open = vi.fn((a: unknown, i?: string) => {
+      open(a, i);
+      session.access = access;
+    });
+    const onSignedIn = vi.fn();
+    render(<SignInScreen scope="tenant" identifier="acme" apiClient={{ request: vi.fn().mockResolvedValue(answer) }} session={session} onSignedIn={onSignedIn} />);
+    operatorTab();
+    signIn();
+    await waitFor(() => expect(onSignedIn).toHaveBeenCalledTimes(1));
+    expect(session.close).not.toHaveBeenCalled();
+    expect(screen.queryByText(MISMATCH)).not.toBeInTheDocument();
+  });
+});
+
 describe('team role selector, details', () => {
   it('?tab=operador shows it from the start and the platform sign-in has none', () => {
     window.history.replaceState(null, '', '/t/acme/ingresar?tab=operador');
