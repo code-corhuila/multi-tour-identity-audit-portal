@@ -1,7 +1,25 @@
 import { act } from 'react';
 import { vi } from 'vitest';
-import type { ApiClient, Session } from '../contract';
+import type { ApiClient, Scope, Session } from '../contract';
 import { mount } from '../mount';
+
+// A session that behaves like multi-tour-front's: in the general scope `open` needs the company the answer is for and
+// refuses (throws, opening nothing) when it is missing or malformed, so a mismatch with the container fails here too.
+// Opening grants `grants` as roles; closing drops the roles and the access mark.
+export function containerSession(scope: Scope | undefined, grants: string[] = []): Session {
+  const session: Session = { roles: [], open: vi.fn(), close: vi.fn() };
+  session.open = vi.fn((_answer: unknown, identifier?: string) => {
+    if (scope === 'general' && !(identifier && /^[a-z0-9]+(-[a-z0-9]+)*$/.test(identifier) && identifier.length >= 3 && identifier.length <= 40)) {
+      throw new Error('A valid company is required to open a session in the general scope');
+    }
+    session.roles = grants;
+  });
+  session.close = vi.fn(() => {
+    session.roles = [];
+    session.access = undefined;
+  });
+  return session;
+}
 
 // Test kit of the shell tests: mounts the portal with a stub client and a session whose close drops the roles.
 let unmount = () => {};
