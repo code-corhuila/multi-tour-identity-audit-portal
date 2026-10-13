@@ -7,7 +7,7 @@ import { PasswordField } from '../ui/PasswordField';
 import { isCompanyIdentifier, isValidIdentifier } from '../data/security';
 import { focusField } from '../ui/focus';
 import { NavLink } from '../ui/navigation';
-import { useSignIn } from './useSignIn';
+import { useSignIn, type TeamProfile } from './useSignIn';
 
 export interface SignInScreenProps {
   // Identifier of the company link; absent means the platform sign-in (or the general one, by `scope`).
@@ -38,6 +38,7 @@ export function SignInScreen({ identifier, scope, apiClient, session, notice, in
   // The tab only changes the copy: both call the same company session endpoint (Mockup login.html). `?tab=operador`
   // preselects it.
   const [operator, setOperator] = useState(() => new URLSearchParams(window.location.search).get('tab') === 'operador');
+  const [teamProfile, setTeamProfile] = useState<TeamProfile>('admin');
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
@@ -54,7 +55,8 @@ export function SignInScreen({ identifier, scope, apiClient, session, notice, in
       return;
     }
     const target = general ? typed : identifier;
-    if (await submit({ email: email.trim(), password }, target)) {
+    // The profile is only checked on the operator tab; it is never sent.
+    if (await submit({ email: email.trim(), password }, target, !platform && operator ? teamProfile : undefined)) {
       setPassword('');
       onSignedIn?.(target);
     }
@@ -84,6 +86,20 @@ export function SignInScreen({ identifier, scope, apiClient, session, notice, in
           <button type="button" className="auth-tab" aria-pressed={operator} onClick={() => setOperator(true)}>
             {tabs.operator}
           </button>
+        </div>
+      )}
+      {!platform && operator && (
+        <div className="auth-subrole">
+          <span id="signin-team-role" className="auth-subrole-label">
+            {messages.signIn.teamRole.label}
+          </span>
+          <div className="auth-tabs auth-tabs--sub" role="group" aria-labelledby="signin-team-role">
+            {(['admin', 'staff'] as const).map((profile) => (
+              <button key={profile} type="button" className="auth-tab" aria-pressed={teamProfile === profile} onClick={() => setTeamProfile(profile)}>
+                {messages.signIn.teamRole[profile]}
+              </button>
+            ))}
+          </div>
         </div>
       )}
       <form className="auth-form" onSubmit={onSubmit} noValidate>
