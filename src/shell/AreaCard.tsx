@@ -7,9 +7,19 @@ export interface AreaCardProps {
   body: string;
   // Absent means the area has no route in this version: the card is shown disabled.
   href?: string;
+  // An area that opens a view of this same panel instead of a route of the container.
+  onSelect?: () => void;
 }
 
-export function AreaCard({ title, body, href }: AreaCardProps) {
+export function AreaCard({ title, body, href, onSelect }: AreaCardProps) {
+  if (onSelect) {
+    return (
+      <button type="button" className="shell-card" onClick={onSelect}>
+        <strong>{title}</strong>
+        <span>{body}</span>
+      </button>
+    );
+  }
   if (href) {
     return (
       <NavLink className="shell-card" href={href}>
