@@ -16,7 +16,7 @@ function useSignupsThisMonth(): number | undefined {
   const [value, setValue] = useState<number>();
   useEffect(() => {
     // Without the flag the build removes this import, so testData never reaches production (RN-CAL-PLT-07).
-    if (import.meta.env.VITE_STUB === 'true') void import('./testData').then((m) => setValue(m.testData.signupsThisMonth));
+    if (import.meta.env.VITE_STUB === 'true') void import('./testData').then((m) => setValue(m.testData.signupsThisMonth)).catch(() => undefined);
   }, []);
   return value;
 }
@@ -59,7 +59,7 @@ export function SummaryView({ apiClient, onCreate, onSeeAll }: SummaryViewProps)
         </div>
         <p>{text.intro}</p>
       </section>
-      <div className="mt-summary-row" aria-label={text.metricsLabel}>
+      <div className="mt-summary-row" role="group" aria-label={text.metricsLabel}>
         <QueryNotice state={counts.state} retry={counts.retry} />
         {metrics.map(([label, value, note]) => (
           <div key={label} className="mt-summary-metric" role="group" aria-label={label}>
