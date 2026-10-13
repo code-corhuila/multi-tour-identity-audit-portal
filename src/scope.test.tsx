@@ -151,6 +151,8 @@ describe("scope 'tenant' and 'platform'", () => {
     const quiet = vi.spyOn(console, 'error').mockImplementation(() => {});
     await show({ scope: 'platform', navigate: undefined });
     expect(fireEvent.click(screen.getByRole('link', { name: 'Volver al acceso general' }))).toBe(true);
+    // jsdom reports the navigation from a timer, after the click returned.
+    await new Promise((r) => setTimeout(r, 0));
     quiet.mockRestore();
   });
 
@@ -159,6 +161,8 @@ describe("scope 'tenant' and 'platform'", () => {
     const { navigate } = await show({ scope: 'tenant', identifier: 'acme' });
     expect(fireEvent.click(screen.getByRole('link', { name: 'Volver al inicio' }), { ctrlKey: true })).toBe(true);
     expect(navigate).not.toHaveBeenCalled();
+    // jsdom reports the navigation from a timer, after the click returned.
+    await new Promise((r) => setTimeout(r, 0));
     quiet.mockRestore();
   });
 
