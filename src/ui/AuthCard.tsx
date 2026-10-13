@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { messages } from '../messages';
+import { NavLink } from './navigation';
 import './theme.css';
 
 export interface AuthCardProps {
@@ -28,18 +29,22 @@ export function AuthCard({ kicker, eyebrow, title, subtitle, wide, homeHref, vis
       <aside className="auth-visual">
         {!platform && <img className="auth-visual-img" src={text.photo} alt={text.photoAlt} />}
         <div className="auth-visual-content">
-          <span className="auth-visual-brand">{messages.brand}</span>
+          <NavLink className="auth-visual-brand" href="/">
+            {messages.brand}
+          </NavLink>
           {platform && <span className="auth-visual-chip">{text.chip}</span>}
           <p className="auth-visual-title">{phrase}</p>
         </div>
       </aside>
       <section className="auth-panel">
         <header className="auth-header">
-          <span className="auth-brand">{messages.brand}</span>
+          <NavLink className="auth-brand" href="/">
+            {messages.brand}
+          </NavLink>
           {homeHref && (
-            <a className="auth-home" href={homeHref}>
+            <NavLink className="auth-home" href={homeHref}>
               {text.home}
-            </a>
+            </NavLink>
           )}
         </header>
         <div className="auth-stage">

@@ -8,16 +8,25 @@ export interface Session {
   // Mark of the current token (G-2): a temporary credential or a restricted access; absent for a normal one.
   // The container's session must provide it and update it when a session opens or closes.
   access?: 'password-change' | 'restricted';
-  open(answer: unknown): void;
+  // `identifier` is the company the answer is for; the container requires it in the general scope and ignores it in
+  // the tenant and platform scopes.
+  open(answer: unknown, identifier?: string): void;
   close(): void;
 }
 
 export interface MountProps {
   // Identifier of the company link; absent means the platform sign-in. The container must provide it.
   identifier?: string;
+  // 'general': the company is typed on the sign-in; 'platform': the platform sign-in and shell; 'tenant': the company
+  // comes from `identifier`. Absent keeps the older rule (no identifier means platform).
+  scope?: Scope;
+  // SPA navigation owned by the container; absent (older container) leaves every link as a plain anchor.
+  navigate?: (path: string) => void;
   apiClient: ApiClient;
   session: Session;
 }
+
+export type Scope = 'general' | 'platform' | 'tenant';
 
 // Shape of the error the container's client rejects with (outline of ADR-006 F4, spec gap G-2).
 export interface ApiError {
