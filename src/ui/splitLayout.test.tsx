@@ -74,7 +74,7 @@ describe('SignInScreen tabs and links of the Mockup', () => {
     expect(screen.getByRole('link', { name: 'Crear cuenta' })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Equipo del operador' }));
     expect(screen.queryByRole('link', { name: 'Crear cuenta' })).not.toBeInTheDocument();
-    expect(screen.getByText(/Solicítalo a un administrador del operador/)).toBeInTheDocument();
+    expect(screen.getByText(/Solicítalo a un Administrador del tenant/)).toBeInTheDocument();
   });
 
   it('?tab=operador preselects the operator tab', () => {

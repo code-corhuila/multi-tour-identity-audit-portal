@@ -12,12 +12,12 @@ const frame = (current: 'summary' | 'staff' = 'staff', onSignOut = vi.fn(), onNa
   );
 
 describe('staff frame (RN-CAL-USR-01, RN-CAL-USR-02)', () => {
-  it('U·staff_frame_has_label_items_and_sign_out: wordmark, role label, the nine items and the sign-out at the bottom', () => {
+  it('U·staff_frame_has_label_items_and_sign_out: wordmark, role label, the ten items and the sign-out at the bottom', () => {
     const onSignOut = vi.fn();
     const { container } = frame('staff', onSignOut);
     const sidebar = container.querySelector('aside') as HTMLElement;
     expect(within(sidebar).getByText('MULTI').parentElement).toHaveTextContent('MULTITOUR');
-    expect(within(sidebar).getByText('Administrador del operador')).toBeInTheDocument();
+    expect(within(sidebar).getByText('Administrador del tenant')).toBeInTheDocument();
     const nav = within(sidebar).getByRole('navigation', { name: 'Navegación del operador' });
     const labels = [...nav.querySelectorAll('li')].map((li) => (li.textContent ?? '').replace('Próximamente', '').trim());
     expect(labels).toEqual([
@@ -28,6 +28,7 @@ describe('staff frame (RN-CAL-USR-01, RN-CAL-USR-02)', () => {
       'Pagos',
       'Caja',
       'Operación',
+      'Notificaciones',
       'Reportes',
       'Colaboradores',
     ]);
@@ -55,7 +56,7 @@ describe('staff frame (RN-CAL-USR-01, RN-CAL-USR-02)', () => {
     frame('summary', vi.fn(), onNavigate);
     expect(screen.getByRole('link', { name: 'Catálogos' })).toHaveAttribute('href', COMMERCIAL);
     expect(screen.getByRole('link', { name: 'Descuentos' })).toHaveAttribute('href', COMMERCIAL);
-    for (const name of ['Reservas', 'Pagos', 'Caja', 'Operación', 'Reportes']) {
+    for (const name of ['Reservas', 'Pagos', 'Caja', 'Operación', 'Notificaciones', 'Reportes']) {
       const item = screen.getByText(name).closest('[aria-disabled]') as HTMLElement;
       expect(item).toHaveAttribute('aria-disabled', 'true');
       expect(within(item).getByText('Próximamente')).toBeInTheDocument();
