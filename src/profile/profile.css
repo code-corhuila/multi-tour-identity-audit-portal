@@ -1,0 +1,20 @@
+/* "Mi perfil" of the Mockup (profile.html): identity card, read-only form grid, rows and the footer link. The tokens
+   come from .operator-content (theme.css). */
+.profile { display: grid; gap: 20px; max-width: 760px; padding: 32px 24px 56px; }
+.profile h1 { margin: 0; color: var(--mt-ink); }
+.profile h2 { margin: 0 0 12px; color: var(--mt-ink); font-size: 1.05rem; }
+.profile-link { justify-self: start; padding: 0; border: 0; background: none; color: var(--mt-slate); font: inherit; font-weight: 700; cursor: pointer; }
+.profile-card { display: flex; align-items: center; gap: 16px; padding: 20px; border: 1px solid var(--mt-line); border-radius: 18px; background: var(--mt-surface); }
+.profile-card div { display: grid; gap: 4px; }
+.profile-card div span { color: var(--mt-slate); }
+.profile-avatar { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; background: var(--mt-ink); color: var(--mt-warm-white); font-size: 1.3rem; font-weight: 800; }
+.profile-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+.profile-field { display: grid; gap: 6px; color: var(--mt-slate); font-size: 0.85rem; font-weight: 700; }
+.profile-field input { min-height: 44px; padding: 0 14px; border: 1px solid var(--mt-line); border-radius: 12px; background: var(--mt-sand); color: var(--mt-ink); font: inherit; }
+.profile-rows { display: grid; gap: 8px; }
+.profile-row { display: flex; align-items: center; min-height: 48px; padding: 0 16px; border: 1px solid var(--mt-line); border-radius: 12px; background: var(--mt-surface); color: var(--mt-ink); font: inherit; font-weight: 700; text-align: left; cursor: pointer; }
+.profile-row[aria-pressed='true'] { border-color: var(--mt-coral); }
+.profile-row:disabled { color: var(--mt-slate); cursor: not-allowed; }
+.profile-signout { justify-self: start; padding: 0; border: 0; background: none; color: var(--mt-error); font: inherit; font-weight: 800; cursor: pointer; }
+.profile-error { margin: 0; color: var(--mt-error); font-weight: 700; }
+.profile-link:focus-visible, .profile-row:focus-visible, .profile-signout:focus-visible { outline: 3px solid var(--mt-coral); outline-offset: 2px; }

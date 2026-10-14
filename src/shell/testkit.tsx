@@ -36,9 +36,9 @@ const listRequest = () =>
     return { data, meta: { page: 1, limit: 20, total: totals[status], totalPages: 1 } };
   }) as unknown as ApiClient['request'] & ReturnType<typeof vi.fn>;
 
-export async function show(roles: string[], identifier?: string, access?: Session['access']) {
+export async function show(roles: string[], identifier?: string, access?: Session['access'], account?: Session['account']) {
   const element = document.body.appendChild(document.createElement('div'));
-  const session: Session = { roles, access, open: vi.fn(), close: vi.fn() };
+  const session: Session = { roles, access, account, open: vi.fn(), close: vi.fn() };
   // Like the container's session: closing it drops the roles and the access mark.
   session.close = vi.fn(() => {
     session.roles = [];
