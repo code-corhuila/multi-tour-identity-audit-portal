@@ -57,3 +57,9 @@
 .operator-pages { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 20px; color: var(--op-soft); }
 .operator-error { display: grid; gap: 12px; justify-items: start; color: var(--op-error); }
 .operator-error p { margin: 0; }
+
+/* Collaborator views (spec 009): classes of the Mockup that operator.css did not define. */
+.operator-copy { margin: 0; color: var(--op-soft); line-height: 1.55; }
+.operator-detail-list { margin: 0; padding-left: 20px; display: grid; gap: 8px; color: var(--op-soft); }
+.operator-access-note { margin: 16px 0 0; padding: 12px 14px; border-radius: 10px; background: #eef2f1; color: var(--op-soft); font-size: 0.9rem; }
+.mt-page-header-action { display: inline-flex; align-items: center; gap: 8px; }
