@@ -23,7 +23,7 @@ const defaultData: HomeData | undefined = import.meta.env.DEV ? homeTestData : u
 export function OperationHome({ identifier, commercialHref, canEditIdentity, onOpenIdentity, onOpenProfile, data: given }: OperationHomeProps) {
   const data = given === undefined ? defaultData : given;
   const value = (n: number | string | undefined) => (n === undefined ? text.none : String(n));
-  const daily = [data?.createdToday, data?.pendingPayment, data?.confirmed, data?.cancelled, data?.upcoming];
+  const daily = [data?.createdToday, data?.pendingPayment, data?.confirmed, data?.confirmedWithBalance, data?.cancelled, data?.upcoming];
   const pending = [data?.paymentsToValidate, data?.cashTotal];
   const { cards } = text.manage;
   return (
@@ -53,7 +53,7 @@ export function OperationHome({ identifier, commercialHref, canEditIdentity, onO
       <p>{text.daily.copy}</p>
       <div className="home-row" role="group" aria-label={text.daily.title}>
         {text.daily.metrics.map((label, i) => (
-          <Metric key={label} label={label} value={value(daily[i])} />
+          <Metric key={label} label={label} value={value(daily[i])} note={text.daily.notes[i]} />
         ))}
       </div>
       <p className="home-eyebrow">{text.pending.eyebrow}</p>

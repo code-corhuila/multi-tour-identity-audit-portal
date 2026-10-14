@@ -1,7 +1,8 @@
 // Texts of the "Mi perfil" view, in Spanish as in the Mockup (profile.html).
 export const profileMessages = {
   title: 'Mi perfil',
-  intro: 'Consulta y actualiza tu información personal dentro del operador actual.',
+  intro:
+    'Consulta y actualiza tu información personal dentro del operador actual. Los datos sensibles se eliminan automáticamente un año después de la finalización del servicio; los consentimientos y la auditoría se conservan.',
   identity: 'Identidad',
   notRegistered: 'No registrado',
   account: { title: 'Datos de la cuenta', name: 'Nombre completo', email: 'Correo electrónico', role: 'Rol' },
@@ -12,7 +13,7 @@ export const profileMessages = {
   error: { message: 'No pudimos leer tu sesión.', action: 'Volver al inicio de sesión' },
   roles: {
     PLATFORM_ADMINISTRATOR: 'Administrador de plataforma',
-    TENANT_ADMINISTRATOR: 'Administrador del operador',
+    TENANT_ADMINISTRATOR: 'Administrador del tenant',
     OPERATIONAL_COLLABORATOR: 'Colaborador operativo',
     MANAGER: 'Gerente',
     ACCOUNTANT: 'Contador',

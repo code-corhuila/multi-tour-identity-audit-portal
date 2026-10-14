@@ -17,7 +17,7 @@ describe('"Mi perfil" view (spec 010, RN-CAL-PRF)', () => {
     draw(session());
     expect(screen.getByRole('button', { name: 'Volver al panel cliente' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 1, name: 'Mi perfil' })).toBeInTheDocument();
-    expect(screen.getByText('Consulta y actualiza tu información personal dentro del operador actual.')).toBeInTheDocument();
+    expect(screen.getByText('Consulta y actualiza tu información personal dentro del operador actual. Los datos sensibles se eliminan automáticamente un año después de la finalización del servicio; los consentimientos y la auditoría se conservan.')).toBeInTheDocument();
     const card = screen.getByRole('group', { name: 'Identidad' });
     expect(within(card).getByText('CP')).toBeInTheDocument();
     expect(within(card).getByText('Carlos Pérez')).toBeInTheDocument();
