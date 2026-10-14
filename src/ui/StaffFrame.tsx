@@ -26,21 +26,25 @@ export interface StaffFrameProps {
   commercialHref: string;
   onNavigate: (item: StaffItem) => void;
   onSignOut: () => void;
+  // The collaborator sees the same frame without the administrator's items (the role comes from the account).
+  canManageStaff?: boolean;
+  onOpenProfile?: () => void;
   children: ReactNode;
 }
 
 // Frame shared by the staff views (spec 009 D-01, spec 011): the light sidebar of the Mockup and the content slot.
-export function StaffFrame({ current, commercialHref, onNavigate, onSignOut, children }: StaffFrameProps) {
+export function StaffFrame({ current, commercialHref, onNavigate, onSignOut, canManageStaff = true, onOpenProfile, children }: StaffFrameProps) {
+  const entries = canManageStaff ? ENTRIES : ENTRIES.filter((entry) => !(entry.kind === 'own' && entry.item === 'staff'));
   return (
     <div className="staff-shell">
       <aside className="staff-sidebar">
         <span className="staff-brand">
           MULTI<span>TOUR</span>
         </span>
-        <p className="staff-role">{text.role}</p>
+        <p className="staff-role">{canManageStaff ? text.role : text.collaboratorRole}</p>
         <nav aria-label={text.navLabel}>
           <ul className="staff-nav">
-            {ENTRIES.map((entry) => (
+            {entries.map((entry) => (
               <li key={entry.label}>
                 {entry.kind === 'own' && (
                   <button type="button" aria-current={current === entry.item ? 'page' : undefined} onClick={() => onNavigate(entry.item)}>
@@ -57,6 +61,11 @@ export function StaffFrame({ current, commercialHref, onNavigate, onSignOut, chi
             ))}
           </ul>
         </nav>
+        {onOpenProfile && (
+          <button type="button" className="staff-signout" onClick={onOpenProfile}>
+            {text.profile}
+          </button>
+        )}
         <button type="button" className="staff-signout" onClick={onSignOut}>
           {text.signOut}
         </button>
