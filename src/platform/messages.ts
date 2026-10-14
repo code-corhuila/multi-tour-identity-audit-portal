@@ -85,6 +85,8 @@ export const platformMessages = {
     panelEyebrow: 'Directorio',
     panelTitle: 'Empresas operadoras',
     columns: { operator: 'Operador', identifier: 'Identificador', firstAdministrator: 'Primer administrador', status: 'Estado', actions: 'Acciones' },
+    note: 'Cada operador mantiene su información y operación aisladas dentro de Multitour.',
+    created: (date: string) => `Creado: ${date}`,
     open: 'Ver detalle',
     none: '—',
   },
