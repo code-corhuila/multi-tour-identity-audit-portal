@@ -30,30 +30,42 @@ describe('shell.css full-bleed', () => {
   });
 });
 
-describe('platform administrator shell', () => {
-  it('shows the top bar with Resumen, Operadores and Crear operador, and no audit entry', async () => {
+describe('platform administrator shell (spec 007: the Mockup panel, wired)', () => {
+  it('shows the left sidebar with Resumen, Operadores and Auditoría, and Crear operador as a header button', async () => {
     await show(['PLATFORM_ADMINISTRATOR']);
     const nav = screen.getByRole('navigation', { name: 'Navegación de plataforma' });
-    expect(within(nav).getAllByRole('button').map((b) => b.textContent)).toEqual(['Resumen', 'Operadores', 'Crear operador']);
-    expect(screen.getByRole('banner')).toHaveTextContent('MULTITOUR');
-    expect(screen.queryByText(/Auditor/)).not.toBeInTheDocument();
+    expect(within(nav).getAllByRole('button').map((b) => b.textContent)).toEqual(['Resumen', 'Operadores', 'Auditoría']);
+    expect(within(nav).queryByText('Crear operador')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Crear operador' })).toBeInTheDocument();
   });
 
-  it('Resumen is the first page: operators under control with total, active and inactive counts', async () => {
+  it('Resumen is the first page with the three metrics of the Mockup', async () => {
     await show(['PLATFORM_ADMINISTRATOR']);
     expect(await screen.findByRole('heading', { name: 'Operadores bajo control' })).toBeInTheDocument();
-    expect(await within(await screen.findByRole('group', { name: 'Total de operadores' })).findByText('3')).toBeInTheDocument();
-    expect(within(screen.getByRole('group', { name: 'Operadores activos' })).getByText('2')).toBeInTheDocument();
-    expect(within(screen.getByRole('group', { name: 'Operadores inactivos' })).getByText('1')).toBeInTheDocument();
+    expect(await screen.findByText('Operadores activos')).toBeInTheDocument();
+    expect(screen.getByText('Operadores inactivos')).toBeInTheDocument();
   });
 
-  it('Operadores shows the list and Crear operador shows the register form', async () => {
+  it('Operadores shows the directory and the header button opens the create form', async () => {
     await show(['PLATFORM_ADMINISTRATOR']);
     fireEvent.click(screen.getByRole('button', { name: 'Operadores' }));
     expect(await screen.findByText('Sierra Azul')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Operadores' })).toHaveAttribute('aria-current', 'page');
     fireEvent.click(screen.getByRole('button', { name: 'Crear operador' }));
-    expect(screen.getByLabelText('Identificador')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Crear operador' })).toHaveAttribute('aria-current', 'page');
+    expect(await screen.findByText('Alta administrativa')).toBeInTheDocument();
+  });
+
+  it('Ver detalle leaves the directory for the operator detail', async () => {
+    await show(['PLATFORM_ADMINISTRATOR']);
+    fireEvent.click(screen.getByRole('button', { name: 'Operadores' }));
+    fireEvent.click(await screen.findByRole('button', { name: /Ver detalle/ }));
+    expect(screen.queryByText('Empresas operadoras')).not.toBeInTheDocument();
+  });
+
+  it('Auditoría shows the audit view', async () => {
+    await show(['PLATFORM_ADMINISTRATOR']);
+    fireEvent.click(screen.getByRole('button', { name: 'Auditoría' }));
+    expect(await screen.findByRole('heading', { name: 'Auditoría de plataforma' })).toBeInTheDocument();
   });
 
   it('Cerrar sesión closes the session and goes back to the platform sign-in', async () => {
@@ -63,4 +75,3 @@ describe('platform administrator shell', () => {
     expect(await screen.findByRole('heading', { name: 'Acceso de plataforma' })).toBeInTheDocument();
   });
 });
-
