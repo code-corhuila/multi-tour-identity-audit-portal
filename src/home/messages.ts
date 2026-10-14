@@ -15,7 +15,9 @@ export const homeMessages = {
     title: 'Resumen diario',
     eyebrow: 'Seguimiento de reservas y ejecución',
     copy: 'Indicadores obligatorios para priorizar la operación del día.',
-    metrics: ['Reservas creadas hoy', 'Reservas pendientes de pago', 'Reservas confirmadas', 'Reservas canceladas', 'Tours o servicios próximos a ejecutar'],
+    metrics: ['Reservas creadas hoy', 'Reservas pendientes de pago', 'Reservas confirmadas', 'Confirmadas con saldo', 'Reservas canceladas', 'Tours o servicios próximos a ejecutar'],
+    // Under "Reservas confirmadas" (index 2), as the Mockup of 2026-10-12.
+    notes: { 2: 'Incluye las confirmadas con saldo' } as Record<number, string>,
   },
   pending: { title: 'Pendientes operativos', eyebrow: 'Validaciones y control de caja', metrics: ['Pagos y soportes por validar', 'Total operativo de caja'] },
   manage: {
