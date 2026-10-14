@@ -22,6 +22,11 @@ export const messages = {
     submit: 'Iniciar sesión',
     noAccount: '¿No tienes una cuenta?',
     createAccount: 'Crear cuenta',
+    forgot: '¿Olvidaste tu contraseña?',
+  },
+  companyLink: {
+    title: 'Elige tu empresa',
+    subtitle: 'Ingresa desde el enlace de tu empresa o vuelve al inicio.',
   },
   platform: {
     kicker: 'Multi tour / entorno interno',
@@ -45,12 +50,7 @@ export const messages = {
     emailRequired: 'Ingresa tu correo electrónico.',
     passwordRequired: 'Ingresa tu contraseña.',
     refused: 'Correo o contraseña incorrectos',
-    refusedGeneral: 'Credenciales o empresa incorrectas',
     roleMismatch: 'Esta cuenta no tiene el rol seleccionado.',
-    companyLabel: 'Empresa',
-    companyPlaceholder: 'mi-empresa',
-    companyRequired: 'Ingresa la empresa.',
-    companyShape: 'Usa de 3 a 40 caracteres: minúsculas, números y guiones.',
     unavailable: 'No pudimos completar la solicitud. Intenta de nuevo.',
     trace: 'Código de seguimiento',
   },
@@ -81,8 +81,26 @@ export const messages = {
     notice: 'La empresa está inactiva. Solo puedes atender las obligaciones pendientes.',
     signOut: 'Cerrar sesión',
   },
+  recover: {
+    title: 'Recuperar acceso',
+    notice: 'La recuperación de contraseña por autoservicio aún no está disponible en esta versión de Multi Tour.',
+    detail:
+      'Por ahora no podemos enviar un código de verificación ni procesar un cambio de contraseña desde aquí. Si perdiste el acceso a tu cuenta, vuelve a iniciar sesión con tus credenciales actuales o crea una cuenta nueva.',
+    backToSignIn: 'Volver al inicio de sesión',
+    createAccount: 'Crear una cuenta',
+  },
+  newPasswordNotice: {
+    title: 'Definir nueva contraseña',
+    notice:
+      'Este enlace de cambio de contraseña no corresponde a un proceso activo: la recuperación por autoservicio aún no está disponible en esta versión de Multi Tour.',
+    detail:
+      'No es posible guardar una nueva contraseña desde esta pantalla todavía. Vuelve a iniciar sesión con tus credenciales actuales o crea una cuenta nueva.',
+    backToSignIn: 'Volver al inicio de sesión',
+  },
   signUp: {
     title: 'Crear cuenta',
+    personalData: 'Datos personales',
+    security: 'Seguridad',
     visual: 'Crea tu cuenta y empieza a planear tu próxima experiencia.',
     subtitle: 'Únete a la plataforma y crea tu acceso para comenzar.',
     firstName: 'Nombre',

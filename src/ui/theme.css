@@ -166,6 +166,10 @@ body[data-theme='travesia-natural'] { --accent: #146b5d; }
 .auth-footer a { color: var(--accent, #147D73); font-weight: 700; }
 .auth-link:hover, .auth-footer a:hover, .auth-platform-entry a:hover { text-decoration: underline; }
 .auth-divider { height: 0; margin: 0; }
+.auth-forgot { margin: -6px 0 0; font-size: 0.8rem; text-align: right; }
+.auth-forgot a { color: var(--accent, #147D73); font-weight: 600; }
+.auth-forgot a:hover { text-decoration: underline; }
+
 .auth-platform-entry { margin: 18px 0 0; font-size: 0.8rem; text-align: center; }
 .auth-platform-entry a { color: var(--accent, #147D73); font-weight: 600; }
 .auth-platform-entry a::after { content: ' →'; }
@@ -201,3 +205,8 @@ button.auth-link { border: 0; background: none; cursor: pointer; font: inherit; 
   .auth-card { margin-top: 0; }
 }
 @media (max-width: 520px) { .auth-name-group { grid-template-columns: 1fr; } }
+
+/* Sections of the sign-up (crear-cuenta.css): "Datos personales" and "Seguridad". */
+.auth-section { display: grid; gap: 16px; }
+.auth-section + .auth-section { margin-top: 4px; padding-top: 18px; border-top: 1px solid var(--mt-line); }
+.auth-section-title { margin: 0; color: var(--mt-slate); font-size: 0.74rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
