@@ -60,7 +60,7 @@ export function OperatorsView({ apiClient, onCreate, onOpen }: OperatorsViewProp
                     <tr key={t.tenantId}>
                       <td>
                         <strong>{t.commercialName}</strong>
-                        <small>{text.created(t.createdAt.slice(0, 10))}</small>
+                        <small>{text.created(Number.isNaN(Date.parse(t.createdAt)) ? text.none : t.createdAt.slice(0, 10))}</small>
                       </td>
                       <td>{t.identifier}</td>
                       <td>{t.firstAdministratorMembershipId ?? text.none}</td>
