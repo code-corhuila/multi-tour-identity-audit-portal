@@ -18,7 +18,7 @@ export const messages = {
     tabs: { customer: 'Cliente', operator: 'Equipo del operador', label: 'Tipo de acceso' },
     teamRole: { label: 'Rol en el equipo', admin: 'Administrador', staff: 'Colaborador' },
     platformEntry: 'Administración de plataforma',
-    staffAccess: '¿Necesitas acceso al equipo? Solicítalo a un administrador del operador.',
+    staffAccess: '¿Necesitas acceso al equipo? Solicítalo a un Administrador del tenant.',
     submit: 'Iniciar sesión',
     noAccount: '¿No tienes una cuenta?',
     createAccount: 'Crear cuenta',
@@ -81,20 +81,27 @@ export const messages = {
     notice: 'La empresa está inactiva. Solo puedes atender las obligaciones pendientes.',
     signOut: 'Cerrar sesión',
   },
+  // recuperar.html and nueva-contrasena.html (Mockup of 2026-10-12): forms that send nothing, the contract has no
+  // recovery route yet.
   recover: {
     title: 'Recuperar acceso',
-    notice: 'La recuperación de contraseña por autoservicio aún no está disponible en esta versión de Multi Tour.',
-    detail:
-      'Por ahora no podemos enviar un código de verificación ni procesar un cambio de contraseña desde aquí. Si perdiste el acceso a tu cuenta, vuelve a iniciar sesión con tus credenciales actuales o crea una cuenta nueva.',
+    subtitle: 'Solicita un enlace seguro para recuperar el acceso a tu cuenta.',
+    email: 'Correo electrónico registrado',
+    note: 'Si existe una cuenta con ese correo, enviaremos un enlace de un solo uso que vence en 30 minutos.',
+    submit: 'Enviar enlace de recuperación',
+    visualOnly: 'Esta pantalla es solo visual en esta versión: no envía ningún pedido.',
     backToSignIn: 'Volver al inicio de sesión',
-    createAccount: 'Crear una cuenta',
   },
   newPasswordNotice: {
     title: 'Definir nueva contraseña',
-    notice:
-      'Este enlace de cambio de contraseña no corresponde a un proceso activo: la recuperación por autoservicio aún no está disponible en esta versión de Multi Tour.',
-    detail:
-      'No es posible guardar una nueva contraseña desde esta pantalla todavía. Vuelve a iniciar sesión con tus credenciales actuales o crea una cuenta nueva.',
+    subtitle: 'Define una nueva contraseña para completar la recuperación de tu cuenta.',
+    password: 'Nueva contraseña',
+    confirmation: 'Confirmar contraseña',
+    rule: 'Mínimo 8 caracteres, con mayúscula, minúscula, número y carácter especial.',
+    note: 'El enlace o código vence en 30 minutos y solo puede usarse una vez.',
+    submit: 'Guardar nueva contraseña',
+    mismatch: 'Las contraseñas no coinciden.',
+    visualOnly: 'Esta pantalla es solo visual en esta versión: no cambia la contraseña.',
     backToSignIn: 'Volver al inicio de sesión',
   },
   signUp: {

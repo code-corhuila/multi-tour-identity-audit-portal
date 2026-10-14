@@ -6,6 +6,7 @@ export const homeTestData = {
   createdToday: 12,
   pendingPayment: 4,
   confirmed: 7,
+  confirmedWithBalance: 0,
   cancelled: 1,
   upcoming: 9,
   paymentsToValidate: 3,

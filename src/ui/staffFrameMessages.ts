@@ -1,6 +1,6 @@
 // Texts of the tenant administrator sidebar, in Spanish as in the Mockup (admin-colaboradores.html).
 export const staffFrameMessages = {
-  role: 'Administrador del operador',
+  role: 'Administrador del tenant',
   collaboratorRole: 'Colaborador operativo',
   profile: 'Mi perfil',
   navLabel: 'Navegación del operador',
