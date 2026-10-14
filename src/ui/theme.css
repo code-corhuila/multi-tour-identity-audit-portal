@@ -4,7 +4,7 @@
 body[data-theme='travesia-natural'] { --accent: #146b5d; }
 
 /* The tokens also reach the operator screens, which reuse the auth form classes outside .auth-shell. */
-.auth-shell, .operator-content, .platform-content {
+.auth-shell, .operator-content {
   --mt-ink: #102A32;
   --mt-coral: #E9785D;
   --mt-coral-hover: #d9694f;

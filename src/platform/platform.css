@@ -51,3 +51,5 @@
 .platform-state-form textarea { width: 100%; padding: 12px 14px; border: 1px solid var(--mt-line); border-radius: 10px; font: inherit; resize: vertical; }
 .platform-state-form button { justify-self: start; }
 .platform-scope-list { margin: 14px 0 0; padding-left: 18px; color: #48575b; line-height: 1.7; }
+/* The form classes of the auth screens read these tokens; the panel declares them as the operator screens do. */
+.platform-content { --mt-ink: #102a32; --mt-slate: #627177; --mt-line: #e5e0d8; --mt-surface: #ffffff; --mt-error: #9e3b2b; --mt-coral: #e9785d; }
