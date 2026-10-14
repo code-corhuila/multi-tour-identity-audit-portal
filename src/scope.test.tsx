@@ -27,11 +27,96 @@ async function show(props: Partial<MountProps>, request: ApiClient['request'] = 
 
 const type = (label: string, value: string) => fireEvent.change(screen.getByLabelText(label), { target: { value } });
 const signInWith = (company: string | null = 'sierra-azul') => {
-  void company;
+  if (company !== null) type('Empresa', company);
   type('Correo electrónico', 'ana@sierra.co');
   type('Contraseña', 'Viaje-2026!');
   fireEvent.click(screen.getByRole('button', { name: 'Iniciar sesión' }));
 };
+
+describe("scope 'general': the company is typed", () => {
+  it('shows the Empresa field above the e-mail and signs in against the typed company, then navigates to it', async () => {
+    const { navigate, request } = await show({ scope: 'general' });
+    const company = screen.getByLabelText('Empresa');
+    const email = screen.getByLabelText('Correo electrónico');
+    expect(company.compareDocumentPosition(email) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    signInWith();
+    // The route where the container mounts the portal for the company; the index of /t/<id> is its public landing.
+    await waitFor(() => expect(navigate).toHaveBeenCalledWith('/t/sierra-azul/ingresar'));
+    expect(navigate).not.toHaveBeenCalledWith('/t/sierra-azul');
+    expect(request.mock.calls[0][0]).toBe('/api/v1/security/public/tenants/sierra-azul/sessions');
+  });
+
+  it('opens the session with the answer and the typed company, as the container requires', async () => {
+    const { session } = await show({ scope: 'general' });
+    signInWith('acme');
+    await waitFor(() => expect(session.open).toHaveBeenCalledWith(answer, 'acme'));
+  });
+
+  it('a container that refuses to open without the company is never reached with a missing one', async () => {
+    const request = vi.fn().mockResolvedValue(answer);
+    const { session } = await show({ scope: 'general' }, request);
+    signInWith('');
+    expect(request).not.toHaveBeenCalled();
+    expect(session.open).not.toHaveBeenCalled();
+  });
+
+  it('flags a company that is not kebab-case of 3 to 40 beside the field and sends nothing', async () => {
+    const { request } = await show({ scope: 'general' });
+    for (const bad of ['', 'ab', 'Sierra Azul', 'a'.repeat(41), '-sierra', 'sierra--azul']) {
+      type('Empresa', bad);
+      type('Correo electrónico', 'ana@sierra.co');
+      type('Contraseña', 'Viaje-2026!');
+      fireEvent.click(screen.getByRole('button', { name: 'Iniciar sesión' }));
+      const company = screen.getByLabelText('Empresa');
+      expect(company.getAttribute('aria-invalid')).toBe('true');
+      expect(company.getAttribute('aria-describedby')).toBe(document.querySelector('#signin-company-error')?.id);
+    }
+    expect(request).not.toHaveBeenCalled();
+  });
+
+  it('a failed company lookup shows the fixed text with the trace id and no detail', async () => {
+    const request = vi.fn().mockRejectedValue(Object.assign(new Error('Tenant not found'), { status: 401, traceId: 'tr-5' }));
+    await show({ scope: 'general' }, request);
+    signInWith('no-existe');
+    expect(await screen.findByText(/Credenciales o empresa incorrectas.*tr-5/)).toBeInTheDocument();
+    expect(screen.queryByText(/Tenant not found/)).not.toBeInTheDocument();
+  });
+
+  it('Crear cuenta needs the company too and registers against the typed one', async () => {
+    const request = vi.fn().mockResolvedValue({ id: 'a1' });
+    await show({ scope: 'general' }, request);
+    type('Empresa', 'sierra-azul');
+    fireEvent.click(screen.getByRole('link', { name: 'Crear cuenta' }));
+    expect(screen.getByLabelText('Empresa')).toHaveValue('sierra-azul');
+    type('Empresa', 'otra-empresa');
+    type('Nombre', 'Laura');
+    type('Apellido', 'Pérez');
+    type('Correo electrónico', 'laura@example.com');
+    type('Número de teléfono', '3001234567');
+    type('Contraseña', 'Viaje-2026!');
+    type('Confirmar contraseña', 'Viaje-2026!');
+    fireEvent.click(screen.getByRole('button', { name: 'Registrarse' }));
+    await waitFor(() => expect(request).toHaveBeenCalledTimes(1));
+    expect(request.mock.calls[0][0]).toBe('/api/v1/security/public/tenants/otra-empresa/accounts');
+  });
+
+  it('without navigate (old container) a signed-in staff user still reaches the tenant panel', async () => {
+    await show({ scope: 'general', navigate: undefined }, undefined, ['TENANT_ADMINISTRATOR']);
+    signInWith();
+    expect(await screen.findByRole('heading', { name: 'Control de la operación' })).toBeInTheDocument();
+    expect(screen.getByText('sierra-azul')).toBeInTheDocument();
+  });
+
+  it("'Administración de plataforma' and the brand and home links go through navigate", async () => {
+    const { navigate } = await show({ scope: 'general' });
+    expect(fireEvent.click(screen.getByRole('link', { name: /Administración de plataforma/ }))).toBe(false);
+    expect(navigate).toHaveBeenLastCalledWith('/platform');
+    for (const link of screen.getAllByRole('link', { name: 'Multi Tour' })) {
+      fireEvent.click(link);
+      expect(navigate).toHaveBeenLastCalledWith('/');
+    }
+  });
+});
 
 describe("scope 'tenant' and 'platform'", () => {
   it('tenant: no Empresa field, and Volver al inicio goes to the company home through navigate', async () => {
@@ -41,11 +126,11 @@ describe("scope 'tenant' and 'platform'", () => {
     expect(navigate).toHaveBeenLastCalledWith('/t/acme');
   });
 
-  it("platform: 'Volver al acceso general' goes back to the container's welcome", async () => {
+  it("platform: 'Volver al acceso general' goes back to the general sign-in", async () => {
     const { navigate } = await show({ scope: 'platform' });
     expect(screen.queryByLabelText('Empresa')).not.toBeInTheDocument();
     expect(fireEvent.click(screen.getByRole('link', { name: 'Volver al acceso general' }))).toBe(false);
-    expect(navigate).toHaveBeenLastCalledWith('/');
+    expect(navigate).toHaveBeenLastCalledWith('/ingresar');
   });
 
   it('a tenant sign-in opens the session with the answer only', async () => {

@@ -3,18 +3,20 @@ import type { ApiClient } from '../contract';
 import { messages } from '../messages';
 import { AuthCard } from '../ui/AuthCard';
 import { Field } from '../ui/Field';
+import { isCompanyIdentifier } from '../data/security';
 import { focusField } from '../ui/focus';
 import { PasswordField } from '../ui/PasswordField';
 import type { RegisterField } from './registerErrors';
 import { useRegisterCustomer } from './useRegisterCustomer';
 
 export interface RegisterScreenProps {
-  // Company of the link; it is never typed (RN-CAL-IDN-01).
+  // Company of the link, or the one typed before in the general sign-in (then `askCompany` shows it as a field).
   identifier?: string;
+  askCompany?: boolean;
   apiClient: ApiClient;
-  // Called once the account exists; the caller sends the person to sign-in.
-  onDone: () => void;
-  onSignIn: () => void;
+  // Called once the account exists, with the company it was created in; the caller sends the person to sign-in.
+  onDone: (company?: string) => void;
+  onSignIn: (company?: string) => void;
 }
 
 const text = messages.signUp;
@@ -29,8 +31,10 @@ const ids: Record<RegisterField, string> = {
 // Order of the form, to put the focus on the first field with an error.
 const order: RegisterField[] = ['firstName', 'lastName', 'email', 'phone', 'password', 'passwordConfirmation'];
 
-export function RegisterScreen({ identifier, apiClient, onDone, onSignIn }: RegisterScreenProps) {
+export function RegisterScreen({ identifier, askCompany = false, apiClient, onDone, onSignIn }: RegisterScreenProps) {
   const { sending, failure, submit } = useRegisterCustomer(identifier, apiClient);
+  const [company, setCompany] = useState(identifier ?? '');
+  const [companyError, setCompanyError] = useState<string | undefined>();
   const [values, setValues] = useState({ firstName: '', lastName: '', email: '', phone: '', password: '', passwordConfirmation: '' });
   const [local, setLocal] = useState<Partial<Record<RegisterField, string>>>({});
   const set = (field: RegisterField) => (e: { target: { value: string } }) => setValues({ ...values, [field]: e.target.value });
@@ -48,6 +52,13 @@ export function RegisterScreen({ identifier, apiClient, onDone, onSignIn }: Regi
       passwordConfirmation: values.password && values.password !== values.passwordConfirmation ? text.mismatch : undefined,
     };
     setLocal(found);
+    const typed = company.trim();
+    const companyProblem = !askCompany ? undefined : !typed ? messages.errors.companyRequired : isCompanyIdentifier(typed) ? undefined : messages.errors.companyShape;
+    setCompanyError(companyProblem);
+    if (companyProblem) {
+      focusField('signup-company');
+      return;
+    }
     const first = order.find((f) => found[f]);
     if (first) {
       focusField(ids[first]);
@@ -56,7 +67,8 @@ export function RegisterScreen({ identifier, apiClient, onDone, onSignIn }: Regi
     const body = { ...values, firstName: values.firstName.trim(), lastName: values.lastName.trim(), email: values.email.trim(), phone: values.phone.trim() };
     // Cleared as soon as they are sent; never kept (RN-SEC-PT-17).
     setValues({ ...values, password: '', passwordConfirmation: '' });
-    if (await submit(body)) onDone();
+    const target = askCompany ? typed : identifier;
+    if (await submit(body, target)) onDone(target);
   }
 
   useEffect(() => {
@@ -65,7 +77,7 @@ export function RegisterScreen({ identifier, apiClient, onDone, onSignIn }: Regi
   }, [failure]);
 
   return (
-    <AuthCard title={text.title} subtitle={text.subtitle} wide eyebrow={messages.signIn.kicker} homeHref={`/t/${identifier}`} visualTitle={text.visual}>
+    <AuthCard title={text.title} subtitle={text.subtitle} wide eyebrow={messages.signIn.kicker} homeHref={askCompany ? '/' : `/t/${identifier}`} visualTitle={text.visual}>
       <form className="auth-form" onSubmit={onSubmit} noValidate>
         {askCompany && (
           <Field id="signup-company" label={messages.errors.companyLabel} autoComplete="organization" placeholder={messages.errors.companyPlaceholder} value={company} error={companyError} onChange={(e) => setCompany(e.target.value)} />
@@ -102,7 +114,7 @@ export function RegisterScreen({ identifier, apiClient, onDone, onSignIn }: Regi
       <div className="auth-divider" />
       <p className="auth-footer">
         {text.haveAccount}{' '}
-        <button type="button" className="auth-link" onClick={onSignIn}>
+        <button type="button" className="auth-link" onClick={() => onSignIn(askCompany && isCompanyIdentifier(company.trim()) ? company.trim() : undefined)}>
           {text.signIn}
         </button>
       </p>
