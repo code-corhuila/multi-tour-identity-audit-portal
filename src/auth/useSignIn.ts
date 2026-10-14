@@ -5,11 +5,9 @@ import { messages } from '../messages';
 import { STAFF_ROLES } from '../shell/roles';
 
 // The status decides the text, never the answer's message (RN-SEC-PT-02).
-// In the general sign-in the company is typed too, so a refusal may be about either: one fixed text, with the trace id.
-function describeFailure(error: unknown, general: boolean): string {
+function describeFailure(error: unknown): string {
   const { status, traceId } = (error ?? {}) as ApiError;
   const trace = traceId ? ` (${messages.errors.trace}: ${traceId})` : '';
-  if (general && status !== undefined && status < 500) return `${messages.errors.refusedGeneral}${trace}`;
   if (status === 401 || status === 400) return messages.errors.refused;
   return `${messages.errors.unavailable}${trace}`;
 }
@@ -27,7 +25,7 @@ function checkProfile(profile: TeamProfile, roles: string[]): RoleCheck {
   return roles.some((r) => required.includes(r)) ? 'ok' : 'mismatch';
 }
 
-export function useSignIn(identifier: string | undefined, apiClient: ApiClient, session: Session, general = false) {
+export function useSignIn(identifier: string | undefined, apiClient: ApiClient, session: Session) {
   const [sending, setSending] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
   const current = useRef<AbortController | null>(null);
@@ -35,32 +33,28 @@ export function useSignIn(identifier: string | undefined, apiClient: ApiClient, 
   useEffect(() => () => current.current?.abort(), []);
 
   // Resolves true when the session was opened and, on the operator tab, it matches the chosen profile.
-  async function submit(credentials: SignInRequest, company = identifier, profile?: TeamProfile): Promise<boolean> {
-    // The general sign-in never falls back to the platform route when the company is missing.
-    if (general && company === undefined) return false;
+  async function submit(credentials: SignInRequest, profile?: TeamProfile): Promise<boolean> {
     current.current?.abort();
     const controller = new AbortController();
     current.current = controller;
     setSending(true);
     setFailure(null);
     try {
-      const answer = await signIn(apiClient, company, credentials, controller.signal);
+      const answer = await signIn(apiClient, identifier, credentials, controller.signal);
       if (controller.signal.aborted) return false;
-      // The general scope needs to know which company the session belongs to; the other scopes open it as before.
-      if (general) session.open(answer, company);
-      else session.open(answer);
+      session.open(answer);
       // A temporary or restricted token carries no ordinary roles: its screens (first password, notice) decide, so the
       // profile is not checked and the session is not closed here.
       const check = profile && session.access === undefined ? checkProfile(profile, session.roles) : 'ok';
       if (check !== 'ok') {
         // The account does not fit the operator tab: drop the session just opened and say so with a fixed text.
         session.close();
-        setFailure(check === 'customer' ? (general ? messages.errors.refusedGeneral : messages.errors.refused) : messages.errors.roleMismatch);
+        setFailure(check === 'customer' ? messages.errors.refused : messages.errors.roleMismatch);
         return false;
       }
       return true;
     } catch (error) {
-      if (!controller.signal.aborted) setFailure(describeFailure(error, general));
+      if (!controller.signal.aborted) setFailure(describeFailure(error));
       return false;
     } finally {
       if (!controller.signal.aborted) setSending(false);

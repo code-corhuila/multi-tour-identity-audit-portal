@@ -27,15 +27,13 @@ function setup(scope: Scope, grants: string[]) {
 
 const operatorTab = () => fireEvent.click(screen.getByRole('button', { name: 'Equipo del operador' }));
 const profile = (name: 'Administrador' | 'Colaborador') => screen.getByRole('button', { name });
-function signIn(company = 'acme') {
-  const typed = screen.queryByLabelText('Empresa');
-  if (typed) fireEvent.change(typed, { target: { value: company } });
+function signIn() {
   fireEvent.change(screen.getByLabelText('Correo electrónico'), { target: { value: 'ana@acme.co' } });
   fireEvent.change(screen.getByLabelText('Contraseña'), { target: { value: 'Viaje-2026!' } });
   fireEvent.click(screen.getByRole('button', { name: 'Iniciar sesión' }));
 }
 
-describe.each<Scope>(['tenant', 'general'])('team role selector, scope %s', (scope) => {
+describe.each<Scope>(['tenant'])('team role selector, scope %s', (scope) => {
   it('is hidden on the Cliente tab and shown on the operator tab with Administrador pressed', () => {
     setup(scope, []);
     expect(screen.queryByText('Rol en el equipo')).not.toBeInTheDocument();
@@ -99,7 +97,7 @@ describe.each<Scope>(['tenant', 'general'])('team role selector, scope %s', (sco
     const { session, onSignedIn } = setup(scope, ['FINAL_CUSTOMER']);
     operatorTab();
     signIn();
-    const text = scope === 'general' ? /Credenciales o empresa incorrectas/ : /Correo o contraseña incorrectos/;
+    const text = /Correo o contraseña incorrectos/;
     expect(await screen.findByText(text)).toBeInTheDocument();
     expect(screen.queryByText(MISMATCH)).not.toBeInTheDocument();
     expect(session.close).toHaveBeenCalledTimes(1);
