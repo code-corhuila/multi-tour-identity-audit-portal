@@ -21,7 +21,9 @@ describe('OperatorsView (spec 007 PT-02, RN-CAL-PLT-04)', () => {
     await screen.findByText('Sierra Azul');
     const headers = screen.getAllByRole('columnheader').map((h) => h.textContent);
     expect(headers).toEqual(['Operador', 'Identificador', 'Primer administrador', 'Estado', 'Acciones']);
+    expect(screen.getByText('Cada operador mantiene su información y operación aisladas dentro de Multitour.')).toBeInTheDocument();
     const [, first, second] = screen.getAllByRole('row');
+    expect(within(first).getByText('Creado: 2026-01-10')).toBeInTheDocument();
     expect(within(first).getByText('Activo')).toHaveClass('is-active');
     expect(within(second).getByText('Inactivo')).toHaveClass('is-inactive');
     expect(within(first).getByText('m-1')).toBeInTheDocument();
