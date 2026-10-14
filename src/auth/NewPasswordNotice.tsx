@@ -23,10 +23,10 @@ export function NewPasswordNotice({ identifier, onSignIn }: NewPasswordNoticePro
     <AuthCard title={text.title} subtitle={text.subtitle} homeHref={identifier ? `/t/${identifier}` : '/'}>
       <form className="auth-form" onSubmit={onSubmit}>
         <PasswordField id="new-password" label={text.password} autoComplete="new-password" minLength={8} required value={password} onChange={(e) => setPassword(e.target.value)} />
-        <PasswordField id="new-password-confirmation" label={text.confirmation} autoComplete="new-password" minLength={8} required value={confirmation} onChange={(e) => setConfirmation(e.target.value)} />
+        <PasswordField id="new-password-confirmation" label={text.confirmation} autoComplete="new-password" minLength={8} required value={confirmation} error={feedback?.error ? text.mismatch : undefined} onChange={(e) => setConfirmation(e.target.value)} />
         <p className="auth-footer">{text.rule}</p>
-        <p className={feedback?.error ? 'auth-feedback is-error' : 'auth-feedback'} role="status">
-          {feedback?.line ?? text.note}
+        <p className="auth-feedback" role="status">
+          {feedback && !feedback.error ? feedback.line : text.note}
         </p>
         <button className="auth-submit" type="submit">
           {text.submit}
