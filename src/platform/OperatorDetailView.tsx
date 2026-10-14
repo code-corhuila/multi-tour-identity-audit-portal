@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
-import type { ApiClient, ApiError } from '../contract';
-import { inactivateTenant, type TenantResponse } from '../data/tenants';
+import type { ApiClient } from '../contract';
+import type { TenantResponse } from '../data/tenants';
 import { messages } from '../messages';
 import { tenantMessages } from '../tenants/messages';
 import { platformMessages } from './messages';
@@ -18,7 +18,7 @@ export interface OperatorDetailViewProps {
 
 // Detail view of the platform panel: the Mockup's band, state panel and scope panel (spec 007 PT-03).
 export function OperatorDetailView({ apiClient, tenantId, onBack }: OperatorDetailViewProps) {
-  const { state, retry, replace } = useTenant(apiClient, tenantId);
+  const { state, retry } = useTenant(apiClient, tenantId);
   const back = (
     <button type="button" className="platform-link" onClick={onBack}>
       {t.back}
@@ -58,7 +58,7 @@ export function OperatorDetailView({ apiClient, tenantId, onBack }: OperatorDeta
         </div>
       </section>
       <div className="platform-detail-grid">
-        <StatePanel apiClient={apiClient} tenant={tenant} onChanged={replace} />
+        <StatePanel tenant={tenant} />
         <section className="platform-panel" aria-label={t.scopeEyebrow}>
           <p className="platform-eyebrow">{t.scopeEyebrow}</p>
           <h2>{t.scopeTitle}</h2>
@@ -73,30 +73,23 @@ export function OperatorDetailView({ apiClient, tenantId, onBack }: OperatorDeta
   );
 }
 
-function StatePanel({ apiClient, tenant, onChanged }: { apiClient: ApiClient; tenant: TenantResponse; onChanged: (tenant: TenantResponse) => void }) {
+// The "Inactivar operador" action is visual only in this version (decision of the lead, 2026-10-13): it checks the
+// reason, says so and sends nothing. Wiring the inactivation is the debt of portal 001 PT-05.
+function StatePanel({ tenant }: { tenant: TenantResponse }) {
   const [reason, setReason] = useState('');
   const [error, setError] = useState<string>();
-  const [sending, setSending] = useState(false);
+  const [note, setNote] = useState<string>();
   const copy = t.states[tenant.tenantStatus];
 
-  async function onSubmit(event: FormEvent) {
+  function onSubmit(event: FormEvent) {
     event.preventDefault();
-    const trimmed = reason.trim();
-    if (!trimmed) {
+    if (!reason.trim()) {
+      setNote(undefined);
       setError(t.reasonRequired);
       return;
     }
     setError(undefined);
-    setSending(true);
-    try {
-      onChanged(await inactivateTenant(apiClient, tenant.tenantId, trimmed));
-    } catch (failure) {
-      const { status, traceId } = (failure ?? {}) as ApiError;
-      const trace = traceId ? ` (${messages.errors.trace}: ${traceId})` : '';
-      setError(status === 422 ? t.notActive : `${messages.errors.unavailable}${trace}`);
-    } finally {
-      setSending(false);
-    }
+    setNote(t.visualOnly);
   }
 
   return (
@@ -108,11 +101,11 @@ function StatePanel({ apiClient, tenant, onChanged }: { apiClient: ApiClient; te
         <form className="platform-state-form" onSubmit={onSubmit} noValidate>
           <label htmlFor="inactivation-reason">{t.reasonLabel}</label>
           <textarea id="inactivation-reason" rows={3} maxLength={MAX_REASON} placeholder={t.reasonPlaceholder} value={reason} onChange={(e) => setReason(e.target.value)} aria-describedby={error ? 'inactivation-error' : undefined} />
-          <p id="inactivation-error" className="auth-feedback is-error" aria-live="polite">
-            {error}
+          <p id="inactivation-error" className={error ? 'auth-feedback is-error' : 'auth-feedback'} aria-live="polite">
+            {error ?? note}
           </p>
-          <button className="platform-danger" type="submit" disabled={sending}>
-            {sending ? t.inactivating : t.inactivate}
+          <button className="platform-danger" type="submit">
+            {t.inactivate}
           </button>
         </form>
       ) : (

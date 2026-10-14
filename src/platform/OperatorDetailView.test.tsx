@@ -64,25 +64,14 @@ describe('operator detail view (RN-CAL-PLT-06)', () => {
     expect(request).toHaveBeenCalledTimes(1);
   });
 
-  it('U·inactivation_posts_the_reason_and_shows_the_inactive_state: one POST, then the inactive panel without the form', async () => {
+  it('U·inactivation_is_visual_only: a valid reason shows the notice and nothing is posted', async () => {
     const request = answering();
     setup(request);
     fireEvent.change(await screen.findByLabelText('Motivo de la inactivación'), { target: { value: 'Contrato vencido' } });
     fireEvent.click(screen.getByRole('button', { name: 'Inactivar operador' }));
-    expect(await screen.findByRole('heading', { name: 'Operador inactivo' })).toBeInTheDocument();
-    expect(request).toHaveBeenCalledWith(`${GET}/inactivate`, expect.objectContaining({ method: 'POST', body: { reason: 'Contrato vencido' } }));
-    expect(screen.getByText('Contrato vencido')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Inactivar operador' })).not.toBeInTheDocument();
-  });
-
-  it('U·inactivation_refused_shows_the_line: a 422 says the operator is no longer active', async () => {
-    const request = vi.fn((_path: string, init?: { method?: string }) =>
-      init?.method === 'POST' ? Promise.reject(failure(422)) : Promise.resolve(tenant),
-    ) as unknown as ApiClient['request'];
-    setup(request);
-    fireEvent.change(await screen.findByLabelText('Motivo de la inactivación'), { target: { value: 'Motivo' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Inactivar operador' }));
-    expect(await screen.findByText('El operador ya no está activo.')).toBeInTheDocument();
+    expect(screen.getByText('Esta acción es solo visual en esta versión: no inactiva el operador.')).toBeInTheDocument();
+    expect(request).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole('heading', { name: 'Operador activo' })).toBeInTheDocument();
   });
 
   it('U·detail_has_four_states: loading, error with retry and data', async () => {

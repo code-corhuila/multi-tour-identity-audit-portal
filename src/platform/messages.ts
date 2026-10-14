@@ -5,7 +5,7 @@ export const platformMessages = {
   signOut: 'Cerrar sesión',
   nav: { summary: 'Resumen', operators: 'Operadores', audit: 'Auditoría' },
   // admin-crear-operador.html
-  create: {
+  createOperator: {
     eyebrow: 'Alta administrativa',
     title: 'Crear operador',
     identityEyebrow: '01. Identidad del operador',
@@ -50,8 +50,7 @@ export const platformMessages = {
     reasonRequired: 'Ingresa el motivo de la inactivación.',
     reasonShown: 'Motivo registrado',
     inactivate: 'Inactivar operador',
-    inactivating: 'Inactivando…',
-    notActive: 'El operador ya no está activo.',
+    visualOnly: 'Esta acción es solo visual en esta versión: no inactiva el operador.',
     notFound: 'No encontramos este operador.',
     scopeEyebrow: 'Alcance del Administrador de plataforma',
     scopeTitle: 'Soporte administrativo, no operativo',

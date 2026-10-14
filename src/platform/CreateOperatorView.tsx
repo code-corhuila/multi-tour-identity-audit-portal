@@ -11,7 +11,7 @@ import { useOnboardTenant } from '../tenants/useOnboardTenant';
 import { platformMessages } from './messages';
 import { PageHeader } from './PageHeader';
 
-const t = platformMessages.create;
+const t = platformMessages.createOperator;
 const text = tenantMessages.register;
 
 type FormField = OnboardField | 'passwordConfirmation';
