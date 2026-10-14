@@ -48,3 +48,9 @@ export function tenantsPath({ page, limit, status }: TenantQuery): string {
 export function listTenants(client: ApiClient, query: TenantQuery, signal: AbortSignal): Promise<TenantPage> {
   return client.request<TenantPage>(tenantsPath(query), { signal });
 }
+
+const tenantPath = (tenantId: string) => `/api/v1/identity-audit/tenants/${encodeURIComponent(tenantId)}`;
+
+export function getTenant(client: ApiClient, tenantId: string, signal: AbortSignal): Promise<TenantResponse> {
+  return client.request<TenantResponse>(tenantPath(tenantId), { signal });
+}
