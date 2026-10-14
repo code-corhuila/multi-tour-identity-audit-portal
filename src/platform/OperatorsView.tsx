@@ -38,6 +38,7 @@ export function OperatorsView({ apiClient, onCreate, onOpen }: OperatorsViewProp
             <p className="platform-eyebrow">{text.panelEyebrow}</p>
             <h2>{text.panelTitle}</h2>
           </div>
+          <span className="platform-table-note">{text.note}</span>
         </div>
         <QueryNotice state={state} retry={retry} />
         {state.kind === 'data' && state.page.data.length === 0 && <p>{list.empty}</p>}
@@ -59,6 +60,7 @@ export function OperatorsView({ apiClient, onCreate, onOpen }: OperatorsViewProp
                     <tr key={t.tenantId}>
                       <td>
                         <strong>{t.commercialName}</strong>
+                        <small>{text.created(Number.isNaN(Date.parse(t.createdAt)) ? text.none : t.createdAt.slice(0, 10))}</small>
                       </td>
                       <td>{t.identifier}</td>
                       <td>{t.firstAdministratorMembershipId ?? text.none}</td>
