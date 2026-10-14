@@ -67,9 +67,6 @@ export function RegisterScreen({ identifier, apiClient, onDone, onSignIn }: Regi
   return (
     <AuthCard title={text.title} subtitle={text.subtitle} wide eyebrow={messages.signIn.kicker} homeHref={`/t/${identifier}`} visualTitle={text.visual}>
       <form className="auth-form" onSubmit={onSubmit} noValidate>
-        {askCompany && (
-          <Field id="signup-company" label={messages.errors.companyLabel} autoComplete="organization" placeholder={messages.errors.companyPlaceholder} value={company} error={companyError} onChange={(e) => setCompany(e.target.value)} />
-        )}
         <div className="auth-section" role="group" aria-labelledby="signup-personal-title">
           <h2 id="signup-personal-title" className="auth-section-title">{text.personalData}</h2>
           <div className="auth-name-group">
