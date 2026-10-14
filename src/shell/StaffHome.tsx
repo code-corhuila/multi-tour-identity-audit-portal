@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import type { ApiClient, MountProps, Session } from '../contract';
-import { profileMessages } from '../profile/messages';
 import { ProfileScreen } from '../profile/ProfileScreen';
 import { VisualIdentityScreen } from '../visualIdentity/VisualIdentityScreen';
-import { visualIdentityMessages } from '../visualIdentity/messages';
-import { AreaCard } from './AreaCard';
+import { OperationHome } from '../home/OperationHome';
+import { StaffFrame } from '../ui/StaffFrame';
 import { shellMessages } from './messages';
 import { commercialAreaHref, TENANT_ADMINISTRATOR } from './roles';
 import { TopBar } from './TopBar';
@@ -25,7 +24,6 @@ export interface StaffHomeProps extends Pick<MountProps, 'commercialName' | 'vis
 export function StaffHome({ identifier, session, apiClient, commercialName, visualIdentity, onVisualIdentityChange, onSignOut }: StaffHomeProps) {
   const [view, setView] = useState<'home' | 'identity' | 'profile'>('home');
   const area = commercialAreaHref(identifier);
-  const { cards } = text;
   const canEditIdentity = session.roles.includes(TENANT_ADMINISTRATOR);
 
   if (view === 'profile') {
@@ -48,37 +46,16 @@ export function StaffHome({ identifier, session, apiClient, commercialName, visu
     );
   }
 
-  const profileLink = (
-    <button type="button" className="shell-nav-item" onClick={() => setView('profile')}>
-      {profileMessages.title}
-    </button>
-  );
+  // The frame has no routes of its own yet: Colaboradores is wired by the staff users views (portal spec 009).
   return (
-    <div className="shell">
-      <TopBar role={text.role} nav={profileLink} onSignOut={onSignOut} />
-      <main className="operator-content">
-        <header className="operator-topbar">
-          <div>
-            <p className="operator-eyebrow">{text.eyebrow}</p>
-            <h1>{text.title}</h1>
-          </div>
-          <p className="shell-tenant">
-            {text.tenant}: <strong>{identifier}</strong>
-          </p>
-        </header>
-        <p className="shell-intro">{text.intro}</p>
-        <div className="shell-cards">
-          <AreaCard {...cards.cash} />
-          <AreaCard {...cards.catalogs} href={area} />
-          <AreaCard {...cards.collaborators} />
-          <AreaCard {...cards.discounts} href={area} />
-          <AreaCard {...cards.operations} />
-          <AreaCard {...cards.payments} />
-          {canEditIdentity && (
-            <AreaCard title={visualIdentityMessages.card} body={visualIdentityMessages.cardBody} onSelect={() => setView('identity')} />
-          )}
-        </div>
-      </main>
-    </div>
+    <StaffFrame current="summary" commercialHref={area} onNavigate={() => undefined} onSignOut={onSignOut}>
+      <OperationHome
+        identifier={identifier}
+        commercialHref={area}
+        canEditIdentity={canEditIdentity}
+        onOpenIdentity={() => setView('identity')}
+        onOpenProfile={() => setView('profile')}
+      />
+    </StaffFrame>
   );
 }
