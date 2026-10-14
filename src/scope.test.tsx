@@ -96,16 +96,20 @@ describe("scope 'tenant' and 'platform'", () => {
     expect(screen.queryByRole('heading', { name: 'Bienvenido de nuevo' })).not.toBeInTheDocument();
   });
 
-  it('area cards of the staff panel navigate through the container and keep their href', async () => {
+  it('area links of the staff panel navigate through the container and keep their href', async () => {
     const element = document.body.appendChild(document.createElement('div'));
     const navigate = vi.fn();
     const session: Session = { roles: ['TENANT_ADMINISTRATOR'], open: vi.fn(), close: vi.fn() };
     await act(async () => {
       unmount = mount(element, { apiClient: { request: vi.fn() }, session, identifier: 'sierra-azul', scope: 'tenant', navigate });
     });
-    const card = screen.getByRole('link', { name: /Catálogos/ });
-    expect(card).toHaveAttribute('href', '/t/sierra-azul/areas/commercial-reservation-portal');
-    expect(fireEvent.click(card)).toBe(false);
-    expect(navigate).toHaveBeenCalledWith('/t/sierra-azul/areas/commercial-reservation-portal');
+    const area = '/t/sierra-azul/areas/commercial-reservation-portal';
+    for (const name of [/Catálogos/, /Descuentos y condiciones/]) {
+      const link = screen.getByRole('link', { name });
+      expect(link).toHaveAttribute('href', area);
+      expect(fireEvent.click(link)).toBe(false);
+    }
+    expect(navigate).toHaveBeenCalledTimes(2);
+    expect(navigate).toHaveBeenCalledWith(area);
   });
 });

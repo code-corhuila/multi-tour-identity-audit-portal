@@ -15,18 +15,24 @@ describe('tenant staff shell', () => {
     },
   );
 
-  it('Catálogos and Descuentos link to the commercial area; the other cards are disabled as Próximamente', async () => {
+  it('Catálogos, Descuentos and the card link to the commercial area; the other areas are disabled as Próximamente', async () => {
     await show(['TENANT_ADMINISTRATOR'], 'sierra-azul');
     const area = '/t/sierra-azul/areas/commercial-reservation-portal';
-    expect(screen.getByRole('link', { name: /Catálogos/ })).toHaveAttribute('href', area);
-    expect(screen.getByRole('link', { name: /Descuentos/ })).toHaveAttribute('href', area);
-    for (const name of ['Caja', 'Colaboradores', 'Operación', 'Pagos']) {
+    expect(screen.getByRole('link', { name: 'Catálogos' })).toHaveAttribute('href', area);
+    expect(screen.getByRole('link', { name: 'Descuentos' })).toHaveAttribute('href', area);
+    expect(screen.getByRole('link', { name: /Descuentos y condiciones/ })).toHaveAttribute('href', area);
+    for (const name of ['Reservas y clientes', 'Pagos y devoluciones', 'Ejecución y costos']) {
       const card = screen.getByRole('group', { name });
       expect(card).toHaveAttribute('aria-disabled', 'true');
       expect(within(card).getByText('Próximamente')).toBeInTheDocument();
       expect(within(card).queryByRole('link')).not.toBeInTheDocument();
     }
-    expect(screen.getAllByText('Próximamente')).toHaveLength(4);
+  });
+
+  it('a role that is neither staff nor customer sees the sign-in, never the home', async () => {
+    await show(['SOMETHING_ELSE'], 'sierra-azul');
+    expect(screen.queryByRole('heading', { name: 'Control de la operación' })).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Bienvenido de nuevo' })).toBeInTheDocument();
   });
 
   it('Cerrar sesión closes the session and returns to the company sign-in', async () => {

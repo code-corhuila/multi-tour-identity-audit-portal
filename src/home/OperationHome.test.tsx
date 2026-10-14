@@ -48,7 +48,7 @@ describe('staff home Control de la operación (spec 011, RN-CAL-HOM-01 to 05)', 
   });
 
   it('U·home_has_its_states: without data the numbers are dashes and nothing is labelled test data', () => {
-    render(<OperationHome {...props} data={undefined} />);
+    render(<OperationHome {...props} data={null} />);
     expect(screen.queryByText('Datos de prueba')).not.toBeInTheDocument();
     expect(screen.getAllByText('—')).toHaveLength(7);
     expect(screen.getByText('Los indicadores llegan con las áreas comercial y de caja.')).toBeInTheDocument();
@@ -57,12 +57,12 @@ describe('staff home Control de la operación (spec 011, RN-CAL-HOM-01 to 05)', 
   it('U·identity_card_and_profile_open_their_screens: the card only for the administrator', () => {
     const onOpenIdentity = vi.fn();
     const onOpenProfile = vi.fn();
-    const { rerender } = render(<OperationHome {...props} data={undefined} onOpenIdentity={onOpenIdentity} onOpenProfile={onOpenProfile} />);
+    const { rerender } = render(<OperationHome {...props} data={null} onOpenIdentity={onOpenIdentity} onOpenProfile={onOpenProfile} />);
     fireEvent.click(screen.getByRole('button', { name: /Identidad visual/ }));
     fireEvent.click(screen.getByRole('button', { name: 'Mi perfil' }));
     expect(onOpenIdentity).toHaveBeenCalledTimes(1);
     expect(onOpenProfile).toHaveBeenCalledTimes(1);
-    rerender(<OperationHome {...props} canEditIdentity={false} data={undefined} />);
+    rerender(<OperationHome {...props} canEditIdentity={false} data={null} />);
     expect(screen.queryByRole('button', { name: /Identidad visual/ })).not.toBeInTheDocument();
   });
 });

@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { NavLink } from './navigation';
 import { staffFrameMessages as text } from './staffFrameMessages';
 import './staffFrame.css';
 
@@ -46,7 +47,7 @@ export function StaffFrame({ current, commercialHref, onNavigate, onSignOut, chi
                     {entry.label}
                   </button>
                 )}
-                {entry.kind === 'link' && <a href={commercialHref}>{entry.label}</a>}
+                {entry.kind === 'link' && <NavLink href={commercialHref}>{entry.label}</NavLink>}
                 {entry.kind === 'soon' && (
                   <span aria-disabled="true">
                     {entry.label} <small>{text.soon}</small>
