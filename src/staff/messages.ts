@@ -1,0 +1,38 @@
+// Texts of the staff users views, in Spanish as in the Mockup (admin-colaboradores.html and its sibling views).
+export const staffMessages = {
+  eyebrow: 'Gestión del equipo',
+  list: {
+    title: 'Colaboradores',
+    register: 'Registrar colaborador',
+    bandEyebrow: 'Equipo interno',
+    bandTitle: 'Usuarios internos de tu operador.',
+    bandCopy: 'Gestiona los usuarios internos que apoyan la operación de tu empresa.',
+    panelEyebrow: 'Equipo del operador',
+    panelTitle: 'Colaboradores registrados',
+    columns: { name: 'Nombre', email: 'Correo / usuario de acceso', role: 'Rol', action: 'Acción' },
+    open: 'Ver detalle',
+    empty: 'Aún no se han registrado colaboradores.',
+    permissionsEyebrow: 'Permisos del equipo',
+    permissionsTitle: 'Validación de soportes de transferencia',
+    permissionsCopy:
+      'Cuando está habilitado, el Colaborador operativo puede validar o rechazar soportes de transferencia en Pagos (PDR RF-015A). Deshabilitado por defecto: el Colaborador solo consulta el soporte.',
+    enabled: 'Habilitado',
+    disabled: 'Deshabilitado',
+    enable: 'Habilitar validación',
+    disable: 'Deshabilitar validación',
+  },
+  detail: {
+    title: 'Detalle del colaborador',
+    back: 'Volver a colaboradores',
+    eyebrow: 'Colaborador',
+    name: 'Nombre',
+    email: 'Correo / usuario de acceso',
+    role: 'Rol',
+    tenant: 'Tenant',
+    createdAt: 'Fecha de registro',
+    notFound: 'No se encontró el colaborador seleccionado.',
+  },
+  loading: 'Cargando colaboradores…',
+  error: 'No pudimos cargar los colaboradores.',
+  retry: 'Reintentar',
+} as const;

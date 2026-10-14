@@ -1,0 +1,17 @@
+/* Audit view: values of main.css of the Mockup, spec 008 section 4. The frame and the table come from platform.css. */
+.platform-intro { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 18px; margin-bottom: 24px; color: #48575b; }
+.platform-intro h2 { margin: 4px 0 0; color: #172426; font-size: 1.3rem; letter-spacing: -0.03em; }
+.platform-intro > p { max-width: 520px; margin: 0; font-size: 0.9rem; }
+.platform-eyebrow { margin: 0; color: #6a7a7e; font-size: 0.74rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+.platform-dialog-open { min-height: 36px; padding: 0 14px; border: 1px solid #c8d5cf; border-radius: 9px; background: #ffffff; color: #123c46; font: inherit; font-weight: 800; cursor: pointer; }
+.platform-dialog-open:hover { background: #eef3f0; }
+.platform-dialog-open:focus-visible, .platform-dialog-close:focus-visible { outline: 3px solid #e9a23b; outline-offset: 2px; }
+.platform-audit-dialog { width: 680px; max-width: calc(100vw - 32px); padding: 0; border: 1px solid #d8e2dc; border-radius: 18px; box-shadow: 0 24px 56px rgba(20, 38, 35, 0.22); color: #172426; }
+.platform-audit-dialog::backdrop { background: rgba(20, 38, 35, 0.42); }
+.platform-audit-dialog-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 26px 28px 20px; border-bottom: 1px solid #e1e8e3; }
+.platform-audit-dialog-head h2 { margin: 4px 0 0; font-size: 1.3rem; }
+.platform-dialog-close { min-height: 40px; padding: 0 16px; border: 1px solid #c8d5cf; border-radius: 9px; background: #ffffff; font: inherit; font-weight: 800; cursor: pointer; }
+.platform-audit-detail-grid { display: grid; gap: 14px; margin: 0; padding: 22px 28px 28px; }
+.platform-audit-detail-grid dt { color: #748084; font-size: 0.71rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+.platform-audit-detail-grid dd { margin: 4px 0 0; color: #172426; font-weight: 600; }
+@media (prefers-reduced-motion: reduce) { .platform-dialog-open, .platform-dialog-close { transition: none; } }
