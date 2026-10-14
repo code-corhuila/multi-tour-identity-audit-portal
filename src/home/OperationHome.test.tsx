@@ -15,8 +15,9 @@ describe('staff home Control de la operación (spec 011, RN-CAL-HOM-01 to 05)', 
     expect(screen.getByText('Vista diaria')).toBeInTheDocument();
     expect(screen.getByText('Decisiones comerciales y operativas en un solo lugar.')).toBeInTheDocument();
     const daily = screen.getByRole('group', { name: 'Resumen diario' });
-    expect(within(daily).getAllByRole('group')).toHaveLength(5);
-    for (const label of ['Reservas creadas hoy', 'Reservas pendientes de pago', 'Reservas confirmadas', 'Reservas canceladas', 'Tours o servicios próximos a ejecutar']) {
+    expect(within(daily).getAllByRole('group')).toHaveLength(6);
+    expect(within(daily).getByText('Incluye las confirmadas con saldo')).toBeInTheDocument();
+    for (const label of ['Reservas creadas hoy', 'Reservas pendientes de pago', 'Reservas confirmadas', 'Confirmadas con saldo', 'Reservas canceladas', 'Tours o servicios próximos a ejecutar']) {
       expect(within(daily).getByText(label)).toBeInTheDocument();
     }
     const pending = screen.getByRole('group', { name: 'Pendientes operativos' });
