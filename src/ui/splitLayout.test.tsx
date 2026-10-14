@@ -83,11 +83,11 @@ describe('SignInScreen tabs and links of the Mockup', () => {
     expect(screen.getByRole('button', { name: 'Equipo del operador' })).toHaveAttribute('aria-pressed', 'true');
   });
 
-  it('links to the platform and back home, and offers no password recovery', () => {
+  it('links to the platform, back home and to the recovery notice', () => {
     signIn('acme');
     expect(screen.getByRole('link', { name: /Administración de plataforma/ })).toHaveAttribute('href', '/platform');
     expect(screen.getByRole('link', { name: 'Volver al inicio' })).toHaveAttribute('href', '/t/acme');
-    expect(screen.queryByText(/Olvidaste/)).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: '¿Olvidaste tu contraseña?' })).toHaveAttribute('href', '/t/acme/recuperar');
   });
 
   it('the platform sign-in has no tabs and no company links', () => {
