@@ -39,10 +39,10 @@ describe('calque of the Mockup: the sign-in view (RN-CAL-IDN-02, -03, -05)', () 
   it('tabs_change_text_but_not_fields_or_request', () => {
     setup('acme');
     const before = screen.getAllByRole('textbox').length + document.querySelectorAll('input').length;
-    expect(screen.queryByText(/Solicítalo a un administrador/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Solicítalo a un Administrador del tenant/)).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Equipo del operador' }));
     expect(screen.getByText('Ingresa a tu cuenta para gestionar la operación.')).toBeInTheDocument();
-    expect(screen.getByText(/Solicítalo a un administrador/)).toBeInTheDocument();
+    expect(screen.getByText(/Solicítalo a un Administrador del tenant/)).toBeInTheDocument();
     expect(screen.getAllByRole('textbox').length + document.querySelectorAll('input').length).toBe(before);
   });
 

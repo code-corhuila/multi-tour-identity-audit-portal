@@ -17,6 +17,7 @@ const ENTRIES: readonly Entry[] = [
   { label: 'Pagos', kind: 'soon' },
   { label: 'Caja', kind: 'soon' },
   { label: 'Operación', kind: 'soon' },
+  { label: 'Notificaciones', kind: 'soon' },
   { label: 'Reportes', kind: 'soon' },
   { label: 'Colaboradores', kind: 'own', item: 'staff' },
 ];
