@@ -73,7 +73,7 @@ export function AccessRoutes({ apiClient, session, identifier: link, scope, navi
         />
       );
     }
-    if (session.roles.includes(FINAL_CUSTOMER)) return <CustomerHome identifier={company} onSignOut={signOut} />;
+    if (session.roles.includes(FINAL_CUSTOMER)) return <CustomerHome identifier={company} session={session} onSignOut={signOut} />;
   }
   if (view === 'sign-up' && (identifier !== undefined || general)) {
     return (

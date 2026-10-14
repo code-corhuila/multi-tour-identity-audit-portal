@@ -38,13 +38,11 @@ describe('tenant staff shell', () => {
 });
 
 describe('final customer panel', () => {
-  it('greets, links Mis reservas to the commercial area and disables Mi perfil', async () => {
+  it('greets, links Mis reservas to the commercial area and opens Mi perfil', async () => {
     await show(['FINAL_CUSTOMER'], 'sierra-azul');
     expect(screen.getByRole('heading', { level: 1, name: /Hola/ })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Mis reservas/ })).toHaveAttribute('href', '/t/sierra-azul/areas/commercial-reservation-portal');
-    const profile = screen.getByRole('group', { name: 'Mi perfil' });
-    expect(profile).toHaveAttribute('aria-disabled', 'true');
-    expect(within(profile).getByText('Próximamente')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Mi perfil/ })).toBeEnabled();
   });
 
   it('Cerrar sesión returns to the company sign-in', async () => {

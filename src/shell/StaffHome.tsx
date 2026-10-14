@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import type { ApiClient, MountProps, Session } from '../contract';
+import { profileMessages } from '../profile/messages';
+import { ProfileScreen } from '../profile/ProfileScreen';
 import { VisualIdentityScreen } from '../visualIdentity/VisualIdentityScreen';
 import { visualIdentityMessages } from '../visualIdentity/messages';
 import { AreaCard } from './AreaCard';
@@ -21,10 +23,14 @@ export interface StaffHomeProps extends Pick<MountProps, 'commercialName' | 'vis
 // this version are links; the rest are shown disabled. The Tenant Administrator also gets the visual identity card, which
 // opens its screen inside this same panel (portal spec 005, PT-09).
 export function StaffHome({ identifier, session, apiClient, commercialName, visualIdentity, onVisualIdentityChange, onSignOut }: StaffHomeProps) {
-  const [view, setView] = useState<'home' | 'identity'>('home');
+  const [view, setView] = useState<'home' | 'identity' | 'profile'>('home');
   const area = commercialAreaHref(identifier);
   const { cards } = text;
   const canEditIdentity = session.roles.includes(TENANT_ADMINISTRATOR);
+
+  if (view === 'profile') {
+    return <ProfileScreen session={session} backLabel="Volver al panel" onBack={() => setView('home')} onSignOut={onSignOut} />;
+  }
 
   if (view === 'identity' && canEditIdentity) {
     return (
@@ -42,9 +48,14 @@ export function StaffHome({ identifier, session, apiClient, commercialName, visu
     );
   }
 
+  const profileLink = (
+    <button type="button" className="shell-nav-item" onClick={() => setView('profile')}>
+      {profileMessages.title}
+    </button>
+  );
   return (
     <div className="shell">
-      <TopBar role={text.role} onSignOut={onSignOut} />
+      <TopBar role={text.role} nav={profileLink} onSignOut={onSignOut} />
       <main className="operator-content">
         <header className="operator-topbar">
           <div>
