@@ -67,21 +67,30 @@ export function RegisterScreen({ identifier, apiClient, onDone, onSignIn }: Regi
   return (
     <AuthCard title={text.title} subtitle={text.subtitle} wide eyebrow={messages.signIn.kicker} homeHref={`/t/${identifier}`} visualTitle={text.visual}>
       <form className="auth-form" onSubmit={onSubmit} noValidate>
-        <div className="auth-name-group">
-          <Field id={ids.firstName} label={text.firstName} autoComplete="given-name" placeholder={text.firstNamePlaceholder} value={values.firstName} error={errors.firstName} onChange={set('firstName')} />
-          <Field id={ids.lastName} label={text.lastName} autoComplete="family-name" placeholder={text.lastNamePlaceholder} value={values.lastName} error={errors.lastName} onChange={set('lastName')} />
+        {askCompany && (
+          <Field id="signup-company" label={messages.errors.companyLabel} autoComplete="organization" placeholder={messages.errors.companyPlaceholder} value={company} error={companyError} onChange={(e) => setCompany(e.target.value)} />
+        )}
+        <div className="auth-section" role="group" aria-labelledby="signup-personal-title">
+          <h2 id="signup-personal-title" className="auth-section-title">{text.personalData}</h2>
+          <div className="auth-name-group">
+            <Field id={ids.firstName} label={text.firstName} autoComplete="given-name" placeholder={text.firstNamePlaceholder} value={values.firstName} error={errors.firstName} onChange={set('firstName')} />
+            <Field id={ids.lastName} label={text.lastName} autoComplete="family-name" placeholder={text.lastNamePlaceholder} value={values.lastName} error={errors.lastName} onChange={set('lastName')} />
+          </div>
+          <Field id={ids.email} label={messages.fields.email} type="email" autoComplete="email" placeholder={messages.fields.emailPlaceholder} value={values.email} error={errors.email} onChange={set('email')} />
+          <Field id={ids.phone} label={text.phone} type="tel" autoComplete="tel" placeholder={text.phonePlaceholder} value={values.phone} error={errors.phone} onChange={set('phone')} />
         </div>
-        <Field id={ids.email} label={messages.fields.email} type="email" autoComplete="email" placeholder={messages.fields.emailPlaceholder} value={values.email} error={errors.email} onChange={set('email')} />
-        <Field id={ids.phone} label={text.phone} type="tel" autoComplete="tel" placeholder={text.phonePlaceholder} value={values.phone} error={errors.phone} onChange={set('phone')} />
-        <PasswordField id={ids.password} label={messages.fields.password} autoComplete="new-password" value={values.password} error={errors.password} aria-describedby="signup-policy" onChange={set('password')} />
-        <PasswordField id={ids.passwordConfirmation} label={text.confirmPassword} autoComplete="new-password" value={values.passwordConfirmation} error={errors.passwordConfirmation} onChange={set('passwordConfirmation')} />
-        <div className="auth-policy" id="signup-policy" role="group" aria-labelledby="signup-policy-title">
-          <p id="signup-policy-title">{text.policyTitle}</p>
-          <ul>
-            {text.policy.map((rule) => (
-              <li key={rule}>{rule}</li>
-            ))}
-          </ul>
+        <div className="auth-section" role="group" aria-labelledby="signup-security-title">
+          <h2 id="signup-security-title" className="auth-section-title">{text.security}</h2>
+          <PasswordField id={ids.password} label={messages.fields.password} autoComplete="new-password" value={values.password} error={errors.password} aria-describedby="signup-policy" onChange={set('password')} />
+          <PasswordField id={ids.passwordConfirmation} label={text.confirmPassword} autoComplete="new-password" value={values.passwordConfirmation} error={errors.passwordConfirmation} onChange={set('passwordConfirmation')} />
+          <div className="auth-policy" id="signup-policy" role="group" aria-labelledby="signup-policy-title">
+            <p id="signup-policy-title">{text.policyTitle}</p>
+            <ul>
+              {text.policy.map((rule) => (
+                <li key={rule}>{rule}</li>
+              ))}
+            </ul>
+          </div>
         </div>
         <p className={failure?.line ? 'auth-feedback is-error' : 'auth-feedback'} aria-live="polite">
           {failure?.line}

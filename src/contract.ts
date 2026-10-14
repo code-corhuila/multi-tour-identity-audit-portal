@@ -8,6 +8,8 @@ export interface Session {
   // Mark of the current token (G-2): a temporary credential or a restricted access; absent for a normal one.
   // The container's session must provide it and update it when a session opens or closes.
   access?: 'password-change' | 'restricted';
+  // What the token of the session says about the person (the "Mi perfil" view reads it); each value may be absent.
+  account?: { name?: string; email?: string; phone?: string };
   // `identifier` is the company the answer is for; the container requires it in the general scope and ignores it in
   // the tenant and platform scopes.
   open(answer: unknown, identifier?: string): void;
