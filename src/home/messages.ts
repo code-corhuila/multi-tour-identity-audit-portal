@@ -6,16 +6,18 @@ export const homeMessages = {
   profile: 'Mi perfil',
   heroEyebrow: 'Vista diaria',
   heroTitle: 'Decisiones comerciales y operativas en un solo lugar.',
-  heroCopy: 'Consulta el pulso del día y entra a cada área desde aquí.',
+  heroCopy: 'Gestiona únicamente la información de tu operador: reservas, catálogo, descuentos, pagos, caja y ejecución.',
   testData: 'Datos de prueba',
   empty: 'Los indicadores llegan con las áreas comercial y de caja.',
   soon: 'Próximamente',
   none: '—',
   daily: {
     title: 'Resumen diario',
+    eyebrow: 'Seguimiento de reservas y ejecución',
+    copy: 'Indicadores obligatorios para priorizar la operación del día.',
     metrics: ['Reservas creadas hoy', 'Reservas pendientes de pago', 'Reservas confirmadas', 'Reservas canceladas', 'Tours o servicios próximos a ejecutar'],
   },
-  pending: { title: 'Pendientes operativos', metrics: ['Pagos y soportes por validar', 'Total operativo de caja'] },
+  pending: { title: 'Pendientes operativos', eyebrow: 'Validaciones y control de caja', metrics: ['Pagos y soportes por validar', 'Total operativo de caja'] },
   manage: {
     title: '¿Qué necesitas gestionar?',
     cards: {
