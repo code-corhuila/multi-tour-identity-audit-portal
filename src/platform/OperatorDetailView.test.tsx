@@ -14,7 +14,6 @@ const tenant = {
   firstAdministratorMembershipId: '7c9e6679-7425-40de-944b-e07fc1f90ae7',
   createdAt: '2026-10-11T10:00:00Z',
 };
-const GET = `/api/v1/identity-audit/tenants/${ID}`;
 const failure = (status: number, extra = {}) => Object.assign(new Error('x'), { status, ...extra });
 
 function setup(request: ApiClient['request']) {
