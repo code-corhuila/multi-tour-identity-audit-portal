@@ -49,11 +49,14 @@ export function OperationHome({ identifier, commercialHref, canEditIdentity, onO
         <p>{text.heroCopy}</p>
       </section>
       <p className="home-testdata">{data ? text.testData : text.empty}</p>
+      <p className="home-eyebrow">{text.daily.eyebrow}</p>
+      <p>{text.daily.copy}</p>
       <div className="home-row" role="group" aria-label={text.daily.title}>
         {text.daily.metrics.map((label, i) => (
           <Metric key={label} label={label} value={value(daily[i])} />
         ))}
       </div>
+      <p className="home-eyebrow">{text.pending.eyebrow}</p>
       <div className="home-row" role="group" aria-label={text.pending.title}>
         {text.pending.metrics.map((label, i) => (
           <Metric key={label} label={label} value={value(pending[i])} />

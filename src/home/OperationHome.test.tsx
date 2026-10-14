@@ -29,6 +29,14 @@ describe('staff home Control de la operación (spec 011, RN-CAL-HOM-01 to 05)', 
     }
   });
 
+  it('U·home_uses_the_mockup_copy: the hero sentence and the captions of the two metric sections', () => {
+    render(<OperationHome {...props} data={homeTestData} />);
+    expect(screen.getByText('Gestiona únicamente la información de tu operador: reservas, catálogo, descuentos, pagos, caja y ejecución.')).toBeInTheDocument();
+    expect(screen.getByText('Seguimiento de reservas y ejecución')).toBeInTheDocument();
+    expect(screen.getByText('Indicadores obligatorios para priorizar la operación del día.')).toBeInTheDocument();
+    expect(screen.getByText('Validaciones y control de caja')).toBeInTheDocument();
+  });
+
   it('U·metrics_are_labelled_test_data: with data, every group says so; the cards of other portals are disabled', () => {
     render(<OperationHome {...props} data={homeTestData} />);
     expect(screen.getAllByText('Datos de prueba').length).toBeGreaterThan(0);
