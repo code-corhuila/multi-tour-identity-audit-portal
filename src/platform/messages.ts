@@ -59,6 +59,7 @@ export const platformMessages = {
       'Conserva trazabilidad de las decisiones sobre el operador.',
       'No registra reservas, pagos, gastos ni movimientos de caja.',
     ],
+  },
   create: 'Crear operador',
   summary: {
     eyebrow: 'Control de plataforma',
