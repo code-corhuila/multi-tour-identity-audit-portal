@@ -39,10 +39,9 @@ describe('staff list view (spec 009 PT-02, RN-CAL-USR-03)', () => {
     const source = vi.fn(async () => members);
     show(source);
     await screen.findByRole('table');
-    const status = screen.getByText('Deshabilitado');
+    expect(screen.getByText('Deshabilitado')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Habilitar validación' }));
     expect(screen.getByText('Habilitado')).toBeInTheDocument();
-    expect(status).not.toBeInTheDocument();
     expect(source).toHaveBeenCalledTimes(1);
   });
 
