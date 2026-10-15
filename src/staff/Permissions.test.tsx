@@ -7,7 +7,7 @@ import { StaffListView } from './StaffListView';
 
 const member = (role: string): StaffMember => ({ id: 'c1', name: 'Camila Restrepo', email: 'camila@travesianatural.co', role, tenant: 'Travesia Natural', createdAt: '2026-10-10T15:00:00Z' });
 const detail = (role: string) => render(<StaffDetailView id="c1" source={async () => [member(role)]} onBack={vi.fn()} />);
-const row = (name: string) => screen.getByText(name).closest('tr') as HTMLElement;
+const row = (name: string) => within(screen.getByRole('table', { name: 'Permisos' })).getByText(name).closest('tr') as HTMLElement;
 
 describe('special permissions per user (spec 009 PT-06, RN-CAL-USR-08, -09, -12)', () => {
   it('U·detail_assigns_and_withdraws_permissions: assign and withdraw one permission, with reason and audit row', async () => {

@@ -7,22 +7,13 @@ import '../tenants/operator.css';
 
 const t = staffMessages.list;
 
-// Permission of HU-SEC-006: the service does not exist, so the toggle only flips local state (RN-CAL-USR-04, plan D-03).
-function TransferValidationPanel() {
-  const [enabled, setEnabled] = useState(false);
+// The special permissions are assigned per user from the detail (RN-CAL-USR-08); this panel only explains them.
+function PermissionsExplained() {
   return (
     <section className="operator-panel">
-      <div className="operator-panel-head">
-        <div>
-          <p className="operator-eyebrow">{t.permissionsEyebrow}</p>
-          <h2>{t.permissionsTitle}</h2>
-        </div>
-        <span className="operator-status">{enabled ? t.enabled : t.disabled}</span>
-      </div>
+      <p className="operator-eyebrow">{t.permissionsEyebrow}</p>
+      <h2>{t.permissionsTitle}</h2>
       <p className="operator-copy">{t.permissionsCopy}</p>
-      <button type="button" className="operator-outline" onClick={() => setEnabled(!enabled)}>
-        {enabled ? t.disable : t.enable}
-      </button>
     </section>
   );
 }
@@ -129,7 +120,7 @@ export function StaffListView({ onRegister, onOpen, source }: StaffListViewProps
           </div>
         )}
       </section>
-      <TransferValidationPanel />
+      <PermissionsExplained />
     </>
   );
 }
