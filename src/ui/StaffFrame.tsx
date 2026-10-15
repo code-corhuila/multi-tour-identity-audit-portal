@@ -71,7 +71,7 @@ export function StaffFrame({ current, commercialHref, onNavigate, onSignOut, can
           {text.signOut}
         </button>
       </aside>
-      <main className="staff-content">{children}</main>
+      <main className="staff-content operator-content">{children}</main>
     </div>
   );
 }

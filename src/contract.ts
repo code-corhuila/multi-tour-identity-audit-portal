@@ -10,6 +10,9 @@ export interface Session {
   access?: 'password-change' | 'restricted';
   // What the token of the session says about the person (the "Mi perfil" view reads it); each value may be absent.
   account?: { name?: string; email?: string; phone?: string };
+  // Special permissions granted to the person (e.g. 'Validar comprobantes'). The token does not carry them yet: the
+  // container fills this from a claim when one exists and, until then, the roles substitute (ADR-007, 2026-10-15).
+  permissions?: string[];
   // `identifier` is the company the answer is for; the container requires it in the general scope and ignores it in
   // the tenant and platform scopes.
   open(answer: unknown, identifier?: string): void;
