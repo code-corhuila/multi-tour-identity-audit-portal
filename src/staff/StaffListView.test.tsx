@@ -20,7 +20,7 @@ describe('staff list view (spec 009 PT-02, RN-CAL-USR-03)', () => {
     expect(screen.getByText('Usuarios internos de tu operador.')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Colaboradores registrados' })).toBeInTheDocument();
     const table = await screen.findByRole('table');
-    expect(within(table).getAllByRole('columnheader').map((c) => c.textContent)).toEqual(['Nombre', 'Correo / usuario de acceso', 'Rol', 'Acción']);
+    expect(within(table).getAllByRole('columnheader').map((c) => c.textContent)).toEqual(['Nombre', 'Correo / usuario de acceso', 'Rol y permisos', 'Estado', 'Acción']);
     expect(within(table).getByText('camila@travesianatural.co')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Validación de soportes de transferencia' })).toBeInTheDocument();
   });
