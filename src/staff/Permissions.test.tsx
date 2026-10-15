@@ -1,15 +1,17 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
-import type { Session } from '../contract';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { StaffMember } from './staff';
 import { StaffDetailView } from './StaffDetailView';
 import { StaffListView } from './StaffListView';
+import { resetAssignedPermissions } from './PermissionsPanel';
 
 const member = (role: string): StaffMember => ({ id: 'c1', name: 'Camila Restrepo', email: 'camila@travesianatural.co', role, tenant: 'Travesia Natural', createdAt: '2026-10-10T15:00:00Z' });
 const detail = (role: string) => render(<StaffDetailView id="c1" source={async () => [member(role)]} onBack={vi.fn()} />);
 const row = (name: string) => within(screen.getByRole('table', { name: 'Permisos' })).getByText(name).closest('tr') as HTMLElement;
 
 describe('special permissions per user (spec 009 PT-06, RN-CAL-USR-08, -09, -12)', () => {
+  beforeEach(resetAssignedPermissions);
+
   it('U·detail_assigns_and_withdraws_permissions: assign and withdraw one permission, with reason and audit row', async () => {
     detail('Colaborador operativo');
     await screen.findByRole('heading', { name: 'Permisos de este usuario' });
@@ -46,10 +48,15 @@ describe('special permissions per user (spec 009 PT-06, RN-CAL-USR-08, -09, -12)
     expect(screen.getByText(/Permisos especiales por usuario/)).toBeInTheDocument();
   });
 
-  it('U·session_permissions_are_optional: the session may carry the granted permissions or not', () => {
-    const without: Session = { roles: ['TENANT_ADMINISTRATOR'], open: vi.fn(), close: vi.fn() };
-    const withThem: Session = { ...without, permissions: ['Validar comprobantes'] };
-    expect(without.permissions).toBeUndefined();
-    expect(withThem.permissions).toContain('Validar comprobantes');
+  it('U·assignments_survive_leaving_and_reopening_the_detail: the demo goes list, detail, back and detail again', async () => {
+    const first = detail('Colaborador operativo');
+    await screen.findByRole('heading', { name: 'Permisos de este usuario' });
+    fireEvent.click(within(row('Gestionar caja')).getByRole('button', { name: 'Asignar' }));
+    expect(within(row('Gestionar caja')).getByText('Asignado')).toBeInTheDocument();
+    first.unmount();
+    detail('Colaborador operativo');
+    await screen.findByRole('heading', { name: 'Permisos de este usuario' });
+    expect(within(row('Gestionar caja')).getByText('Asignado')).toBeInTheDocument();
+    expect(within(screen.getByRole('table', { name: 'Auditoría de permisos' })).getAllByRole('row')).toHaveLength(2);
   });
 });

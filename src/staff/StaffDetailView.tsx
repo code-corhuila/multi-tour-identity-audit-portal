@@ -60,7 +60,7 @@ export function StaffDetailView({ id, onBack, source }: StaffDetailViewProps) {
           </dl>
         </section>
       )}
-      {member && <PermissionsPanel key={member.id} role={member.role} />}
+      {member && <PermissionsPanel key={member.id} memberId={member.id} role={member.role} />}
     </>
   );
 }

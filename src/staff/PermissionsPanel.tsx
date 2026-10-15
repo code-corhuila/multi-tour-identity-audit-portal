@@ -13,17 +13,25 @@ interface AuditEntry {
 
 // Permissions of one user (Mockup admin-detalle-colaborador.html): assign or withdraw each one, with an optional
 // reason and the audit table. HU-SEC-006 is not built, so it only changes local state and sends nothing.
-export function PermissionsPanel({ role }: { role: string }) {
-  const [granted, setGranted] = useState<ReadonlySet<Permission>>(new Set());
+// Assignments of the session by user: the fixture has no service, so they live here and survive leaving the detail.
+// shortcut: module memory, cleared with the page; replace by the call of HU-SEC-006 when it exists.
+const assigned = new Map<string, { granted: ReadonlySet<Permission>; audit: AuditEntry[] }>();
+export const resetAssignedPermissions = () => assigned.clear();
+
+export function PermissionsPanel({ role, memberId }: { role: string; memberId: string }) {
+  const saved = assigned.get(memberId);
+  const [granted, setGranted] = useState<ReadonlySet<Permission>>(saved?.granted ?? new Set());
   const [reason, setReason] = useState('');
-  const [audit, setAudit] = useState<AuditEntry[]>([]);
+  const [audit, setAudit] = useState<AuditEntry[]>(saved?.audit ?? []);
 
   function toggle(permission: Permission, on: boolean) {
     const next = new Set(granted);
     if (on) next.add(permission);
     else next.delete(permission);
+    const entries = [{ at: new Date().toISOString().slice(0, 16).replace('T', ' '), permission, action: on ? t.actionAssigned : t.actionWithdrawn, reason: reason.trim() || '—' }, ...audit];
     setGranted(next);
-    setAudit([{ at: new Date().toISOString().slice(0, 16).replace('T', ' '), permission, action: on ? t.actionAssigned : t.actionWithdrawn, reason: reason.trim() || '—' }, ...audit]);
+    setAudit(entries);
+    assigned.set(memberId, { granted: next, audit: entries });
     setReason('');
   }
 
