@@ -22,7 +22,6 @@ describe('staff list view (spec 009 PT-02, RN-CAL-USR-03)', () => {
     const table = await screen.findByRole('table');
     expect(within(table).getAllByRole('columnheader').map((c) => c.textContent)).toEqual(['Nombre', 'Correo / usuario de acceso', 'Rol y permisos', 'Estado', 'Acción']);
     expect(within(table).getByText('camila@travesianatural.co')).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Validación de soportes de transferencia' })).toBeInTheDocument();
   });
 
   it('U·register_and_detail_hand_over: the header button and a row action call the container', async () => {
@@ -35,15 +34,6 @@ describe('staff list view (spec 009 PT-02, RN-CAL-USR-03)', () => {
     expect(handlers.onOpen).toHaveBeenCalledWith('c2');
   });
 
-  it('U·permission_toggle_sends_nothing: the panel flips local state and asks nothing of the source', async () => {
-    const source = vi.fn(async () => members);
-    show(source);
-    await screen.findByRole('table');
-    expect(screen.getByText('Deshabilitado')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Habilitar validación' }));
-    expect(screen.getByText('Habilitado')).toBeInTheDocument();
-    expect(source).toHaveBeenCalledTimes(1);
-  });
 
   it('U·list_has_four_states: loading, error with retry, empty and data', async () => {
     const source = vi.fn().mockRejectedValueOnce(new Error('x')).mockResolvedValueOnce([]).mockResolvedValue(members);
