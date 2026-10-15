@@ -1,5 +1,6 @@
 import { PageHeader } from '../platform/PageHeader';
 import type { StaffSource } from './staff';
+import { PermissionsPanel } from './PermissionsPanel';
 import { staffMessages } from './messages';
 import { useStaffMembers } from './useStaffMembers';
 import '../tenants/operator.css';
@@ -59,6 +60,7 @@ export function StaffDetailView({ id, onBack, source }: StaffDetailViewProps) {
           </dl>
         </section>
       )}
+      {member && <PermissionsPanel key={member.id} memberId={member.id} role={member.role} />}
     </>
   );
 }
