@@ -66,7 +66,7 @@ export function StaffListView({ onRegister, onOpen, source }: StaffListViewProps
             <h2>{t.panelTitle}</h2>
           </div>
           {state.kind === 'data' && state.members.length > 0 && (
-            <span className="operator-status">
+            <span className="operator-status" role="status">
               {t.summary(state.members.filter(isActive).length, state.members.filter((m) => !isActive(m)).length)}
             </span>
           )}

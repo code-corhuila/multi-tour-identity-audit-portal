@@ -17,16 +17,21 @@ describe('staff team table (spec 009 PT-05, RN-CAL-USR-07)', () => {
     expect(within(table).getAllByRole('row')).toHaveLength(3);
     const filter = screen.getByLabelText('Mostrar');
     expect([...(filter as HTMLSelectElement).options].map((o) => o.textContent)).toEqual(['Todos', 'Activos', 'Inactivos']);
-    fireEvent.change(filter, { target: { value: 'inactivos' } });
+    fireEvent.change(filter, { target: { value: 'inactive' } });
     expect(within(screen.getByRole('table')).getByText('Mateo Rojas')).toBeInTheDocument();
     expect(within(screen.getByRole('table')).queryByText('Camila Restrepo')).not.toBeInTheDocument();
     expect(within(screen.getByRole('table')).getByText('Inactivo')).toBeInTheDocument();
+    // The counter totals every registered user, not the filtered rows (decision of PR 42).
+    expect(screen.getByText('1 usuario activo · 1 inactivo')).toBeInTheDocument();
+    fireEvent.change(filter, { target: { value: 'active' } });
+    expect(within(screen.getByRole('table')).getByText('Camila Restrepo')).toBeInTheDocument();
+    expect(within(screen.getByRole('table')).queryByText('Mateo Rojas')).not.toBeInTheDocument();
   });
 
   it('U·filter_without_users_says_so: an empty filter shows the Mockup line and no table', async () => {
     render(<StaffListView source={async () => [members[0]]} onRegister={vi.fn()} onOpen={vi.fn()} />);
     await screen.findByRole('table');
-    fireEvent.change(screen.getByLabelText('Mostrar'), { target: { value: 'inactivos' } });
+    fireEvent.change(screen.getByLabelText('Mostrar'), { target: { value: 'inactive' } });
     expect(screen.getByText('No hay usuarios para el filtro seleccionado.')).toBeInTheDocument();
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });
