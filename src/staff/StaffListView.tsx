@@ -3,6 +3,8 @@ import { PageHeader } from '../platform/PageHeader';
 import type { StaffMember, StaffSource } from './staff';
 import { staffMessages } from './messages';
 import { useStaffMembers } from './useStaffMembers';
+import { OptionalRolesPanel } from './OptionalRolesPanel';
+import { RegionalSettingsPanel } from './RegionalSettingsPanel';
 import '../tenants/operator.css';
 
 const t = staffMessages.list;
@@ -87,7 +89,7 @@ export function StaffListView({ onRegister, onOpen, source }: StaffListViewProps
         )}
         {state.kind === 'data' && visible(state.members, show).length > 0 && (
           <div className="operator-table-wrap">
-            <table className="operator-table">
+            <table className="operator-table" aria-label={t.tableLabel}>
               <thead>
                 <tr>
                   <th>{t.columns.name}</th>
@@ -120,7 +122,9 @@ export function StaffListView({ onRegister, onOpen, source }: StaffListViewProps
           </div>
         )}
       </section>
+      <OptionalRolesPanel />
       <PermissionsExplained />
+      <RegionalSettingsPanel />
     </>
   );
 }

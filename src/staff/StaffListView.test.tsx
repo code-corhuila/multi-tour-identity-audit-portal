@@ -19,7 +19,7 @@ describe('staff list view (spec 009 PT-02, RN-CAL-USR-03)', () => {
     expect(screen.getByRole('button', { name: 'Registrar colaborador' })).toBeInTheDocument();
     expect(screen.getByText('Usuarios internos de tu operador.')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Colaboradores registrados' })).toBeInTheDocument();
-    const table = await screen.findByRole('table');
+    const table = await screen.findByRole('table', { name: 'Usuarios registrados' });
     expect(within(table).getAllByRole('columnheader').map((c) => c.textContent)).toEqual(['Nombre', 'Correo / usuario de acceso', 'Rol y permisos', 'Estado', 'Acción']);
     expect(within(table).getByText('camila@travesianatural.co')).toBeInTheDocument();
   });
@@ -41,6 +41,6 @@ describe('staff list view (spec 009 PT-02, RN-CAL-USR-03)', () => {
     expect(screen.getByRole('status')).toBeInTheDocument();
     fireEvent.click(await screen.findByRole('button', { name: 'Reintentar' }));
     expect(await screen.findByText('Aún no se han registrado colaboradores.')).toBeInTheDocument();
-    expect(screen.queryByRole('table')).not.toBeInTheDocument();
+    expect(screen.queryByRole('table', { name: 'Usuarios registrados' })).not.toBeInTheDocument();
   });
 });
