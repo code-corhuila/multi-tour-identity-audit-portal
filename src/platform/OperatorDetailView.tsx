@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
-import type { ApiClient } from '../contract';
-import type { TenantResponse } from '../data/tenants';
+import type { ApiClient, ApiError } from '../contract';
+import { inactivateTenant, reactivateTenant, type TenantResponse } from '../data/tenants';
 import { messages } from '../messages';
 import { tenantMessages } from '../tenants/messages';
 import { platformMessages } from './messages';
@@ -16,9 +16,10 @@ export interface OperatorDetailViewProps {
   onBack: () => void;
 }
 
-// Detail view of the platform panel: the Mockup's band, state panel and scope panel (spec 007 PT-03).
+// Detail view of the platform panel: the Mockup's band, state panel and scope panel (spec 007 PT-03; status
+// change built by the amendment of spec 001, 2026-10-23).
 export function OperatorDetailView({ apiClient, tenantId, onBack }: OperatorDetailViewProps) {
-  const { state, retry } = useTenant(apiClient, tenantId);
+  const { state, retry, replace } = useTenant(apiClient, tenantId);
   const back = (
     <button type="button" className="platform-link" onClick={onBack}>
       {t.back}
@@ -58,7 +59,7 @@ export function OperatorDetailView({ apiClient, tenantId, onBack }: OperatorDeta
         </div>
       </section>
       <div className="platform-detail-grid">
-        <StatePanel tenant={tenant} />
+        <StatePanel tenant={tenant} apiClient={apiClient} tenantId={tenantId} onChanged={replace} onRequestReload={retry} />
         <section className="platform-panel" aria-label={t.scopeEyebrow}>
           <p className="platform-eyebrow">{t.scopeEyebrow}</p>
           <h2>{t.scopeTitle}</h2>
@@ -73,23 +74,56 @@ export function OperatorDetailView({ apiClient, tenantId, onBack }: OperatorDeta
   );
 }
 
-// The "Inactivar operador" action is visual only in this version (decision of the lead, 2026-10-13): it checks the
-// reason, says so and sends nothing. Wiring the inactivation is the debt of portal 001 PT-05.
-function StatePanel({ tenant }: { tenant: TenantResponse }) {
+// "Responsable: <who> · <when>", the local date and time as the platform panel shows them elsewhere.
+function formatChangedAt(iso: string): string {
+  return new Date(iso).toLocaleString('es-CO', { dateStyle: 'medium', timeStyle: 'short' });
+}
+
+interface StatePanelProps {
+  tenant: TenantResponse;
+  apiClient: ApiClient;
+  tenantId: string;
+  onChanged: (tenant: TenantResponse) => void;
+  onRequestReload: () => void;
+}
+
+// RN-IDA-PT-05, -10, -11: a reason, a confirmation that names the tenant and lists what the change does, sent
+// once; the service's answer decides the next screen (the Mockup's `admin-detalle-operador.html` flow).
+function StatePanel({ tenant, apiClient, tenantId, onChanged, onRequestReload }: StatePanelProps) {
   const [reason, setReason] = useState('');
   const [error, setError] = useState<string>();
-  const [note, setNote] = useState<string>();
+  const [confirming, setConfirming] = useState(false);
+  const [sending, setSending] = useState(false);
   const copy = t.states[tenant.tenantStatus];
+  const active = tenant.tenantStatus === 'ACTIVE';
+  const canChange = tenant.tenantStatus === 'ACTIVE' || tenant.tenantStatus === 'INACTIVE';
+  const reasonId = 'status-change-reason';
 
   function onSubmit(event: FormEvent) {
     event.preventDefault();
     if (!reason.trim()) {
-      setNote(undefined);
-      setError(t.reasonRequired);
+      setError(t.reasonRequired(active));
       return;
     }
     setError(undefined);
-    setNote(t.visualOnly);
+    setConfirming(true);
+  }
+
+  async function onConfirm() {
+    setSending(true);
+    try {
+      const updated = active ? await inactivateTenant(apiClient, tenantId, reason.trim()) : await reactivateTenant(apiClient, tenantId, reason.trim());
+      setConfirming(false);
+      setReason('');
+      setError(undefined);
+      onChanged(updated);
+    } catch (thrown: unknown) {
+      const { status, traceId } = (thrown ?? {}) as ApiError;
+      setConfirming(false);
+      setError(status === 422 ? t.alreadyChanged : `${messages.errors.unavailable}${traceId ? ` (${messages.errors.trace}: ${traceId})` : ''}`);
+    } finally {
+      setSending(false);
+    }
   }
 
   return (
@@ -97,23 +131,62 @@ function StatePanel({ tenant }: { tenant: TenantResponse }) {
       <p className="platform-eyebrow">{t.stateEyebrow}</p>
       <h2>{copy.title}</h2>
       <p className="platform-section-copy">{copy.copy}</p>
-      {tenant.tenantStatus === 'ACTIVE' ? (
+      {canChange && (
         <form className="platform-state-form" onSubmit={onSubmit} noValidate>
-          <label htmlFor="inactivation-reason">{t.reasonLabel}</label>
-          <textarea id="inactivation-reason" rows={3} maxLength={MAX_REASON} placeholder={t.reasonPlaceholder} value={reason} onChange={(e) => setReason(e.target.value)} aria-describedby={error ? 'inactivation-error' : undefined} />
-          <p id="inactivation-error" className={error ? 'auth-feedback is-error' : 'auth-feedback'} aria-live="polite">
-            {error ?? note}
+          <label htmlFor={reasonId}>{t.reasonLabel(active)}</label>
+          <textarea
+            id={reasonId}
+            rows={3}
+            maxLength={MAX_REASON}
+            placeholder={t.reasonPlaceholder(active)}
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            aria-describedby="status-change-feedback"
+          />
+          <p id="status-change-feedback" className={error && error !== t.alreadyChanged ? 'auth-feedback is-error' : 'auth-feedback'} aria-live="polite">
+            {error && error !== t.alreadyChanged ? error : null}
           </p>
-          <button className="platform-danger" type="submit">
-            {t.inactivate}
+          <button className={active ? 'platform-danger' : 'platform-primary'} type="submit">
+            {t.action(active)}
           </button>
         </form>
-      ) : (
-        tenant.statusReason && (
-          <p>
-            <strong>{t.reasonShown}:</strong> <span>{tenant.statusReason}</span>
-          </p>
-        )
+      )}
+      {error === t.alreadyChanged && (
+        <p className="auth-feedback is-error" role="alert">
+          {t.alreadyChanged}{' '}
+          <button type="button" className="platform-link" onClick={onRequestReload}>
+            {t.reload}
+          </button>
+        </p>
+      )}
+      {(tenant.statusReason || tenant.statusChangedBy) && (
+        <p>
+          {tenant.statusReason && (
+            <>
+              <strong>{t.reasonShown}:</strong> <span>{tenant.statusReason}</span>
+              <br />
+            </>
+          )}
+          {tenant.statusChangedBy && tenant.statusChangedAt && <span>{t.changedBy(tenant.statusChangedBy, formatChangedAt(tenant.statusChangedAt))}</span>}
+        </p>
+      )}
+      {confirming && (
+        <div role="dialog" aria-modal="true" aria-label={t.confirmTitle(active, tenant.commercialName)} className="platform-state-dialog">
+          <h3>{t.confirmTitle(active, tenant.commercialName)}</h3>
+          <ul>
+            {(active ? t.consequences.inactivate : t.consequences.reactivate).map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+          <div className="platform-state-dialog-actions">
+            <button type="button" className="platform-outline" onClick={() => setConfirming(false)}>
+              {t.cancel}
+            </button>
+            <button type="button" className={active ? 'platform-danger' : 'platform-primary'} onClick={onConfirm} disabled={sending}>
+              {t.confirmButton(active)}
+            </button>
+          </div>
+        </div>
       )}
     </section>
   );
