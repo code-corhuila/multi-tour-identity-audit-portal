@@ -49,13 +49,14 @@ export interface CreateCustomerRequest {
   passwordConfirmation: string;
 }
 
-// Skeleton: the test comes first (PV-01, plan D-05).
-export function requestEmailVerificationPath(_identifier: string): string {
-  return '';
+export function requestEmailVerificationPath(identifier: string): string {
+  if (!isValidIdentifier(identifier)) throw new Error('Invalid company identifier');
+  return `/api/v1/security/public/tenants/${identifier}/email-verifications`;
 }
 
-export function requestEmailVerification(_client: ApiClient, _identifier: string, _email: string, _signal: AbortSignal): Promise<void> {
-  return Promise.resolve();
+// Always 202 and no body, whatever the e-mail (RN-SEC-004-06); the route takes no Idempotency-Key.
+export function requestEmailVerification(client: ApiClient, identifier: string, email: string, signal: AbortSignal): Promise<void> {
+  return client.request<void>(requestEmailVerificationPath(identifier), { method: 'POST', body: { email }, signal });
 }
 
 export function createCustomerPath(identifier: string): string {

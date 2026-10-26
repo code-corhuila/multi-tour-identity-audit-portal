@@ -12,8 +12,8 @@ export interface RegisterScreenProps {
   // Company of the link; it is never typed (RN-CAL-IDN-01).
   identifier?: string;
   apiClient: ApiClient;
-  // Called once the account exists; the caller sends the person to sign-in.
-  onDone: () => void;
+  // Called once the account exists, with the e-mail typed; the caller shows the notice to check it.
+  onDone: (email: string) => void;
   onSignIn: () => void;
 }
 
@@ -56,7 +56,7 @@ export function RegisterScreen({ identifier, apiClient, onDone, onSignIn }: Regi
     const body = { ...values, firstName: values.firstName.trim(), lastName: values.lastName.trim(), email: values.email.trim(), phone: values.phone.trim() };
     // Cleared as soon as they are sent; never kept (RN-SEC-PT-17).
     setValues({ ...values, password: '', passwordConfirmation: '' });
-    if (await submit(body)) onDone();
+    if (await submit(body)) onDone(body.email);
   }
 
   useEffect(() => {

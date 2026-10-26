@@ -41,6 +41,12 @@ describe('CheckEmailNotice', () => {
     expect(await screen.findByText(/No pudimos completar la solicitud\. Intenta de nuevo\..*tr-3/)).toBeInTheDocument();
   });
 
+  it('a 400 that names the e-mail is still told on the message line, as there is no field to put it beside', async () => {
+    setup(vi.fn().mockRejectedValue(Object.assign(new Error('x'), { status: 400, details: [{ field: 'email', message: 'bad' }] })));
+    fireEvent.click(screen.getByRole('button', { name: 'Reenviar enlace' }));
+    expect(await screen.findByText('Revisa tu correo electrónico.')).toBeInTheDocument();
+  });
+
   it('"Ir a iniciar sesión" goes to sign-in', () => {
     const { onSignIn } = setup();
     fireEvent.click(screen.getByRole('button', { name: 'Ir a iniciar sesión' }));
