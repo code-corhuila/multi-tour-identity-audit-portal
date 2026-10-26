@@ -49,6 +49,15 @@ export interface CreateCustomerRequest {
   passwordConfirmation: string;
 }
 
+// Skeleton: the test comes first (PV-01, plan D-05).
+export function requestEmailVerificationPath(_identifier: string): string {
+  return '';
+}
+
+export function requestEmailVerification(_client: ApiClient, _identifier: string, _email: string, _signal: AbortSignal): Promise<void> {
+  return Promise.resolve();
+}
+
 export function createCustomerPath(identifier: string): string {
   if (!isValidIdentifier(identifier)) throw new Error('Invalid company identifier');
   return `/api/v1/security/public/tenants/${identifier}/accounts`;
