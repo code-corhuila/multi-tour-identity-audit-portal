@@ -59,6 +59,15 @@ export function requestEmailVerification(client: ApiClient, identifier: string, 
   return client.request<void>(requestEmailVerificationPath(identifier), { method: 'POST', body: { email }, signal });
 }
 
+// Skeleton: the test comes first (PV-02, plan D-05).
+export function confirmEmailVerificationPath(_identifier: string): string {
+  return '';
+}
+
+export function confirmEmailVerification(_client: ApiClient, _identifier: string, _token: string, _password: string, _signal: AbortSignal): Promise<void> {
+  return Promise.resolve();
+}
+
 export function createCustomerPath(identifier: string): string {
   if (!isValidIdentifier(identifier)) throw new Error('Invalid company identifier');
   return `/api/v1/security/public/tenants/${identifier}/accounts`;
