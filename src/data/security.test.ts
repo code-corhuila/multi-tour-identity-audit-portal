@@ -1,5 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createCustomerAccount, createCustomerPath, isValidIdentifier, signInPath } from './security';
+import {
+  createCustomerAccount,
+  createCustomerPath,
+  isValidIdentifier,
+  requestEmailVerification,
+  requestEmailVerificationPath,
+  signInPath,
+} from './security';
 
 describe('identifier of the link', () => {
   it.each(['acme', 'acme-tours', 'a1', 'x-9'])('identifier_valid: %s', (id) => {
@@ -44,5 +51,22 @@ describe('createCustomerAccount', () => {
 
   it.each(['', '.', '..', 'Acme', 'a/b'])('never builds a route for the invalid identifier "%s"', (id) => {
     expect(() => createCustomerPath(id)).toThrow();
+  });
+});
+
+describe('requestEmailVerification', () => {
+  it('posts only the e-mail to the tenant e-mail-verifications route, with no Idempotency-Key', async () => {
+    const request = vi.fn().mockResolvedValue(undefined);
+    const signal = new AbortController().signal;
+    await requestEmailVerification({ request }, 'acme', 'a@b.co', signal);
+    expect(request).toHaveBeenCalledWith('/api/v1/security/public/tenants/acme/email-verifications', {
+      method: 'POST',
+      body: { email: 'a@b.co' },
+      signal,
+    });
+  });
+
+  it.each(['', '.', '..', 'Acme', 'a/b'])('never builds a route for the invalid identifier "%s"', (id) => {
+    expect(() => requestEmailVerificationPath(id)).toThrow();
   });
 });
