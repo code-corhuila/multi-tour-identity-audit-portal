@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
+  confirmEmailVerification,
+  confirmEmailVerificationPath,
   createCustomerAccount,
   createCustomerPath,
   isValidIdentifier,
@@ -68,5 +70,22 @@ describe('requestEmailVerification', () => {
 
   it.each(['', '.', '..', 'Acme', 'a/b'])('never builds a route for the invalid identifier "%s"', (id) => {
     expect(() => requestEmailVerificationPath(id)).toThrow();
+  });
+});
+
+describe('confirmEmailVerification', () => {
+  it('posts the link and the password to the tenant confirmations route, with no Idempotency-Key', async () => {
+    const request = vi.fn().mockResolvedValue(undefined);
+    const signal = new AbortController().signal;
+    await confirmEmailVerification({ request }, 'acme', 'T'.repeat(43), 'Viaje-2026!', signal);
+    expect(request).toHaveBeenCalledWith('/api/v1/security/public/tenants/acme/email-verifications/confirmations', {
+      method: 'POST',
+      body: { token: 'T'.repeat(43), password: 'Viaje-2026!' },
+      signal,
+    });
+  });
+
+  it.each(['', '.', '..', 'Acme', 'a/b'])('never builds a route for the invalid identifier "%s"', (id) => {
+    expect(() => confirmEmailVerificationPath(id)).toThrow();
   });
 });
