@@ -43,6 +43,21 @@ describe('sign-in of an account that is still pending', () => {
     expect(screen.queryByRole('button', { name: NEW_LINK })).not.toBeInTheDocument();
   });
 
+  it('editing the e-mail drops the pending message, so the action never carries an e-mail that was not refused', async () => {
+    setup(vi.fn().mockRejectedValue(pending()));
+    signIn();
+    await screen.findByText(PENDING);
+    fireEvent.change(screen.getByLabelText('Correo electrónico'), { target: { value: 'otra@mail.co' } });
+    expect(screen.queryByText(PENDING)).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: NEW_LINK })).not.toBeInTheDocument();
+  });
+
+  it('a details field that is not a list does not break the failure text', async () => {
+    setup(vi.fn().mockRejectedValue(Object.assign(new Error('x'), { status: 403, details: 'EMAIL_NOT_VERIFIED' })));
+    signIn();
+    expect(await screen.findByText(/No pudimos completar la solicitud/)).toBeInTheDocument();
+  });
+
   it('wrong_password_keeps_the_generic_message: a 401 tells nothing about the account', async () => {
     setup(vi.fn().mockRejectedValue(Object.assign(new Error('x'), { status: 401 })));
     signIn();

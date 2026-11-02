@@ -22,13 +22,13 @@ export interface SignInScreenProps {
   onSignedIn?: () => void;
   // When given, the 'Crear cuenta' link calls it instead of navigating (the container owns real routes).
   onCreateAccount?: () => void;
-  // Skeleton: the test comes first (PV-03, plan D-03). Called with the e-mail typed when the account is still pending.
+  // Called with the e-mail typed when the account is still pending, to open the new-link form (R-2: kept only on screen).
   onRequestLink?: (email: string) => void;
 }
 
-export function SignInScreen({ identifier, scope, apiClient, session, notice, onSignedIn, onCreateAccount }: SignInScreenProps) {
+export function SignInScreen({ identifier, scope, apiClient, session, notice, onSignedIn, onCreateAccount, onRequestLink }: SignInScreenProps) {
   const platform = (scope ?? (identifier === undefined ? 'platform' : 'tenant')) === 'platform';
-  const { sending, failure, submit } = useSignIn(identifier, apiClient, session);
+  const { sending, failure, unverified, submit, dismissPending } = useSignIn(identifier, apiClient, session);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
@@ -105,7 +105,10 @@ export function SignInScreen({ identifier, scope, apiClient, session, notice, on
           placeholder={messages.fields.emailPlaceholder}
           value={email}
           error={errors.email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            dismissPending();
+          }}
         />
         <PasswordField
           id="signin-password"
@@ -123,6 +126,11 @@ export function SignInScreen({ identifier, scope, apiClient, session, notice, on
         <p className={failure ? 'auth-feedback is-error' : 'auth-feedback is-success'} aria-live="polite" role={!failure && notice ? 'status' : undefined}>
           {failure ?? notice}
         </p>
+        {unverified && onRequestLink && (
+          <button type="button" className="auth-link" onClick={() => onRequestLink(email.trim())}>
+            {messages.signIn.pendingAction}
+          </button>
+        )}
         <button className={platform ? 'auth-submit' : 'auth-submit auth-submit--arrow'} type="submit" disabled={sending}>
           {sending ? messages.sending : text.submit}
         </button>
