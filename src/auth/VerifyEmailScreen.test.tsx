@@ -7,10 +7,10 @@ const TOKEN = 'T'.repeat(43);
 const failure = (status: number, extra = {}) => Object.assign(new Error('x'), { status, ...extra });
 const BAD_LINK = /Este enlace ya no funciona/;
 
-function setup(request: ApiClient['request'], token: string | undefined = TOKEN) {
+function setup(request: ApiClient['request'], token: string | null = TOKEN) {
   const onSignIn = vi.fn();
   const onRequestLink = vi.fn();
-  render(<VerifyEmailScreen identifier="acme" apiClient={{ request }} token={token} onSignIn={onSignIn} onRequestLink={onRequestLink} />);
+  render(<VerifyEmailScreen identifier="acme" apiClient={{ request }} token={token ?? undefined} onSignIn={onSignIn} onRequestLink={onRequestLink} />);
   return { onSignIn, onRequestLink };
 }
 const type = (value: string) => fireEvent.change(screen.getByLabelText('Contraseña'), { target: { value } });
@@ -33,7 +33,7 @@ describe('VerifyEmailScreen', () => {
 
   it('a_page_without_a_link_offers_a_new_one: no link shows the bad-link screen and sends nothing', () => {
     const request = vi.fn();
-    const { onRequestLink } = setup(request, undefined);
+    const { onRequestLink } = setup(request, null);
     expect(screen.getByText(BAD_LINK)).toBeInTheDocument();
     expect(screen.queryByLabelText('Contraseña')).not.toBeInTheDocument();
     expect(request).not.toHaveBeenCalled();
@@ -49,6 +49,15 @@ describe('VerifyEmailScreen', () => {
     const field = screen.getByLabelText('Contraseña');
     expect(field.getAttribute('aria-invalid')).toBe('true');
     expect(field.getAttribute('aria-describedby')).toContain(screen.getByText('Ingresa tu contraseña.').id);
+  });
+
+  it('the required error goes away as soon as a password is typed', () => {
+    setup(vi.fn());
+    send();
+    expect(screen.getByText('Ingresa tu contraseña.')).toBeInTheDocument();
+    type('V');
+    expect(screen.queryByText('Ingresa tu contraseña.')).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Contraseña')).not.toHaveAttribute('aria-invalid');
   });
 
   it('confirmed_link_shows_verified_and_the_way_to_sign_in: posts the link and the password, no key, and opens no session', async () => {

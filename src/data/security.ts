@@ -59,13 +59,13 @@ export function requestEmailVerification(client: ApiClient, identifier: string, 
   return client.request<void>(requestEmailVerificationPath(identifier), { method: 'POST', body: { email }, signal });
 }
 
-// Skeleton: the test comes first (PV-02, plan D-05).
-export function confirmEmailVerificationPath(_identifier: string): string {
-  return '';
+export function confirmEmailVerificationPath(identifier: string): string {
+  return `${requestEmailVerificationPath(identifier)}/confirmations`;
 }
 
-export function confirmEmailVerification(_client: ApiClient, _identifier: string, _token: string, _password: string, _signal: AbortSignal): Promise<void> {
-  return Promise.resolve();
+// The link and the password of the account; no Idempotency-Key, a link works once.
+export function confirmEmailVerification(client: ApiClient, identifier: string, token: string, password: string, signal: AbortSignal): Promise<void> {
+  return client.request<void>(confirmEmailVerificationPath(identifier), { method: 'POST', body: { token, password }, signal });
 }
 
 export function createCustomerPath(identifier: string): string {
