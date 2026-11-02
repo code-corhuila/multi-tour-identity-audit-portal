@@ -22,6 +22,8 @@ export interface SignInScreenProps {
   onSignedIn?: () => void;
   // When given, the 'Crear cuenta' link calls it instead of navigating (the container owns real routes).
   onCreateAccount?: () => void;
+  // Skeleton: the test comes first (PV-03, plan D-03). Called with the e-mail typed when the account is still pending.
+  onRequestLink?: (email: string) => void;
 }
 
 export function SignInScreen({ identifier, scope, apiClient, session, notice, onSignedIn, onCreateAccount }: SignInScreenProps) {

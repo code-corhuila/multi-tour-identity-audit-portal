@@ -10,6 +10,8 @@ export interface RequestLinkScreenProps {
   // Company of the link; it is never typed (RN-CAL-IDN-01).
   identifier: string;
   apiClient: ApiClient;
+  // Skeleton: the test comes first (PV-03, plan D-03). E-mail the person was typing on the sign-in.
+  initialEmail?: string;
   onSignIn: () => void;
 }
 
