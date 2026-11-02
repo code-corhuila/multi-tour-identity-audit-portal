@@ -59,6 +59,15 @@ export function requestEmailVerification(client: ApiClient, identifier: string, 
   return client.request<void>(requestEmailVerificationPath(identifier), { method: 'POST', body: { email }, signal });
 }
 
+export function confirmEmailVerificationPath(identifier: string): string {
+  return `${requestEmailVerificationPath(identifier)}/confirmations`;
+}
+
+// The link and the password of the account; no Idempotency-Key, a link works once.
+export function confirmEmailVerification(client: ApiClient, identifier: string, token: string, password: string, signal: AbortSignal): Promise<void> {
+  return client.request<void>(confirmEmailVerificationPath(identifier), { method: 'POST', body: { token, password }, signal });
+}
+
 export function createCustomerPath(identifier: string): string {
   if (!isValidIdentifier(identifier)) throw new Error('Invalid company identifier');
   return `/api/v1/security/public/tenants/${identifier}/accounts`;
