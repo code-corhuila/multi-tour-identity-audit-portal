@@ -1,4 +1,4 @@
-import type { ApiError } from '../contract';
+import { toApiError } from '../apiError';
 import { messages } from '../messages';
 import { tenantMessages } from './messages';
 
@@ -17,7 +17,7 @@ const known = (field: string): field is OnboardField => field in refused;
 // The status and the field decide the text, never the answer's message. The service names a field of the
 // administrator as `administrator.email`; the form's fields are flat, so the prefix is dropped.
 export function mapOnboardError(error: unknown): OnboardFailure {
-  const { status, traceId, details } = (error ?? {}) as ApiError;
+  const { status, traceId, details } = toApiError(error);
   const named = (details ?? []).map((d) => d.field.replace(/^administrator\./, '')).filter(known);
   if (status === 400 && named.length > 0) {
     return { fields: Object.fromEntries(named.map((f) => [f, refused[f]])) };

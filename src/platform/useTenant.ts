@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { ApiClient, ApiError } from '../contract';
+import type { ApiClient } from '../contract';
+import { toApiError } from '../apiError';
 import { getTenant, type TenantResponse } from '../data/tenants';
 
 type State = { kind: 'loading' } | { kind: 'error'; status?: number; traceId?: string } | { kind: 'data'; tenant: TenantResponse };
@@ -17,7 +18,7 @@ export function useTenant(apiClient: ApiClient, tenantId: string) {
         if (!controller.signal.aborted) setState({ kind: 'data', tenant });
       },
       (error: unknown) => {
-        const { status, traceId } = (error ?? {}) as ApiError;
+        const { status, traceId } = toApiError(error);
         if (!controller.signal.aborted) setState({ kind: 'error', status, traceId });
       },
     );

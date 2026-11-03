@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { ApiClient, ApiError } from '../contract';
+import type { ApiClient } from '../contract';
+import { toApiError } from '../apiError';
 import { listTenants, type TenantStatus } from '../data/tenants';
 
 export interface TenantCounts {
@@ -25,7 +26,7 @@ export function useTenantCounts(apiClient: ApiClient) {
         if (!controller.signal.aborted) setState({ kind: 'data', counts: { total: all, active, inactive } });
       },
       (error: unknown) => {
-        if (!controller.signal.aborted) setState({ kind: 'error', traceId: (error as ApiError | null)?.traceId });
+        if (!controller.signal.aborted) setState({ kind: 'error', traceId: toApiError(error).traceId });
       },
     );
     return () => controller.abort();
