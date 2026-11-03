@@ -10,8 +10,8 @@ describe('toApiError', () => {
     expect(read.details).toEqual([{ field: 'email', message: 'bad' }]);
   });
 
-  it('reads_anything_that_is_not_an_object_as_no_information: null, undefined, a string, a number', () => {
-    for (const rejected of [null, undefined, 'boom', 42]) {
+  it('reads_anything_that_is_not_an_object_as_no_information: null, undefined, a string, a number, a function', () => {
+    for (const rejected of [null, undefined, 'boom', 42, () => {}]) {
       expect(toApiError(rejected)).toEqual({});
     }
   });

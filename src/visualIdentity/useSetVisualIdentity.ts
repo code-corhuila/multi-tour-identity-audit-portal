@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import type { ApiClient, ApiError, VisualIdentity } from '../contract';
+import type { ApiClient, VisualIdentity } from '../contract';
+import { toApiError } from '../apiError';
 import { messages } from '../messages';
 import { visualIdentityMessages as text } from './messages';
 import { setVisualIdentity } from './visualIdentityApi';
@@ -13,7 +14,7 @@ export interface SaveFailure {
 
 // The status and the field decide the text, never the answer's message (portal 003 D-03).
 function mapError(error: unknown): SaveFailure {
-  const { status, traceId, details } = (error ?? {}) as ApiError;
+  const { status, traceId, details } = toApiError(error);
   if (status === 400) {
     const fields: SaveFailure['fields'] = {};
     for (const d of details ?? []) {
