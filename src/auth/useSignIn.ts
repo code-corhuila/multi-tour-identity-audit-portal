@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
-import type { ApiClient, ApiError, Session } from '../contract';
+import type { ApiClient, Session } from '../contract';
+import { toApiError } from '../apiError';
 import { signIn, type SignInRequest } from '../data/security';
 import { messages } from '../messages';
 import { STAFF_ROLES } from '../shell/roles';
 
 // The status decides the text, never the answer's message (RN-SEC-PT-02).
 function describeFailure(error: unknown): string {
-  const { status, traceId } = (error ?? {}) as ApiError;
+  const { status, traceId } = toApiError(error);
   const trace = traceId ? ` (${messages.errors.trace}: ${traceId})` : '';
   if (status === 401 || status === 400) return messages.errors.refused;
   return `${messages.errors.unavailable}${trace}`;
@@ -14,7 +15,7 @@ function describeFailure(error: unknown): string {
 
 // Only the status and the code name a pending account; the text of the answer is never read (plan D-03).
 function isUnverified(error: unknown): boolean {
-  const { status, details } = (error ?? {}) as ApiError;
+  const { status, details } = toApiError(error);
   return status === 403 && Array.isArray(details) && details.some((d) => d.field === 'email' && d.message === 'EMAIL_NOT_VERIFIED');
 }
 

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import type { ApiClient, ApiError } from '../contract';
+import type { ApiClient } from '../contract';
+import { toApiError } from '../apiError';
 import { requestEmailVerification } from '../data/security';
 import { messages } from '../messages';
 
@@ -11,7 +12,7 @@ export type LinkRequest =
 // The status and the field decide the text, never the message of the answer. Only a 400 that names the e-mail goes beside
 // the field; every 202 is `sent`, so the screen tells nobody which e-mails have an account (RN-SEC-PT-34).
 function describeFailure(error: unknown): LinkRequest {
-  const { status, traceId, details } = (error ?? {}) as ApiError;
+  const { status, traceId, details } = toApiError(error);
   if (status === 400 && (details ?? []).some((d) => d.field === 'email')) {
     return { state: 'failed', field: messages.signUp.fieldRefused.email };
   }

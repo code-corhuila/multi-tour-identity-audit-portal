@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { ApiClient, ApiError } from '../contract';
+import type { ApiClient } from '../contract';
+import { toApiError } from '../apiError';
 import { listTenants, type TenantPage, type TenantQuery } from '../data/tenants';
 
 type State = { kind: 'loading' } | { kind: 'error'; traceId?: string } | { kind: 'data'; page: TenantPage };
@@ -18,7 +19,7 @@ export function useTenantList(apiClient: ApiClient, query: TenantQuery) {
         if (!controller.signal.aborted) setState({ kind: 'data', page: answer });
       },
       (error: unknown) => {
-        if (!controller.signal.aborted) setState({ kind: 'error', traceId: (error as ApiError | null)?.traceId });
+        if (!controller.signal.aborted) setState({ kind: 'error', traceId: toApiError(error).traceId });
       },
     );
     return () => controller.abort();
