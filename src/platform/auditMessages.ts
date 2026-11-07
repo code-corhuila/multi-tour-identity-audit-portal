@@ -14,7 +14,13 @@ export const auditMessages = {
   error: 'No pudimos cargar la auditoría. Inténtalo de nuevo.',
   retry: 'Reintentar',
   empty: 'Aún no hay eventos de auditoría.',
-  testData: 'Datos de prueba',
+  detail: {
+    affectedRecord: 'Registro afectado',
+    previousValue: 'Valor anterior',
+    newValue: 'Valor nuevo',
+    channelOrModule: 'Canal o módulo',
+    functionalReference: 'Referencia funcional',
+  },
   // The record belongs to no tenant: an action on an account of the Platform Administrator.
   platform: 'Plataforma',
   none: '—',
