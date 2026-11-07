@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ApiClient } from '../contract';
-import { toAuditEvent, type AuditEvent } from './audit';
+import { endOfDay, startOfDay, toAuditEvent, type AuditEvent } from './audit';
 import { tenantMessages as pager } from '../tenants/messages';
+import { AuditFilters, NO_FILTERS, type AuditFilterValues } from './AuditFilters';
 import { auditMessages as text } from './auditMessages';
 import { PageHeader } from './PageHeader';
 import { useAuditRecords } from './useAuditRecords';
@@ -21,8 +22,27 @@ const valueOf = (event: AuditEvent, field: (typeof fields)[number]) => (field ==
 
 export function AuditView({ apiClient }: { apiClient: ApiClient }) {
   const [page, setPage] = useState(1);
-  const { state, retry } = useAuditRecords(apiClient, { page, limit: LIMIT });
+  const [filters, setFilters] = useState<AuditFilterValues>(NO_FILTERS);
+  // A period that ends before it starts is not asked: the other filters still are, and the field says why (RN-IDA-PT-26).
+  const from = startOfDay(filters.fromDay);
+  const toStart = startOfDay(filters.toDay);
+  const invalidPeriod = from !== undefined && toStart !== undefined && toStart < from;
+  const period = invalidPeriod ? {} : { from, to: endOfDay(filters.toDay) };
+  // Only what was really asked counts: an inverted period is not asked, so on its own it is not a filter that matched nothing.
+  const filtered = Boolean(filters.action || filters.tenantId || period.from || period.to);
+  const { state, retry } = useAuditRecords(apiClient, {
+    page,
+    limit: LIMIT,
+    action: filters.action || undefined,
+    tenantId: filters.tenantId || undefined,
+    ...period,
+  });
   const names = useOperatorNames(apiClient);
+  // Any change of a filter goes back to the first page: the page that was shown may not exist in the new list.
+  const change = (next: Partial<AuditFilterValues>) => {
+    setFilters((current) => ({ ...current, ...next }));
+    setPage(1);
+  };
   const [selected, setSelected] = useState<AuditEvent | null>(null);
   const dialog = useRef<HTMLDialogElement>(null);
   const trigger = useRef<HTMLButtonElement | null>(null);
@@ -55,6 +75,7 @@ export function AuditView({ apiClient }: { apiClient: ApiClient }) {
         <p>{text.introNote}</p>
       </section>
       <section className="platform-panel">
+        <AuditFilters values={filters} onChange={change} operators={names} invalidPeriod={invalidPeriod} />
         {state.kind === 'loading' && <p role="status">{text.loading}</p>}
         {state.kind === 'error' && (
           <div role="alert">
@@ -64,7 +85,7 @@ export function AuditView({ apiClient }: { apiClient: ApiClient }) {
             </button>
           </div>
         )}
-        {state.kind === 'data' && rows.length === 0 && <p>{text.empty}</p>}
+        {state.kind === 'data' && rows.length === 0 && <p>{filtered ? text.emptyFiltered : text.empty}</p>}
         {state.kind === 'data' && rows.length > 0 && (
           <>
           <div className="platform-table-wrap">
