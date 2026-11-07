@@ -4,11 +4,10 @@ import { toAuditEvent, type AuditEvent } from './audit';
 import { auditMessages as text } from './auditMessages';
 import { PageHeader } from './PageHeader';
 import { useAuditRecords } from './useAuditRecords';
+import { useOperatorNames } from './useOperatorNames';
 import './audit.css';
 
 const LIMIT = 20;
-// The names of the operators come in PA-03; until then a tenant shows its identifier.
-const NO_NAMES: ReadonlyMap<string, string> = new Map();
 
 const fields = ['occurredAt', 'action', 'operator', 'change', 'actor', 'reason'] as const;
 // The extended part of the record, for the detail only (HU-IDA-002 AC2).
@@ -21,10 +20,11 @@ const valueOf = (event: AuditEvent, field: (typeof fields)[number]) => (field ==
 
 export function AuditView({ apiClient }: { apiClient: ApiClient }) {
   const { state, retry } = useAuditRecords(apiClient, { page: 1, limit: LIMIT });
+  const names = useOperatorNames(apiClient);
   const [selected, setSelected] = useState<AuditEvent | null>(null);
   const dialog = useRef<HTMLDialogElement>(null);
   const trigger = useRef<HTMLButtonElement | null>(null);
-  const rows = useMemo(() => (state.kind === 'data' ? state.page.data.map((record) => toAuditEvent(record, NO_NAMES)) : []), [state]);
+  const rows = useMemo(() => (state.kind === 'data' ? state.page.data.map((record) => toAuditEvent(record, names)) : []), [state, names]);
 
   // The native dialog gives the modal behaviour, the focus trap and Escape (spec 008 D-01).
   useEffect(() => {

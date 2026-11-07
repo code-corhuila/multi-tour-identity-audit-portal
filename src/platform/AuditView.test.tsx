@@ -2,8 +2,10 @@ import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ApiClient } from '../contract';
 import type { AuditPage, AuditRecordResponse } from '../data/audit';
+import type { TenantPage } from '../data/tenants';
 import { AuditView } from './AuditView';
 import { PlatformFrame } from './PlatformFrame';
+import { page as tenantsPage, tenant } from './testkit';
 
 const TENANT = '3f2b8c1e-5d4a-4e7b-9a10-6c2d8e4f0a11';
 const OTHER = '0a0a0a0a-0a0a-4a0a-8a0a-0a0a0a0a0a0a';
@@ -35,14 +37,17 @@ const records = [inactivated, blocked];
 
 const pageOf = (data: AuditRecordResponse[]): AuditPage => ({ data, meta: { page: 1, limit: 20, total: data.length, totalPages: data.length ? 1 : 0 } });
 
-// The container's client, as the other views of the panel are tested: `request` answers by path.
+// The container's client, as the other views of the panel are tested: `request` answers by path. The audit route takes
+// the answers in order; the list of tenants (the names of the operators) answers an empty page unless a test changes it.
 function clientFor(...answers: Array<AuditPage | Promise<AuditPage> | Error>) {
   // a request the test did not plan fails with a clear message, not with a TypeError of `undefined.then`
   const request = vi.fn<(path: string) => Promise<AuditPage>>(async () => {
     throw new Error('a request that the test did not expect');
   });
   answers.forEach((a) => request.mockImplementationOnce(() => (a instanceof Error ? Promise.reject(a) : Promise.resolve(a))));
-  return { request, apiClient: { request } as unknown as ApiClient };
+  const tenants = vi.fn<(path: string) => Promise<TenantPage>>(async () => tenantsPage([]));
+  const routed = vi.fn((path: string) => (path.startsWith('/api/v1/identity-audit/tenants') ? tenants(path) : request(path)));
+  return { request, tenants, apiClient: { request: routed } as unknown as ApiClient };
 }
 
 function show(apiClient: ApiClient) {
@@ -163,5 +168,43 @@ describe('platform audit view on the real records (spec 014, RN-IDA-PT-19 to -28
     expect(await screen.findByRole('table')).toBeInTheDocument();
     expect(request).toHaveBeenCalledTimes(3);
     failing.unmount();
+  });
+
+  it('U·operator_names_are_read_once_and_a_failed_read_does_not_hide_the_table: the commercial name when the tenant is known, its identifier when not', async () => {
+    const reactivated: AuditRecordResponse = { ...inactivated, auditRecordId: '00000000-0000-4000-8000-000000000003', tenantId: OTHER, action: 'TENANT_REACTIVATED' };
+    const { request, tenants, apiClient } = clientFor(new Error('down'), pageOf([inactivated, reactivated]));
+    tenants.mockResolvedValue(tenantsPage([tenant({ tenantId: TENANT, commercialName: 'Sierra Azul' })]));
+    show(apiClient);
+
+    // the audit fails first and is asked again: the names are not read again with it
+    fireEvent.click(await screen.findByRole('button', { name: 'Reintentar' }));
+    const rows = within(await screen.findByRole('table')).getAllByRole('row').slice(1);
+    expect(await within(rows[0]).findByText('Sierra Azul')).toBeInTheDocument();
+    expect(within(rows[1]).getAllByRole('cell')[2]).toHaveTextContent(OTHER);
+    expect(request).toHaveBeenCalledTimes(2);
+    expect(tenants).toHaveBeenCalledTimes(1);
+    expect(tenants).toHaveBeenCalledWith('/api/v1/identity-audit/tenants?page=1&limit=100');
+  });
+
+  it('U·names_that_arrive_after_the_table_replace_the_identifiers', async () => {
+    let release: (page: TenantPage) => void = () => {};
+    const { tenants, apiClient } = clientFor(pageOf(records));
+    tenants.mockReturnValue(new Promise<TenantPage>((resolve) => (release = resolve)));
+    show(apiClient);
+
+    const rows = within(await screen.findByRole('table')).getAllByRole('row').slice(1);
+    expect(within(rows[0]).getAllByRole('cell')[2]).toHaveTextContent(TENANT);
+    await act(async () => release(tenantsPage([tenant({ tenantId: TENANT, commercialName: 'Sierra Azul' })])));
+    expect(within(rows[0]).getAllByRole('cell')[2]).toHaveTextContent('Sierra Azul');
+  });
+
+  it('U·a_failed_read_of_the_names_leaves_the_identifiers_and_no_error: the table still shows', async () => {
+    const { tenants, apiClient } = clientFor(pageOf(records));
+    tenants.mockRejectedValue(new Error('down'));
+    show(apiClient);
+
+    const rows = within(await screen.findByRole('table')).getAllByRole('row').slice(1);
+    expect(within(rows[0]).getAllByRole('cell')[2]).toHaveTextContent(TENANT);
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 });

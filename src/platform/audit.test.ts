@@ -64,6 +64,10 @@ describe('the texts of a record (spec 014, RN-IDA-PT-20 to -23)', () => {
     expect(toAuditEvent(record({ tenantId: null, action: 'ACCOUNT_BLOCKED' }), new Map([[TENANT, 'Travesía Natural']])).operator).toBe('Plataforma');
   });
 
+  it('U·a_blank_commercial_name_shows_the_identifier', () => {
+    expect(toAuditEvent(record(), new Map([[TENANT, '']])).operator).toBe(TENANT);
+  });
+
   it('U·operator_shows_the_commercial_name_when_known_and_the_identifier_when_not', () => {
     expect(toAuditEvent(record(), new Map([[TENANT, 'Travesía Natural']])).operator).toBe('Travesía Natural');
     expect(toAuditEvent(record(), none).operator).toBe(TENANT);
