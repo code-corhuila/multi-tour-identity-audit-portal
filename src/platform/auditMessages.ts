@@ -15,4 +15,21 @@ export const auditMessages = {
   retry: 'Reintentar',
   empty: 'Aún no hay eventos de auditoría.',
   testData: 'Datos de prueba',
+  // The record belongs to no tenant: an action on an account of the Platform Administrator.
+  platform: 'Plataforma',
+  none: '—',
+  // Spec 014 section 4: a proposal of the screen until 02-domain closes the list of audited events (gap G-2).
+  actions: {
+    TENANT_CREATED: 'Operador creado',
+    TENANT_INACTIVATED: 'Operador inactivado',
+    TENANT_REACTIVATED: 'Operador reactivado',
+    ACCOUNT_BLOCKED: 'Cuenta bloqueada',
+    ACCOUNT_SESSIONS_REVOKED: 'Sesiones de una cuenta revocadas',
+    SPECIAL_PERMISSION_GRANTED: 'Permiso especial otorgado',
+    SPECIAL_PERMISSION_REVOKED: 'Permiso especial retirado',
+    OPTIONAL_ROLE_ENABLED: 'Rol opcional habilitado',
+    OPTIONAL_ROLE_DISABLED: 'Rol opcional deshabilitado',
+    AUDIT_ACCESS_ENABLED: 'Acceso a la auditoría habilitado',
+    AUDIT_ACCESS_DISABLED: 'Acceso a la auditoría retirado',
+  } as Record<string, string>,
 } as const;
