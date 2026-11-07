@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ApiClient } from '../contract';
 import type { AuditPage, AuditRecordResponse } from '../data/audit';
@@ -234,5 +234,124 @@ describe('platform audit view on the real records (spec 014, RN-IDA-PT-19 to -28
     const rows = within(await screen.findByRole('table')).getAllByRole('row').slice(1);
     expect(within(rows[0]).getAllByRole('cell')[2]).toHaveTextContent(TENANT);
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+});
+
+// The query of the last request to the audit, as the screen sent it.
+const lastQuery = (request: { mock: { calls: Array<[string]> } }) => new URL(request.mock.calls.at(-1)![0], 'http://x').searchParams;
+const choose = (label: string, value: string) => fireEvent.change(screen.getByLabelText(label), { target: { value } });
+
+describe('filters of the platform audit (spec 014, RN-IDA-PT-26 and -27)', () => {
+  it('U·filters_are_sent_and_go_back_to_the_first_page: an action, an operator and a period, each asked exactly as chosen', async () => {
+    const twoPages = (page: number): AuditPage => ({ data: records, meta: { page, limit: 20, total: 21, totalPages: 2 } });
+    const { request, tenants, apiClient } = clientFor(twoPages(1), twoPages(2));
+    request.mockImplementation(async () => twoPages(1));
+    tenants.mockResolvedValue(tenantsPage([tenant({ tenantId: TENANT, commercialName: 'Sierra Azul' })]));
+    show(apiClient);
+    fireEvent.click(await screen.findByRole('button', { name: 'Siguiente' }));
+    expect(await screen.findByText('Página 2 de 2')).toBeInTheDocument();
+    expect(lastQuery(request).get('page')).toBe('2');
+
+    // every filter has its label; the actions on offer are exactly the eleven the service accepts
+    await screen.findByRole('option', { name: 'Sierra Azul' });
+    expect(within(screen.getByLabelText('Acción')).getAllByRole('option').map((o) => o.getAttribute('value'))).toEqual([
+      '', 'TENANT_CREATED', 'TENANT_INACTIVATED', 'TENANT_REACTIVATED', 'ACCOUNT_BLOCKED', 'ACCOUNT_SESSIONS_REVOKED', 'SPECIAL_PERMISSION_GRANTED',
+      'SPECIAL_PERMISSION_REVOKED', 'OPTIONAL_ROLE_ENABLED', 'OPTIONAL_ROLE_DISABLED', 'AUDIT_ACCESS_ENABLED', 'AUDIT_ACCESS_DISABLED',
+    ]);
+    // choosing one goes back to page 1
+    choose('Acción', 'ACCOUNT_BLOCKED');
+    expect(await screen.findByText('Página 1 de 2')).toBeInTheDocument();
+    expect(Object.fromEntries(lastQuery(request))).toEqual({ page: '1', limit: '20', action: 'ACCOUNT_BLOCKED' });
+
+    choose('Operador', TENANT);
+    await waitFor(() => expect(lastQuery(request).get('tenantId')).toBe(TENANT));
+    choose('Desde', '2026-11-01');
+    choose('Hasta', '2026-11-07');
+    // the end is exclusive in the service, so the day chosen is asked up to the start of the next one, in UTC
+    await waitFor(() => expect(lastQuery(request).get('to')).toBe('2026-11-08T00:00:00Z'));
+    expect(Object.fromEntries(lastQuery(request))).toEqual({
+      page: '1', limit: '20', action: 'ACCOUNT_BLOCKED', tenantId: TENANT, from: '2026-11-01T00:00:00Z', to: '2026-11-08T00:00:00Z',
+    });
+
+    // choosing "all" again leaves the filter out of the request
+    choose('Acción', '');
+    await waitFor(() => expect(lastQuery(request).has('action')).toBe(false));
+    expect(lastQuery(request).get('tenantId')).toBe(TENANT);
+  });
+
+  it('U·a_period_that_ends_before_it_starts_is_not_sent: the screen says so next to the field and asks no period', async () => {
+    const { request, apiClient } = clientFor(pageOf(records));
+    request.mockImplementation(async () => pageOf(records));
+    show(apiClient);
+    await screen.findByRole('table');
+
+    choose('Acción', 'ACCOUNT_BLOCKED');
+    choose('Desde', '2026-11-10');
+    // a period with only one end is valid and is asked as it is, and there is no message yet
+    await waitFor(() => expect(lastQuery(request).get('from')).toBe('2026-11-10T00:00:00Z'));
+    expect(screen.queryByText('La fecha final no puede ser anterior a la inicial.')).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Hasta')).not.toHaveAttribute('aria-invalid');
+    const asked = request.mock.calls.length;
+    choose('Hasta', '2026-11-05');
+
+    const message = await screen.findByText('La fecha final no puede ser anterior a la inicial.');
+    expect(message).toHaveAttribute('role', 'alert');
+    expect(screen.getByLabelText('Hasta')).toHaveAttribute('aria-describedby', message.id);
+    expect(screen.getByLabelText('Hasta')).toHaveAttribute('aria-invalid', 'true');
+    // once the period is inverted the request goes without any end of it, and with the other filters
+    await waitFor(() => expect(request.mock.calls.length).toBeGreaterThan(asked));
+    const query = lastQuery(request);
+    expect(query.has('from') || query.has('to')).toBe(false);
+    expect(query.get('action')).toBe('ACCOUNT_BLOCKED');
+    // the same day twice is a valid period: that whole day
+    choose('Hasta', '2026-11-10');
+    await waitFor(() => expect(lastQuery(request).get('to')).toBe('2026-11-11T00:00:00Z'));
+    expect(screen.queryByText('La fecha final no puede ser anterior a la inicial.')).not.toBeInTheDocument();
+  });
+
+  it('U·an_inverted_period_alone_is_not_a_filter_that_matched_nothing: the empty audit keeps its own text', async () => {
+    const { request, apiClient } = clientFor(pageOf([]));
+    request.mockImplementation(async () => pageOf([]));
+    show(apiClient);
+    expect(await screen.findByText('Aún no hay eventos de auditoría.')).toBeInTheDocument();
+
+    choose('Desde', '2026-11-10');
+    choose('Hasta', '2026-11-05');
+
+    expect(await screen.findByText('La fecha final no puede ser anterior a la inicial.')).toBeInTheDocument();
+    expect(screen.queryByText('No hay eventos que coincidan con los filtros.')).not.toBeInTheDocument();
+    expect(await screen.findByText('Aún no hay eventos de auditoría.')).toBeInTheDocument();
+  });
+
+  it('U·a_failed_page_can_be_retried_keeping_the_filters: the retry asks the same page with the same filters', async () => {
+    const { request, apiClient } = clientFor(pageOf(records));
+    request.mockImplementation(async () => pageOf(records));
+    show(apiClient);
+    await screen.findByRole('table');
+
+    // the second request, the one of the filter, fails; the filters stay on the screen
+    request.mockRejectedValueOnce(new Error('down'));
+    choose('Acción', 'ACCOUNT_BLOCKED');
+    fireEvent.click(await screen.findByRole('button', { name: 'Reintentar' }));
+
+    expect(await screen.findByRole('table')).toBeInTheDocument();
+    const [failed, retried] = request.mock.calls.slice(-2).map(([path]) => path);
+    expect(retried).toBe(failed);
+    expect(new URL(retried, 'http://x').searchParams.get('action')).toBe('ACCOUNT_BLOCKED');
+    expect(screen.getByLabelText('Acción')).toHaveValue('ACCOUNT_BLOCKED');
+  });
+
+  it('U·a_filter_with_no_match_says_so_and_keeps_the_filters: the person can change them', async () => {
+    const { request, apiClient } = clientFor(pageOf(records));
+    show(apiClient);
+    await screen.findByRole('table');
+
+    request.mockImplementation(async () => pageOf([]));
+    choose('Acción', 'AUDIT_ACCESS_ENABLED');
+
+    expect(await screen.findByText('No hay eventos que coincidan con los filtros.')).toBeInTheDocument();
+    expect(screen.queryByText('Aún no hay eventos de auditoría.')).not.toBeInTheDocument();
+    choose('Acción', '');
+    expect(await screen.findByText('Aún no hay eventos de auditoría.')).toBeInTheDocument();
   });
 });
