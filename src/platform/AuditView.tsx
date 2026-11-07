@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ApiClient } from '../contract';
 import { toAuditEvent, type AuditEvent } from './audit';
+import { tenantMessages as pager } from '../tenants/messages';
 import { auditMessages as text } from './auditMessages';
 import { PageHeader } from './PageHeader';
 import { useAuditRecords } from './useAuditRecords';
@@ -19,7 +20,8 @@ const when = (iso: string) => `${iso.slice(0, 10)} ${iso.slice(11, 16)} UTC`;
 const valueOf = (event: AuditEvent, field: (typeof fields)[number]) => (field === 'occurredAt' ? when(event.occurredAt) : event[field]);
 
 export function AuditView({ apiClient }: { apiClient: ApiClient }) {
-  const { state, retry } = useAuditRecords(apiClient, { page: 1, limit: LIMIT });
+  const [page, setPage] = useState(1);
+  const { state, retry } = useAuditRecords(apiClient, { page, limit: LIMIT });
   const names = useOperatorNames(apiClient);
   const [selected, setSelected] = useState<AuditEvent | null>(null);
   const dialog = useRef<HTMLDialogElement>(null);
@@ -64,6 +66,7 @@ export function AuditView({ apiClient }: { apiClient: ApiClient }) {
         )}
         {state.kind === 'data' && rows.length === 0 && <p>{text.empty}</p>}
         {state.kind === 'data' && rows.length > 0 && (
+          <>
           <div className="platform-table-wrap">
             <table className="platform-table">
               <thead>
@@ -91,6 +94,16 @@ export function AuditView({ apiClient }: { apiClient: ApiClient }) {
               </tbody>
             </table>
           </div>
+          <nav className="platform-pages" aria-label={pager.pagination}>
+            <button type="button" className="platform-outline" disabled={page <= 1} onClick={() => setPage(page - 1)}>
+              {pager.previous}
+            </button>
+            <span>{pager.pageOf(state.page.meta.page, state.page.meta.totalPages)}</span>
+            <button type="button" className="platform-outline" disabled={page >= state.page.meta.totalPages} onClick={() => setPage(page + 1)}>
+              {pager.next}
+            </button>
+          </nav>
+          </>
         )}
       </section>
       <dialog ref={dialog} className="platform-audit-dialog" aria-labelledby="platform-audit-dialog-title" onClose={closed}>

@@ -186,6 +186,34 @@ describe('platform audit view on the real records (spec 014, RN-IDA-PT-19 to -28
     expect(tenants).toHaveBeenCalledWith('/api/v1/identity-audit/tenants?page=1&limit=100');
   });
 
+  it('U·pager_moves_between_pages_and_disables_at_the_ends: previous and next ask the neighbour page and are disabled where they do not apply', async () => {
+    const twoPages = (page: number, data: AuditRecordResponse[]): AuditPage => ({ data, meta: { page, limit: 20, total: 21, totalPages: 2 } });
+    const { request, apiClient } = clientFor(twoPages(1, [inactivated]), twoPages(2, [blocked]), twoPages(1, [inactivated]));
+    show(apiClient);
+
+    const pager = await screen.findByRole('navigation', { name: 'Paginación' });
+    expect(within(pager).getByText('Página 1 de 2')).toBeInTheDocument();
+    expect(within(pager).getByRole('button', { name: 'Anterior' })).toBeDisabled();
+    fireEvent.click(within(pager).getByRole('button', { name: 'Siguiente' }));
+
+    expect(await screen.findByText('Página 2 de 2')).toBeInTheDocument();
+    expect(request.mock.calls[1][0]).toBe('/api/v1/identity-audit/audit-records?page=2&limit=20');
+    expect(screen.getByRole('button', { name: 'Siguiente' })).toBeDisabled();
+    expect(within(screen.getByRole('table')).getByText('Cuenta bloqueada')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Anterior' }));
+
+    expect(await screen.findByText('Página 1 de 2')).toBeInTheDocument();
+    expect(request.mock.calls[2][0]).toBe(PATH);
+    expect(request).toHaveBeenCalledTimes(3);
+  });
+
+  it('U·no_pager_when_there_is_nothing_to_page: an empty audit shows the empty text and no navigation', async () => {
+    show(clientFor(pageOf([])).apiClient);
+
+    expect(await screen.findByText('Aún no hay eventos de auditoría.')).toBeInTheDocument();
+    expect(screen.queryByRole('navigation', { name: 'Paginación' })).not.toBeInTheDocument();
+  });
+
   it('U·names_that_arrive_after_the_table_replace_the_identifiers', async () => {
     let release: (page: TenantPage) => void = () => {};
     const { tenants, apiClient } = clientFor(pageOf(records));
