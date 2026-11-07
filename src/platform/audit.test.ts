@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { AuditRecordResponse } from '../data/audit';
-import { toAuditEvent } from './audit';
+import { endOfDay, startOfDay, toAuditEvent } from './audit';
 
 const TENANT = '3f2b8c1e-5d4a-4e7b-9a10-6c2d8e4f0a11';
 const none = new Map<string, string>();
@@ -110,5 +110,34 @@ describe('the texts of a record (spec 014, RN-IDA-PT-20 to -23)', () => {
     });
     expect(JSON.parse(event.previousValue as string)).toEqual({ tenantStatus: 'ACTIVE' });
     expect(JSON.parse(event.newValue as string)).toEqual({ tenantStatus: 'INACTIVE' });
+  });
+});
+
+describe('the end of a period (spec 014, plan D-06)', () => {
+  it('U·the_end_of_a_period_is_the_start_of_the_next_day_in_utc', () => {
+    expect(endOfDay('2026-11-07')).toBe('2026-11-08T00:00:00Z');
+    expect(endOfDay('2026-12-31')).toBe('2027-01-01T00:00:00Z');
+    expect(endOfDay('2028-02-28')).toBe('2028-02-29T00:00:00Z');
+    // nothing chosen, or something that is not a day, is no end at all
+    expect(endOfDay('')).toBeUndefined();
+    expect(endOfDay('not a day')).toBeUndefined();
+  });
+});
+
+describe('a day chosen for a period (spec 014, plan D-06)', () => {
+  it('U·a_day_that_does_not_exist_is_no_day', () => {
+    expect(endOfDay('2026-02-30')).toBeUndefined();
+    expect(endOfDay('2100-02-29')).toBeUndefined();
+    expect(startOfDay('2026-13-01')).toBeUndefined();
+    // a year of five digits, which some browsers let a date control hold, is not asked: the service would answer 400
+    expect(startOfDay('12026-01-01')).toBeUndefined();
+  });
+
+  it('U·the_start_and_the_end_of_a_day_hold_on_leap_years_and_on_the_day_of_a_change_of_hour', () => {
+    expect(startOfDay('2026-11-07')).toBe('2026-11-07T00:00:00Z');
+    expect(startOfDay('')).toBeUndefined();
+    expect(endOfDay('2028-02-29')).toBe('2028-03-01T00:00:00Z');
+    expect(endOfDay('2100-02-28')).toBe('2100-03-01T00:00:00Z');
+    expect(endOfDay('2026-03-08')).toBe('2026-03-09T00:00:00Z');
   });
 });
