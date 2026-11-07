@@ -39,7 +39,7 @@ export function toAuditEvent(record: AuditRecordResponse, operatorNames: Readonl
     id: record.auditRecordId,
     occurredAt: record.recordedAt,
     action: Object.hasOwn(text.actions, record.action) ? text.actions[record.action] : record.action,
-    operator: record.tenantId === null ? text.platform : (operatorNames.get(record.tenantId) ?? record.tenantId),
+    operator: record.tenantId === null ? text.platform : (operatorNames.get(record.tenantId) || record.tenantId),
     change: change(record),
     actor: record.actorId,
     reason: record.reason || text.none,
