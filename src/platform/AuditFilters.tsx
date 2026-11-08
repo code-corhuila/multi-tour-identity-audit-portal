@@ -15,7 +15,8 @@ interface Props {
   values: AuditFilterValues;
   onChange: (next: Partial<AuditFilterValues>) => void;
   // Identifier to commercial name of the operators the screen knows (PA-03); they are the options of the operator filter.
-  operators: ReadonlyMap<string, string>;
+  // The screen of one tenant passes none and has no operator filter (spec 015).
+  operators?: ReadonlyMap<string, string>;
   invalidPeriod: boolean;
 }
 
@@ -23,7 +24,7 @@ const t = text.filters;
 const PERIOD_ERROR = 'audit-filter-period-error';
 
 export function AuditFilters({ values, onChange, operators, invalidPeriod }: Props) {
-  const byName = [...operators].sort((a, b) => a[1].localeCompare(b[1], 'es'));
+  const byName = operators ? [...operators].sort((a, b) => a[1].localeCompare(b[1], 'es')) : [];
   return (
     <div className="platform-filters" role="group" aria-label={t.group}>
       <div className="platform-field">
@@ -37,17 +38,19 @@ export function AuditFilters({ values, onChange, operators, invalidPeriod }: Pro
           ))}
         </select>
       </div>
-      <div className="platform-field">
-        <label htmlFor="audit-filter-operator">{t.operator}</label>
-        <select id="audit-filter-operator" value={values.tenantId} onChange={(e) => onChange({ tenantId: e.target.value })}>
-          <option value="">{t.allOperators}</option>
-          {byName.map(([id, name]) => (
-            <option key={id} value={id}>
-              {name}
-            </option>
-          ))}
-        </select>
-      </div>
+      {operators && (
+        <div className="platform-field">
+          <label htmlFor="audit-filter-operator">{t.operator}</label>
+          <select id="audit-filter-operator" value={values.tenantId} onChange={(e) => onChange({ tenantId: e.target.value })}>
+            <option value="">{t.allOperators}</option>
+            {byName.map(([id, name]) => (
+              <option key={id} value={id}>
+                {name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
       <div className="platform-field">
         <label htmlFor="audit-filter-from">{t.from}</label>
         <input id="audit-filter-from" type="date" value={values.fromDay} onChange={(e) => onChange({ fromDay: e.target.value })} />
