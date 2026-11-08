@@ -20,7 +20,8 @@ The access mark of the session decides the screen. It fails closed: an unknown m
 | First password | A person with a temporary credential | `multi-tour-security` |
 | Restricted notice | The Administrator of an inactive company | `multi-tour-security` |
 | Customer home and "Mi perfil" | Final Customer | The session (the profile shows the role; name, e-mail and phone read "No registrado" because the token does not carry them) |
-| Staff home, team and permissions | Internal users | Screens on test data; the service does not serve them yet (HU-SEC-005, HU-SEC-006) |
+| Staff home, team and permissions | Internal users | Screens on test data; the service does not serve them yet (HU-SEC-005, HU-SEC-006). The exception is the switch "Auditoría del tenant" of each optional role in "Roles opcionales del tenant": it reads and sets the audit access in `multi-tour-identity-audit-api` (HU-IDA-002 AC6) |
+| Audit of the tenant ("Auditoría" in the sidebar) | Tenant Administrator, and a Manager or an Analyst whose access the Administrator enabled | `multi-tour-identity-audit-api` (HU-IDA-002 AC4, AC5): the records of its own tenant, 20 per page, narrowed by action and period, with the extended detail; a role without the access gets a notice. The Accountant is not offered the entry until the service gives it only the economic events |
 | Platform panel: tenants, detail, create, audit | Platform Administrator | `multi-tour-identity-audit-api` for the tenants (HU-IDA-001) and for the audit (HU-IDA-002): the records across tenants, 20 per page, narrowed by action, operator and period, with the extended detail of each one |
 | Visual identity of the company | Tenant Administrator | `multi-tour-identity-audit-api` (HU-IDA-003): the primary and the secondary color; the logo and the commercial images are not built |
 
@@ -82,7 +83,7 @@ locked for billing (since 2026-10-14), run the same three commands locally and p
 ## What is missing
 
 - The service behind the staff screens: internal users, permissions and optional roles (HU-SEC-005, HU-SEC-006).
-- The audit of one tenant for its Tenant Administrator and the screen where it enables the audit access of its roles (HU-IDA-002 AC4 to AC6): the service answers them, but there is no screen yet. The audit view of the Platform Administrator shows the records of the services that publish events; those of the services of other owners arrive when they do.
+- In the composition of the platform, the entries "Auditoría" and "Colaboradores" of the sidebar of `multi-tour-front` still open its blank screen (`areas/pendiente`), so the screens of the tenant audit and of the audit access are built here but are not reached by a click until the container hands them the area. The audit views show the records of the services that publish events; those of the services of other owners (`commercial-reservation`, `cash-reporting`) arrive when they do.
 - Inactivating and reactivating a tenant from the panel sends nothing yet (HU-IDA-001).
 - Password recovery (HU-SEC-004).
 - The logo and the commercial images of the visual identity (HU-IDA-003); a color cannot be cleared back to the default.
