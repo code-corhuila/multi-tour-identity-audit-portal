@@ -69,6 +69,7 @@ export function StaffHome({ identifier, session, apiClient, commercialName, visu
     >
       {onStaffView && view === 'staff' && (
         <StaffListView
+          apiClient={apiClient}
           onRegister={() => setView('staff-register')}
           onOpen={(id) => {
             setMemberId(id);
