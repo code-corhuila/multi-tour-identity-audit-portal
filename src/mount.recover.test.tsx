@@ -39,4 +39,17 @@ describe('the recovery of the password inside the portal', () => {
     await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Enviar código' })));
     expect(apiClient.request.mock.calls[0][0]).toBe('/api/v1/security/public/platform/password-recoveries');
   });
+
+  it('C·from_the_sent_notice_to_the_reset_form_and_back_to_sign_in: the e-mail travels, the way back works', async () => {
+    const apiClient = await show('acme');
+    fireEvent.click(screen.getByRole('button', { name: '¿Olvidaste tu contraseña?' }));
+    fireEvent.change(screen.getByLabelText('Correo electrónico registrado'), { target: { value: 'ana@example.com' } });
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Enviar código' })));
+    fireEvent.click(screen.getByRole('button', { name: 'Ya tengo el código' }));
+    expect(screen.getByRole('heading', { name: 'Definir nueva contraseña' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Correo electrónico registrado')).toHaveValue('ana@example.com');
+    fireEvent.click(screen.getByRole('button', { name: 'Volver al inicio de sesión' }));
+    expect(screen.getByRole('heading', { name: 'Bienvenido de nuevo' })).toBeInTheDocument();
+    expect(apiClient.request).toHaveBeenCalledTimes(1);
+  });
 });
