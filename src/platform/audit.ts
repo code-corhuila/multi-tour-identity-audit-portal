@@ -1,6 +1,6 @@
 import type { AuditRecordResponse } from '../data/audit';
 import { tenantMessages } from '../tenants/messages';
-import { auditMessages as text } from './auditMessages';
+import { auditMessages as text, categoryOf } from './auditMessages';
 
 // What the screen shows of one audited action (spec 014 section 3). `toAuditEvent` is the only place that makes it, so the
 // day the service names its columns differently only this file and the data file change.
@@ -9,6 +9,8 @@ export interface AuditEvent {
   // RFC 3339 in UTC.
   occurredAt: string;
   action: string;
+  // The group of the action (spec 015 section 4); "Otros" for an action the table does not know.
+  category: string;
   operator: string;
   change: string;
   actor: string;
@@ -39,6 +41,7 @@ export function toAuditEvent(record: AuditRecordResponse, operatorNames: Readonl
     id: record.auditRecordId,
     occurredAt: record.recordedAt,
     action: Object.hasOwn(text.actions, record.action) ? text.actions[record.action] : record.action,
+    category: categoryOf(record.action),
     operator: record.tenantId === null ? text.platform : (operatorNames.get(record.tenantId) || record.tenantId),
     change: change(record),
     actor: record.actorId,
