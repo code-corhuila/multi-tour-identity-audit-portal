@@ -18,7 +18,7 @@ The access mark of the session decides the screen. It fails closed: an unknown m
 | Sign-up of a Final Customer | Anyone, at the link of a company | `multi-tour-security` (HU-SEC-002) |
 | E-mail verification | Anyone with the link of the e-mail sent at sign-up; a sign-in of a still pending account offers a new link | `multi-tour-security` (HU-SEC-003) |
 | First password | A person with a temporary credential | `multi-tour-security` |
-| Password recovery | Anyone with a registered e-mail: asks for a code of 8 digits, then chooses the new password with it; every session closes | `multi-tour-security` (HU-SEC-004) |
+| Password recovery | Anyone with a registered e-mail: asks for a code of 8 digits, then chooses the new password with it; every session closes. It opens from the "¿Olvidaste tu contraseña?" button of the sign-in by the state of the portal, not by a route of its own; the form keeps the code and the passwords only in memory | `multi-tour-security` (HU-SEC-004) |
 | Restricted notice | The Administrator of an inactive company | `multi-tour-security` |
 | Customer home and "Mi perfil" | Final Customer | The session (the profile shows the role; name, e-mail and phone read "No registrado" because the token does not carry them) |
 | Staff home, team and permissions | Internal users | Screens on test data; the service does not serve them yet (HU-SEC-005, HU-SEC-006). The exception is the switch "Auditoría del tenant" of each optional role in "Roles opcionales del tenant": it reads and sets the audit access in `multi-tour-identity-audit-api` (HU-IDA-002 AC6) |
@@ -44,7 +44,6 @@ portal does with each one:
 | `/t/{identifier}/ingresar` | Sign-in of that company; a signed-in person goes to their own screen |
 | `/t/{identifier}` | Public home of the company (the container); the portal takes over after sign-in |
 | `/t/{identifier}/verificar-correo#token=...` | Page behind the link of the verification e-mail: asks for the password, confirms and leads to the sign-in. The portal reads the link from the fragment once and removes it from the address; without a valid link it offers a new one |
-| `/t/{identifier}/recuperar` | Opens the recovery of the password: the request of the code and, after it, the form with the e-mail, the code and the new password. The code and the passwords live only in the state of the form |
 | `/platform` | Sign-in of the Platform Administrator, with no company; after it, the platform panel |
 | `/ingresar` and `/sign-in` | Aliases that lead to the sign-in of the company link |
 | `/areas/{remote}` | The other portals (protected by the container) |
