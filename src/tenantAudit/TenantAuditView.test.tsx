@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ApiClient } from '../contract';
 import type { AuditPage, AuditRecordResponse } from '../data/audit';
@@ -162,5 +162,93 @@ describe('audit of the tenant (spec 015, RN-IDA-PT-31 to -35 and -39)', () => {
     expect(await screen.findByRole('table')).toBeInTheDocument();
     expect(request).toHaveBeenCalledTimes(3);
     failing.unmount();
+  });
+});
+
+// The query of the last request to the audit, as the screen sent it.
+const lastQuery = (request: { mock: { calls: Array<[string]> } }) => new URL(request.mock.calls.at(-1)![0], 'http://x').searchParams;
+const choose = (label: string, value: string) => fireEvent.change(screen.getByLabelText(label), { target: { value } });
+const OWN = '/api/v1/identity-audit/tenant/audit-records';
+
+describe('pager and filters of the audit of the tenant (spec 015, RN-IDA-PT-34 and -39)', () => {
+  it('U·tenant_pager_moves_between_pages_and_disables_at_the_ends: previous and next ask the neighbour page and are disabled where they do not apply', async () => {
+    const twoPages = (page: number, data: AuditRecordResponse[]): AuditPage => ({ data, meta: { page, limit: 20, total: 21, totalPages: 2 } });
+    const { request, apiClient } = clientFor(twoPages(1, [enabled]), twoPages(2, [blocked]), twoPages(1, [enabled]));
+    show(apiClient);
+
+    const pager = await screen.findByRole('navigation', { name: 'Paginación' });
+    expect(within(pager).getByText('Página 1 de 2')).toBeInTheDocument();
+    expect(within(pager).getByRole('button', { name: 'Anterior' })).toBeDisabled();
+    fireEvent.click(within(pager).getByRole('button', { name: 'Siguiente' }));
+
+    expect(await screen.findByText('Página 2 de 2')).toBeInTheDocument();
+    expect(request.mock.calls[1][0]).toBe(`${OWN}?page=2&limit=20`);
+    expect(screen.getByRole('button', { name: 'Siguiente' })).toBeDisabled();
+    fireEvent.click(screen.getByRole('button', { name: 'Anterior' }));
+
+    expect(await screen.findByText('Página 1 de 2')).toBeInTheDocument();
+    expect(request.mock.calls[2][0]).toBe(PATH);
+    expect(request).toHaveBeenCalledTimes(3);
+  });
+
+  it('U·tenant_filters_are_sent_and_go_back_to_the_first_page: an action and a period, each asked exactly as chosen, and no filter of operator', async () => {
+    const twoPages = (page: number): AuditPage => ({ data: records, meta: { page, limit: 20, total: 21, totalPages: 2 } });
+    const { request, apiClient } = clientFor();
+    request.mockImplementation(async () => twoPages(1));
+    show(apiClient);
+    fireEvent.click(await screen.findByRole('button', { name: 'Siguiente' }));
+    await waitFor(() => expect(lastQuery(request).get('page')).toBe('2'));
+
+    // the screen is of one tenant: there is no filter of operator, and the actions on offer are the eleven the service accepts
+    expect(screen.queryByLabelText('Operador')).not.toBeInTheDocument();
+    expect(within(screen.getByLabelText('Acción')).getAllByRole('option')).toHaveLength(12);
+    choose('Acción', 'AUDIT_ACCESS_ENABLED');
+    expect(await screen.findByText('Página 1 de 2')).toBeInTheDocument();
+    expect(Object.fromEntries(lastQuery(request))).toEqual({ page: '1', limit: '20', action: 'AUDIT_ACCESS_ENABLED' });
+
+    choose('Desde', '2026-11-01');
+    choose('Hasta', '2026-11-07');
+    // the end is exclusive in the service, so the day chosen is asked up to the start of the next one, in UTC
+    await waitFor(() => expect(lastQuery(request).get('to')).toBe('2026-11-08T00:00:00Z'));
+    expect(Object.fromEntries(lastQuery(request))).toEqual({
+      page: '1', limit: '20', action: 'AUDIT_ACCESS_ENABLED', from: '2026-11-01T00:00:00Z', to: '2026-11-08T00:00:00Z',
+    });
+    expect(lastQuery(request).has('tenantId')).toBe(false);
+  });
+
+  it('U·tenant_period_that_ends_before_it_starts_is_not_sent: the screen says so next to the field and asks no period', async () => {
+    const { request, apiClient } = clientFor();
+    request.mockImplementation(async () => pageOf(records));
+    show(apiClient);
+    await screen.findByRole('table');
+
+    choose('Acción', 'AUDIT_ACCESS_ENABLED');
+    choose('Desde', '2026-11-10');
+    await waitFor(() => expect(lastQuery(request).get('from')).toBe('2026-11-10T00:00:00Z'));
+    const asked = request.mock.calls.length;
+    choose('Hasta', '2026-11-05');
+
+    const message = await screen.findByText('La fecha final no puede ser anterior a la inicial.');
+    expect(message).toHaveAttribute('role', 'alert');
+    expect(screen.getByLabelText('Hasta')).toHaveAttribute('aria-describedby', message.id);
+    await waitFor(() => expect(request.mock.calls.length).toBeGreaterThan(asked));
+    const query = lastQuery(request);
+    expect(query.has('from') || query.has('to')).toBe(false);
+    expect(query.get('action')).toBe('AUDIT_ACCESS_ENABLED');
+  });
+
+  it('U·tenant_failed_page_can_be_retried_keeping_the_filters: the retry asks the same page with the same filters and recovers', async () => {
+    const { request, apiClient } = clientFor(pageOf(records), new Error('down'), pageOf(records));
+    show(apiClient);
+    await screen.findByRole('table');
+
+    choose('Acción', 'AUDIT_ACCESS_ENABLED');
+    fireEvent.click(await screen.findByRole('button', { name: 'Reintentar' }));
+
+    expect(await screen.findByRole('table')).toBeInTheDocument();
+    expect(request).toHaveBeenCalledTimes(3);
+    // the failed ask and its retry are the same ask: same page, same filter
+    expect(request.mock.calls[2][0]).toBe(request.mock.calls[1][0]);
+    expect(Object.fromEntries(lastQuery(request))).toEqual({ page: '1', limit: '20', action: 'AUDIT_ACCESS_ENABLED' });
   });
 });
