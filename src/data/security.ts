@@ -68,6 +68,18 @@ export function confirmEmailVerification(client: ApiClient, identifier: string, 
   return client.request<void>(confirmEmailVerificationPath(identifier), { method: 'POST', body: { token, password }, signal });
 }
 
+// The routes of the password recovery (HU-SEC-004): the company of the link, or the platform when there is none.
+export function passwordRecoveryPath(identifier: string | undefined): string {
+  if (identifier === undefined) return '/api/v1/security/public/platform/password-recoveries';
+  if (!isValidIdentifier(identifier)) throw new Error('Invalid company identifier');
+  return `/api/v1/security/public/tenants/${identifier}/password-recoveries`;
+}
+
+// Always 202 and no body, whatever the e-mail (RN-SEC-006-01); the route takes no Idempotency-Key.
+export function requestPasswordRecovery(client: ApiClient, identifier: string | undefined, email: string, signal: AbortSignal): Promise<void> {
+  return client.request<void>(passwordRecoveryPath(identifier), { method: 'POST', body: { email }, signal });
+}
+
 export function createCustomerPath(identifier: string): string {
   if (!isValidIdentifier(identifier)) throw new Error('Invalid company identifier');
   return `/api/v1/security/public/tenants/${identifier}/accounts`;
