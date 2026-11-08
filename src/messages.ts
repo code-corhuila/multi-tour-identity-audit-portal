@@ -83,15 +83,17 @@ export const messages = {
     notice: 'La empresa está inactiva. Solo puedes atender las obligaciones pendientes.',
     signOut: 'Cerrar sesión',
   },
-  // recuperar.html and nueva-contrasena.html (Mockup of 2026-10-12): forms that send nothing, the contract has no
-  // recovery route yet.
+  // recuperar.html (Mockup of 2026-10-12), with "código" where the Mockup says "enlace": the service sends a code (spec 016 G-1).
   recover: {
     title: 'Recuperar acceso',
-    subtitle: 'Solicita un enlace seguro para recuperar el acceso a tu cuenta.',
+    subtitle: 'Escribe el correo de tu cuenta y te enviaremos un código para recuperar el acceso.',
     email: 'Correo electrónico registrado',
-    note: 'Si existe una cuenta con ese correo, enviaremos un enlace de un solo uso que vence en 30 minutos.',
-    submit: 'Enviar enlace de recuperación',
-    visualOnly: 'Esta pantalla es solo visual en esta versión: no envía ningún pedido.',
+    note: 'Si existe una cuenta con ese correo, enviaremos un código de un solo uso que vence en 30 minutos.',
+    submit: 'Enviar código',
+    sending: 'Enviando…',
+    sent: 'Si existe una cuenta con ese correo, enviamos un código. Revisa tu bandeja y escríbelo en la siguiente pantalla.',
+    emailRefused: 'Revisa el correo electrónico.',
+    haveCode: 'Ya tengo el código',
     backToSignIn: 'Volver al inicio de sesión',
   },
   newPasswordNotice: {
