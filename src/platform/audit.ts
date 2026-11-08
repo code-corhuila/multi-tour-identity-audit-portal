@@ -71,3 +71,12 @@ export function endOfDay(day: string): string | undefined {
   const start = dayStart(day);
   return start === undefined ? undefined : `${new Date(start + 86_400_000).toISOString().slice(0, 19)}Z`;
 }
+
+// The period the person chose, as the query asks it. A period that ends before it starts is not asked: the other filters still
+// are, and the field says why (RN-IDA-PT-26). Shared by the platform screen and the screen of the tenant.
+export function auditPeriod(fromDay: string, toDay: string): { invalidPeriod: boolean; period: { from?: string; to?: string } } {
+  const from = startOfDay(fromDay);
+  const toStart = startOfDay(toDay);
+  const invalidPeriod = from !== undefined && toStart !== undefined && toStart < from;
+  return { invalidPeriod, period: invalidPeriod ? {} : { from, to: endOfDay(toDay) } };
+}
