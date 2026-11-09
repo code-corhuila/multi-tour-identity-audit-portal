@@ -24,10 +24,10 @@ function setup(scope: Scope, grants: string[]) {
   return request;
 }
 
-function signIn() {
+function signIn(button = 'Iniciar sesión') {
   fireEvent.change(screen.getByLabelText('Correo electrónico'), { target: { value: 'ana@acme.co' } });
   fireEvent.change(screen.getByLabelText('Contraseña'), { target: { value: 'Viaje-2026!' } });
-  fireEvent.click(screen.getByRole('button', { name: 'Iniciar sesión' }));
+  fireEvent.click(screen.getByRole('button', { name: button }));
 }
 
 describe('the side asked at sign-in', () => {
@@ -48,7 +48,7 @@ describe('the side asked at sign-in', () => {
 
   it('the platform sign-in asks for no side', async () => {
     const request = setup('platform', ['PLATFORM_ADMINISTRATOR']);
-    signIn();
+    signIn('Ingresar a plataforma');
     await waitFor(() => expect(request).toHaveBeenCalledTimes(1));
     expect(request.mock.calls[0][1].body).not.toHaveProperty('context');
   });

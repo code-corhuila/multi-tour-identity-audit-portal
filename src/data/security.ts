@@ -3,6 +3,8 @@ import type { ApiClient } from '../contract';
 export interface SignInRequest {
   email: string;
   password: string;
+  // The side a person who is customer and team member works from (HU-SEC-008); not sent at the platform.
+  context?: 'CUSTOMER' | 'TEAM';
 }
 
 // SessionResponse of multi-tour-security openapi.yaml.

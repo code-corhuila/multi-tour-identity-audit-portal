@@ -34,7 +34,7 @@ export function SignInScreen({ identifier, scope, apiClient, session, notice, on
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
-  // The tab only changes the copy: both call the same company session endpoint (Mockup login.html). `?tab=operador`
+  // Both tabs call the same company session endpoint (Mockup login.html) and differ in the side they ask for. `?tab=operador`
   // preselects it.
   const [operator, setOperator] = useState(() => new URLSearchParams(window.location.search).get('tab') === 'operador');
   const [teamProfile, setTeamProfile] = useState<TeamProfile>('admin');
@@ -51,8 +51,9 @@ export function SignInScreen({ identifier, scope, apiClient, session, notice, on
       focusField(first);
       return;
     }
-    // The profile is only checked on the operator tab; it is never sent.
-    if (await submit({ email: email.trim(), password }, !platform && operator ? teamProfile : undefined)) {
+    // The tab names the side asked of the service; the profile is only checked on the operator tab and is never sent.
+    const context = platform ? undefined : operator ? 'TEAM' : 'CUSTOMER';
+    if (await submit({ email: email.trim(), password, ...(context && { context }) }, !platform && operator ? teamProfile : undefined)) {
       setPassword('');
       onSignedIn?.();
     }
