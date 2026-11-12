@@ -1,0 +1,6 @@
+/* The zone and country screen reuses the operator layout and the auth field look (portal spec 018, D-07). */
+.localization-company { margin: 6px 0 0; color: var(--op-soft); }
+.localization-current { display: grid; gap: 4px; margin: 0 0 18px; color: var(--op-soft); font-size: 0.92rem; }
+.localization-note { margin: 12px 0 0; color: var(--op-soft); font-size: 0.88rem; }
+.localization-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 12px; margin-top: 22px; }
+.localization-summary ul { margin: 12px 0 0; padding-left: 20px; }
