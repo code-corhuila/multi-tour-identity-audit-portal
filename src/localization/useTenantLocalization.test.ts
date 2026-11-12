@@ -21,7 +21,7 @@ describe('the current zone and country of the tenant (portal spec 018, RN-IDA-PT
 
     const { result, rerender } = renderHook(() => useTenantLocalization(clientOf(request)));
     expect(result.current.state.kind).toBe('loading');
-    await waitFor(() => expect(result.current.state).toMatchObject({ kind: 'data', timeZone: 'America/Bogota', country: 'CO', commercialName: 'Acme Tours' }));
+    await waitFor(() => expect(result.current.state).toMatchObject({ kind: 'data', timeZone: 'America/Bogota', country: 'CO', commercialName: 'Acme Tours', tenantStatus: 'ACTIVE' }));
     rerender();
     rerender();
 
