@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ApiClient } from '../contract';
+import type { TenantStatus } from '../data/tenants';
 import { toApiError } from '../apiError';
 import { messages } from '../messages';
 import { getLocalization } from './localizationApi';
@@ -7,7 +8,7 @@ import { getLocalization } from './localizationApi';
 export type LocalizationState =
   | { kind: 'loading' }
   | { kind: 'error'; line: string }
-  | { kind: 'data'; timeZone: string; country: string; commercialName: string };
+  | { kind: 'data'; timeZone: string; country: string; commercialName: string; tenantStatus: TenantStatus };
 
 // Reads the zone and the country the tenant has today, once when the screen opens and again only on retry. Leaving the
 // screen aborts the read in flight and its answer is ignored (portal spec 018, D-01).
@@ -24,7 +25,7 @@ export function useTenantLocalization(apiClient: ApiClient) {
     setState({ kind: 'loading' });
     try {
       const tenant = await getLocalization(client.current, controller.signal);
-      if (!controller.signal.aborted) setState({ kind: 'data', timeZone: tenant.timeZone, country: tenant.country, commercialName: tenant.commercialName });
+      if (!controller.signal.aborted) setState({ kind: 'data', timeZone: tenant.timeZone, country: tenant.country, commercialName: tenant.commercialName, tenantStatus: tenant.tenantStatus });
     } catch (error) {
       if (controller.signal.aborted) return;
       const { traceId } = toApiError(error);
