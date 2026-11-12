@@ -9,3 +9,14 @@ export const LOCALIZATION_PATH = '/api/v1/identity-audit/tenant/localization';
 export function getLocalization(client: ApiClient, signal: AbortSignal): Promise<TenantResponse> {
   return client.request<TenantResponse>(LOCALIZATION_PATH, { method: 'GET', signal });
 }
+
+// The body is the `LocalizationRequest` of the contract: only what changes, at least one of the two. The answer is the
+// tenant with what it has now. A PUT creates nothing, so it takes no Idempotency-Key.
+export interface LocalizationChange {
+  timeZone?: string;
+  country?: string;
+}
+
+export function changeLocalization(client: ApiClient, body: LocalizationChange, signal: AbortSignal): Promise<TenantResponse> {
+  return client.request<TenantResponse>(LOCALIZATION_PATH, { method: 'PUT', body, signal });
+}
