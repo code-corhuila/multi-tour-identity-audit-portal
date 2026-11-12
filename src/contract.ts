@@ -34,6 +34,9 @@ export interface MountProps {
   commercialName?: string;
   // Called after the colors were saved, so the container applies them to the whole page without a reload.
   onVisualIdentityChange?: (visualIdentity: VisualIdentity) => void;
+  // Called after the zone or the country of the company changed, so the container may use the zone to format the dates it shows
+  // (portal spec 018, section 5). Optional, so an older container still works.
+  onLocalizationChange?: (localization: { timeZone: string; country: string }) => void;
   apiClient: ApiClient;
   session: Session;
 }
