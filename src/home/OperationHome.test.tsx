@@ -6,7 +6,7 @@ import { homeTestData } from './homeTestData';
 
 afterEach(() => vi.useRealTimers());
 
-const props = { identifier: 'sierra-azul', commercialHref: '/t/sierra-azul/areas/commercial-reservation-portal', canEditIdentity: true, onOpenIdentity: vi.fn(), onOpenProfile: vi.fn() };
+const props = { identifier: 'sierra-azul', commercialHref: '/t/sierra-azul/areas/commercial-reservation-portal', canEditIdentity: true, onOpenIdentity: vi.fn(), onOpenLocalization: vi.fn(), onOpenProfile: vi.fn() };
 
 describe('staff home Control de la operación (spec 011, RN-CAL-HOM-01 to 05)', () => {
   it('U·home_renders_its_mockup_parts: header, hero, the two metric groups and the four cards, in order', () => {
@@ -73,5 +73,14 @@ describe('staff home Control de la operación (spec 011, RN-CAL-HOM-01 to 05)', 
     expect(onOpenProfile).toHaveBeenCalledTimes(1);
     rerender(<OperationHome {...props} canEditIdentity={false} data={null} />);
     expect(screen.queryByRole('button', { name: /Identidad visual/ })).not.toBeInTheDocument();
+  });
+
+  it('U·localization_card_opens_its_screen_and_is_only_for_the_administrator', () => {
+    const onOpenLocalization = vi.fn();
+    const { rerender } = render(<OperationHome {...props} data={null} onOpenLocalization={onOpenLocalization} />);
+    fireEvent.click(screen.getByRole('button', { name: /Zona horaria y país/ }));
+    expect(onOpenLocalization).toHaveBeenCalledTimes(1);
+    rerender(<OperationHome {...props} canEditIdentity={false} data={null} />);
+    expect(screen.queryByRole('button', { name: /Zona horaria y país/ })).not.toBeInTheDocument();
   });
 });

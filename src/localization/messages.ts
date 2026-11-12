@@ -1,5 +1,7 @@
 // Texts of the zone and country screen, in Spanish like the other screens (portal spec 018, D-06).
 export const localizationMessages = {
+  card: 'Zona horaria y país',
+  cardBody: 'Indica dónde opera tu empresa.',
   eyebrow: 'Configuración de la empresa',
   title: 'Zona horaria y país',
   company: 'Empresa',
