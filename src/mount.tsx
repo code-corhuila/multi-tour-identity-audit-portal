@@ -28,7 +28,7 @@ function isVerifyAddress(identifier?: string): boolean {
 
 // The access mark of the session decides the screen (RN-SEC-PT-05, -08). It fails closed: only an absent mark
 // shows the normal sign-in, and an unknown value is treated as restricted.
-export function AccessRoutes({ apiClient, session, identifier: link, scope, commercialName, visualIdentity, onVisualIdentityChange, linkToken }: MountProps & { linkToken?: string }) {
+export function AccessRoutes({ apiClient, session, identifier: link, scope, commercialName, visualIdentity, onVisualIdentityChange, onLocalizationChange, linkToken }: MountProps & { linkToken?: string }) {
   const [saved, setSaved] = useState(false);
   const identifier = link;
   // A tiny view state instead of a router: the container owns the real routes (the link is only a hint).
@@ -92,6 +92,7 @@ export function AccessRoutes({ apiClient, session, identifier: link, scope, comm
           commercialName={commercialName}
           visualIdentity={visualIdentity}
           onVisualIdentityChange={onVisualIdentityChange}
+          onLocalizationChange={onLocalizationChange}
           onSignOut={signOut}
         />
       );
