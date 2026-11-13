@@ -49,6 +49,16 @@ export interface CreateCustomerRequest {
   passwordConfirmation: string;
 }
 
+export function requestEmailVerificationPath(identifier: string): string {
+  if (!isValidIdentifier(identifier)) throw new Error('Invalid company identifier');
+  return `/api/v1/security/public/tenants/${identifier}/email-verifications`;
+}
+
+// Always 202 and no body, whatever the e-mail (RN-SEC-004-06); the route takes no Idempotency-Key.
+export function requestEmailVerification(client: ApiClient, identifier: string, email: string, signal: AbortSignal): Promise<void> {
+  return client.request<void>(requestEmailVerificationPath(identifier), { method: 'POST', body: { email }, signal });
+}
+
 export function createCustomerPath(identifier: string): string {
   if (!isValidIdentifier(identifier)) throw new Error('Invalid company identifier');
   return `/api/v1/security/public/tenants/${identifier}/accounts`;

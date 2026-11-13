@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { createRoot } from 'react-dom/client';
+import { CheckEmailNotice } from './auth/CheckEmailNotice';
 import { FirstPasswordScreen } from './auth/FirstPasswordScreen';
 import { RegisterScreen } from './auth/RegisterScreen';
+import { RequestLinkScreen } from './auth/RequestLinkScreen';
 import { RestrictedNotice } from './auth/RestrictedNotice';
 import { SignInScreen } from './auth/SignInScreen';
 import type { MountProps } from './contract';
@@ -21,8 +23,9 @@ export function AccessRoutes({ apiClient, session, identifier: link, scope, comm
   const [saved, setSaved] = useState(false);
   const identifier = link;
   // A tiny view state instead of a router: the container owns the real routes (the link is only a hint).
-  const [view, setView] = useState<'sign-in' | 'sign-up'>('sign-in');
-  const [created, setCreated] = useState(false);
+  const [view, setView] = useState<'sign-in' | 'sign-up' | 'check-email' | 'request-link'>('sign-in');
+  // E-mail typed at registration: the notice names it and the resend asks for a link for it.
+  const [registered, setRegistered] = useState('');
   // Re-render after a good sign-in so the access mark of the new session is read again.
   const [, setReads] = useState(0);
   // Every sign-out closes the session and re-reads it, so the sign-in shows again (the container's session drops the
@@ -85,13 +88,27 @@ export function AccessRoutes({ apiClient, session, identifier: link, scope, comm
       <RegisterScreen
         identifier={identifier}
         apiClient={apiClient}
-        onDone={() => {
-          setCreated(true);
-          setView('sign-in');
+        onDone={(email) => {
+          setRegistered(email);
+          setView('check-email');
         }}
         onSignIn={() => setView('sign-in')}
       />
     );
+  }
+  if (view === 'check-email' && identifier !== undefined) {
+    return (
+      <CheckEmailNotice
+        identifier={identifier}
+        company={commercialName ?? identifier}
+        email={registered}
+        apiClient={apiClient}
+        onSignIn={() => setView('sign-in')}
+      />
+    );
+  }
+  if (view === 'request-link' && identifier !== undefined) {
+    return <RequestLinkScreen identifier={identifier} apiClient={apiClient} onSignIn={() => setView('sign-in')} />;
   }
   return (
     <SignInScreen
@@ -99,14 +116,10 @@ export function AccessRoutes({ apiClient, session, identifier: link, scope, comm
       scope={scope}
       apiClient={apiClient}
       session={session}
-      notice={saved ? messages.firstPassword.saved : created ? messages.signUp.created : undefined}
-      onCreateAccount={() => {
-        setCreated(false);
-        setView('sign-up');
-      }}
+      notice={saved ? messages.firstPassword.saved : undefined}
+      onCreateAccount={() => setView('sign-up')}
       onSignedIn={() => {
         setSaved(false);
-        setCreated(false);
         setReads((n) => n + 1);
       }}
     />
