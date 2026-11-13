@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import type { ApiClient, ApiError } from '../contract';
+import type { ApiClient } from '../contract';
+import { toApiError } from '../apiError';
 import { changeOwnPassword } from '../data/security';
 import { messages } from '../messages';
 
@@ -11,7 +12,7 @@ export interface PasswordFailure {
 
 // The status decides the text, never the answer's message.
 function describeFailure(error: unknown): PasswordFailure {
-  const { status, traceId } = (error ?? {}) as ApiError;
+  const { status, traceId } = toApiError(error);
   if (status === 400) return { kind: 'policy', text: messages.firstPassword.policyRefused };
   if (status === 401) return { kind: 'expired', text: messages.firstPassword.expired };
   const trace = traceId ? ` (${messages.errors.trace}: ${traceId})` : '';

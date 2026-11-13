@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
-import type { ApiClient, ApiError } from '../contract';
+import type { ApiClient } from '../contract';
+import { toApiError } from '../apiError';
 import { inactivateTenant, reactivateTenant, type TenantResponse } from '../data/tenants';
 import { messages } from '../messages';
 import { tenantMessages } from '../tenants/messages';
@@ -118,7 +119,7 @@ function StatePanel({ tenant, apiClient, tenantId, onChanged, onRequestReload }:
       setError(undefined);
       onChanged(updated);
     } catch (thrown: unknown) {
-      const { status, traceId } = (thrown ?? {}) as ApiError;
+      const { status, traceId } = toApiError(thrown);
       setConfirming(false);
       setError(status === 422 ? t.alreadyChanged : `${messages.errors.unavailable}${traceId ? ` (${messages.errors.trace}: ${traceId})` : ''}`);
     } finally {
