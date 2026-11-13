@@ -12,6 +12,12 @@ function describeFailure(error: unknown): string {
   return `${messages.errors.unavailable}${trace}`;
 }
 
+// Only the status and the code name a pending account; the text of the answer is never read (plan D-03).
+function isUnverified(error: unknown): boolean {
+  const { status, details } = (error ?? {}) as ApiError;
+  return status === 403 && Array.isArray(details) && details.some((d) => d.field === 'email' && d.message === 'EMAIL_NOT_VERIFIED');
+}
+
 // Profile chosen on the operator tab; it sends nothing to the API, it is checked against the roles the session got.
 export type TeamProfile = 'admin' | 'staff';
 const ADMIN_ROLE = 'TENANT_ADMINISTRATOR';
@@ -28,6 +34,7 @@ function checkProfile(profile: TeamProfile, roles: string[]): RoleCheck {
 export function useSignIn(identifier: string | undefined, apiClient: ApiClient, session: Session) {
   const [sending, setSending] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
+  const [unverified, setUnverified] = useState(false);
   const current = useRef<AbortController | null>(null);
 
   useEffect(() => () => current.current?.abort(), []);
@@ -39,6 +46,7 @@ export function useSignIn(identifier: string | undefined, apiClient: ApiClient, 
     current.current = controller;
     setSending(true);
     setFailure(null);
+    setUnverified(false);
     try {
       const answer = await signIn(apiClient, identifier, credentials, controller.signal);
       if (controller.signal.aborted) return false;
@@ -54,12 +62,23 @@ export function useSignIn(identifier: string | undefined, apiClient: ApiClient, 
       }
       return true;
     } catch (error) {
-      if (!controller.signal.aborted) setFailure(describeFailure(error));
+      if (!controller.signal.aborted) {
+        const pending = isUnverified(error);
+        setUnverified(pending);
+        setFailure(pending ? messages.signIn.pending : describeFailure(error));
+      }
       return false;
     } finally {
       if (!controller.signal.aborted) setSending(false);
     }
   }
 
-  return { sending, failure, submit };
+  // Changing the e-mail makes the refusal stale: the action must not carry an e-mail that was not refused.
+  function dismissPending() {
+    if (!unverified) return;
+    setUnverified(false);
+    setFailure(null);
+  }
+
+  return { sending, failure, unverified, submit, dismissPending };
 }

@@ -102,3 +102,14 @@ describe('RequestLinkScreen', () => {
     expect(window.location.href).toBe(before);
   });
 });
+
+describe('RequestLinkScreen coming from the pending sign-in', () => {
+  it('pending_sign_in_says_to_verify_and_offers_a_link: starts with the e-mail the person was typing and sends it', async () => {
+    const request = vi.fn().mockResolvedValue(undefined);
+    render(<RequestLinkScreen identifier="acme" apiClient={{ request }} initialEmail="ana@mail.co" onSignIn={vi.fn()} />);
+    expect(screen.getByLabelText('Correo electrónico')).toHaveValue('ana@mail.co');
+    send();
+    await waitFor(() => expect(request).toHaveBeenCalledTimes(1));
+    expect(request.mock.calls[0][1].body).toEqual({ email: 'ana@mail.co' });
+  });
+});

@@ -11,6 +11,8 @@ export const messages = {
     home: 'Volver al inicio',
   },
   signIn: {
+    pending: 'Tu cuenta aún está inactiva: verifica tu correo con el enlace que te enviamos.',
+    pendingAction: 'Pedir un nuevo enlace',
     kicker: 'Multi Tour',
     title: 'Bienvenido de nuevo',
     subtitle: 'Ingresa a tu cuenta para gestionar tus viajes.',
