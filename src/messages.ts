@@ -157,6 +157,19 @@ export const messages = {
     goToSignIn: 'Ir a iniciar sesión',
     sent: 'Si tu cuenta está pendiente de verificación, te enviamos un nuevo enlace. Revisa tu correo, también la carpeta de spam.',
   },
+  // Screens D, E and F of portal spec 013: the page behind the link of the e-mail.
+  verifyPage: {
+    subtitle: 'Para activar tu cuenta, confirma la contraseña con la que la creaste.',
+    submit: 'Verificar correo',
+    sending: 'Verificando…',
+    wrongPassword: 'La contraseña no es correcta.',
+    doneTitle: 'Correo verificado',
+    done: 'Tu correo quedó verificado y tu cuenta está activa.',
+    signIn: 'Iniciar sesión',
+    badLinkTitle: 'Este enlace ya no funciona',
+    badLink: 'Pudo vencer o ya se usó. Pide uno nuevo para activar tu cuenta.',
+    newLink: 'Pedir un nuevo enlace',
+  },
   requestLink: {
     title: 'Pedir un nuevo enlace',
     subtitle: 'Escribe el correo con el que creaste tu cuenta.',
