@@ -1,0 +1,10 @@
+/* The logo and images screen reuses the operator layout and the auth field look (portal spec 019, D-01). */
+.branding-company { margin: 6px 0 0; color: var(--op-soft); }
+.branding-note { margin: 12px 0 0; color: var(--op-soft); font-size: 0.88rem; }
+.branding-grid { display: grid; gap: 18px; margin-top: 18px; }
+.branding-slot-title { margin: 0 0 10px; font-size: 1rem; }
+.branding-picture { display: block; max-width: 100%; max-height: 180px; margin: 0 0 12px; border-radius: 8px; object-fit: contain; }
+.branding-preview { outline: 2px dashed var(--op-soft); outline-offset: 2px; }
+.branding-none { margin: 0 0 12px; color: var(--op-soft); font-size: 0.92rem; }
+.branding-messages { min-height: 1.4em; }
+.branding-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 12px; margin-top: 14px; }
