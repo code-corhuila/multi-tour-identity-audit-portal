@@ -45,17 +45,60 @@ export function VisualIdentityScreen({ session, loading = false, ...rest }: Visu
 }
 
 type FormProps = Omit<VisualIdentityScreenProps, 'session' | 'loading'>;
+type ColorErrors = Partial<Record<keyof VisualIdentity, string>>;
+
+function Header({ commercialName, onBack }: Pick<FormProps, 'commercialName' | 'onBack'>) {
+  return (
+    <header className="operator-topbar">
+      <div>
+        <p className="operator-eyebrow">{text.eyebrow}</p>
+        <h1>{text.title}</h1>
+        {commercialName && (
+          <p className="visual-identity-company">
+            {text.company}: <strong>{commercialName}</strong>
+          </p>
+        )}
+      </div>
+      {onBack && (
+        <button type="button" className="operator-outline" onClick={onBack}>
+          {text.back}
+        </button>
+      )}
+    </header>
+  );
+}
+
+// The colors reach the preview box only: the page is painted by the container after the save.
+function Preview({ primary, secondary }: { primary: string; secondary: string }) {
+  const style = { '--accent': primary, '--accent-strong': secondary } as CSSProperties;
+  return (
+    <div className="visual-identity-preview" data-testid="visual-identity-preview" style={style} aria-label={text.preview} role="group">
+      <p className="operator-eyebrow">{text.preview}</p>
+      <h2>{text.previewHeading}</h2>
+      <div className="visual-identity-preview-actions">
+        <span className="visual-identity-preview-primary">{text.previewPrimary}</span>
+        <span className="visual-identity-preview-outline">{text.previewOutline}</span>
+      </div>
+    </div>
+  );
+}
 
 function VisualIdentityForm({ apiClient, commercialName, visualIdentity, onVisualIdentityChange, onBack }: FormProps) {
   const initial = visualIdentity ?? DEFAULT_COLORS;
   const [primary, setPrimary] = useState(initial.primaryColor);
   const [secondary, setSecondary] = useState(initial.secondaryColor);
-  const [local, setLocal] = useState<Partial<Record<keyof VisualIdentity, string>>>({});
+  const [local, setLocal] = useState<ColorErrors>({});
   const { sending, failure, saved, submit } = useSetVisualIdentity(apiClient);
   const previewPrimary = useLastValid(primary, initial.primaryColor);
   const previewSecondary = useLastValid(secondary, initial.secondaryColor);
 
   const errors = { primaryColor: local.primaryColor ?? failure?.fields.primaryColor, secondaryColor: local.secondaryColor ?? failure?.fields.secondaryColor };
+
+  // Typing in a field clears only that field's own error.
+  const edit = (key: keyof VisualIdentity, set: (value: string) => void) => (value: string) => {
+    set(value);
+    setLocal((found) => ({ ...found, [key]: undefined }));
+  };
 
   async function save() {
     const found = {
@@ -73,39 +116,15 @@ function VisualIdentityForm({ apiClient, commercialName, visualIdentity, onVisua
     void save();
   };
 
-  // The colors reach the preview box only: the page is painted by the container after the save.
-  const previewStyle = { '--accent': previewPrimary, '--accent-strong': previewSecondary } as CSSProperties;
   return (
     <main className="operator-content">
-      <header className="operator-topbar">
-        <div>
-          <p className="operator-eyebrow">{text.eyebrow}</p>
-          <h1>{text.title}</h1>
-          {commercialName && (
-            <p className="visual-identity-company">
-              {text.company}: <strong>{commercialName}</strong>
-            </p>
-          )}
-        </div>
-        {onBack && (
-          <button type="button" className="operator-outline" onClick={onBack}>
-            {text.back}
-          </button>
-        )}
-      </header>
+      <Header commercialName={commercialName} onBack={onBack} />
       <section className="operator-panel">
         {visualIdentity == null && <p className="visual-identity-note">{text.defaultsNote}</p>}
         <form className="auth-form" onSubmit={onSubmit} noValidate>
-          <ColorField id="visual-primary" label={text.primary} value={primary} error={errors.primaryColor} onChange={(v) => { setPrimary(v); setLocal({ ...local, primaryColor: undefined }); }} />
-          <ColorField id="visual-secondary" label={text.secondary} value={secondary} error={errors.secondaryColor} onChange={(v) => { setSecondary(v); setLocal({ ...local, secondaryColor: undefined }); }} />
-          <div className="visual-identity-preview" data-testid="visual-identity-preview" style={previewStyle} aria-label={text.preview} role="group">
-            <p className="operator-eyebrow">{text.preview}</p>
-            <h2>{text.previewHeading}</h2>
-            <div className="visual-identity-preview-actions">
-              <span className="visual-identity-preview-primary">{text.previewPrimary}</span>
-              <span className="visual-identity-preview-outline">{text.previewOutline}</span>
-            </div>
-          </div>
+          <ColorField id="visual-primary" label={text.primary} value={primary} error={errors.primaryColor} onChange={edit('primaryColor', setPrimary)} />
+          <ColorField id="visual-secondary" label={text.secondary} value={secondary} error={errors.secondaryColor} onChange={edit('secondaryColor', setSecondary)} />
+          <Preview primary={previewPrimary} secondary={previewSecondary} />
           <div aria-live="polite">
             {failure?.line && (
               <div role="alert" className="operator-error">

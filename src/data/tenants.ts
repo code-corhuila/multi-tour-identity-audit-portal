@@ -1,4 +1,4 @@
-import type { ApiClient } from '../contract';
+import type { ApiClient, VisualIdentity } from '../contract';
 
 // Names and values of `TenantResponse` and `TenantStatus` in identity-audit.yaml.
 export type TenantStatus = 'PENDING' | 'ACTIVE' | 'INACTIVE' | 'FAILED';
@@ -15,6 +15,7 @@ export interface TenantResponse {
   statusChangedBy?: string | null;
   statusReason?: string | null;
   failedStep?: 'CREATE_ACCOUNT' | 'APPLY_STATUS' | null;
+  visualIdentity?: VisualIdentity | null;
   createdAt: string;
 }
 

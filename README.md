@@ -22,6 +22,11 @@ The access mark of the session decides the screen. It fails closed: an unknown m
 | Customer home and "Mi perfil" | Final Customer | The session (the profile shows the role; name, e-mail and phone read "No registrado" because the token does not carry them) |
 | Staff home, team and permissions | Internal users | Screens on test data; the service does not serve them yet (HU-SEC-005, HU-SEC-006) |
 | Platform panel: tenants, detail, create, audit | Platform Administrator | `multi-tour-identity-audit-api` for the tenants (HU-IDA-001); the audit view shows test data (HU-IDA-002) |
+| Visual identity of the company | Tenant Administrator | `multi-tour-identity-audit-api` (HU-IDA-003): the primary and the secondary color; the logo and the commercial images are not built |
+
+The visual identity screen takes three optional props from the container, read from the public profile of the company: `visualIdentity`
+(the saved colors, or `null`), `commercialName` and `onVisualIdentityChange` (called once after a good save, so the container paints the page). A
+container that does not send them still works: the screen starts from the default colors.
 
 Test data is labelled "Datos de prueba" and is left out of the production build
 (`B·test_data_is_not_in_the_production_build`).
@@ -79,4 +84,5 @@ locked for billing (since 2026-10-14), run the same three commands locally and p
 - The service behind the staff screens: internal users, permissions and optional roles (HU-SEC-005, HU-SEC-006).
 - The audit consultation (HU-IDA-002), so the audit view stops showing test data.
 - Inactivating and reactivating a tenant from the panel sends nothing yet (HU-IDA-001).
-- Password recovery and the verification of the e-mail (HU-SEC-004, HU-SEC-003).
+- Password recovery (HU-SEC-004).
+- The logo and the commercial images of the visual identity (HU-IDA-003); a color cannot be cleared back to the default.

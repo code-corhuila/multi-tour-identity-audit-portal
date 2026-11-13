@@ -9,6 +9,9 @@ export interface ColorFieldProps {
   onChange: (value: string) => void;
 }
 
+// What the native picker shows while the text is not a valid color yet: a picker cannot be empty.
+const PICKER_PLACEHOLDER = '#000000';
+
 // A native picker and the `#RRGGBB` text, kept in step. The text is the source (a typed value may be invalid, the
 // picker's never is); the picker shows the last valid color while the text is half typed.
 export function ColorField({ id, label, value, error, onChange }: ColorFieldProps) {
@@ -20,7 +23,7 @@ export function ColorField({ id, label, value, error, onChange }: ColorFieldProp
         <input
           type="color"
           aria-label={text.pickerOf(label)}
-          value={HEX_COLOR.test(value) ? value.toLowerCase() : '#000000'}
+          value={HEX_COLOR.test(value) ? value.toLowerCase() : PICKER_PLACEHOLDER}
           onChange={(e) => onChange(e.target.value)}
         />
         <div className="auth-input-wrap">

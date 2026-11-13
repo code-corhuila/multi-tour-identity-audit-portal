@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import type { ApiClient, ApiError } from '../contract';
+import type { ApiClient } from '../contract';
+import { toApiError } from '../apiError';
 import { confirmEmailVerification } from '../data/security';
 import { messages } from '../messages';
 import { AuthCard } from '../ui/AuthCard';
@@ -23,7 +24,7 @@ type Step = { name: 'form'; field?: string; line?: string } | { name: 'sending' 
 // The status decides the text, never the message of the answer. A 401 is the password, a 422 is a link that expired or was
 // used; the link is kept for a retry only in the first case.
 function describeFailure(error: unknown): Step {
-  const { status, traceId } = (error ?? {}) as ApiError;
+  const { status, traceId } = toApiError(error);
   if (status === 401) return { name: 'form', field: text.wrongPassword };
   if (status === 422) return { name: 'bad-link' };
   const trace = traceId ? ` (${messages.errors.trace}: ${traceId})` : '';
