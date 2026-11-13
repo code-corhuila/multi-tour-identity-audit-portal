@@ -35,6 +35,8 @@ export function AccessRoutes({ apiClient, session, identifier: link, scope, comm
   );
   // E-mail typed at registration: the notice names it and the resend asks for a link for it.
   const [registered, setRegistered] = useState('');
+  // E-mail typed at a sign-in refused as pending: it only starts the new-link form (spec 013, R-2).
+  const [linkEmail, setLinkEmail] = useState('');
   // Re-render after a good sign-in so the access mark of the new session is read again.
   const [, setReads] = useState(0);
   // Every sign-out closes the session and re-reads it, so the sign-in shows again (the container's session drops the
@@ -123,12 +125,15 @@ export function AccessRoutes({ apiClient, session, identifier: link, scope, comm
         apiClient={apiClient}
         token={linkToken}
         onSignIn={() => setView('sign-in')}
-        onRequestLink={() => setView('request-link')}
+        onRequestLink={() => {
+          setLinkEmail('');
+          setView('request-link');
+        }}
       />
     );
   }
   if (view === 'request-link' && identifier !== undefined) {
-    return <RequestLinkScreen identifier={identifier} apiClient={apiClient} onSignIn={() => setView('sign-in')} />;
+    return <RequestLinkScreen identifier={identifier} apiClient={apiClient} initialEmail={linkEmail} onSignIn={() => setView('sign-in')} />;
   }
   return (
     <SignInScreen
@@ -138,6 +143,10 @@ export function AccessRoutes({ apiClient, session, identifier: link, scope, comm
       session={session}
       notice={saved ? messages.firstPassword.saved : undefined}
       onCreateAccount={() => setView('sign-up')}
+      onRequestLink={(email) => {
+        setLinkEmail(email);
+        setView('request-link');
+      }}
       onSignedIn={() => {
         setSaved(false);
         setReads((n) => n + 1);
