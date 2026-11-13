@@ -9,8 +9,8 @@ interface SlotProps {
   place: ImagePlace;
   // What the person sees as the name of the place and in the alternative text of its picture ("Logo", "Imagen 1").
   label: string;
-  // The saved file as the container passes it (a relative path), or null when there is none. It is read once, when the place appears:
-  // after a save the place shows the file that was sent, and the screen gives each place its own key.
+  // The saved file as the container passes it (a relative path), or null when there is none. An untouched place follows it; after a
+  // save or a removal the place shows what was sent.
   savedUrl: string | null;
   // Called after the service took a save or a removal, so the screen may tell the container. An answer that comes after the place went
   // away is not reported: the request is aborted with the place.
@@ -34,10 +34,16 @@ export function ImageSlot({ apiClient, place, label, savedUrl: initial, onChange
   const [confirming, setConfirming] = useState(false);
   const { sending, failure, saved: done, save, remove, reset } = useTenantImage(apiClient, place);
   const lastAction = useRef<'save' | 'remove'>('save');
+  // Once the person saved or removed here, the place shows what was sent and no longer follows the container's address.
+  const touched = useRef(false);
   const titleId = `${id}-title`;
   const messages = useRef<HTMLDivElement>(null);
   const question = useRef<HTMLDivElement>(null);
   const fileInput = useRef<HTMLInputElement>(null);
+  // The container may pass the saved file after the place appears (it reads the profile first): an untouched place follows it.
+  useEffect(() => {
+    if (!touched.current) setSaved(initial);
+  }, [initial]);
   // Every local address made for a preview, released when the file changes or the place goes away.
   const urls = useRef<Set<string>>(new Set());
   const forget = (url: string) => {
@@ -74,6 +80,7 @@ export function ImageSlot({ apiClient, place, label, savedUrl: initial, onChange
     if (await save(chosen.file)) {
       // the file that was saved is the one the person sees: its local address stays until it is replaced
       if (saved && saved !== chosen.url) forget(saved);
+      touched.current = true;
       setSaved(chosen.url);
       setChosen(null);
       // the same file may be chosen again
@@ -87,6 +94,7 @@ export function ImageSlot({ apiClient, place, label, savedUrl: initial, onChange
     setConfirming(false);
     messages.current?.focus();
     if (await remove()) {
+      touched.current = true;
       if (saved) forget(saved);
       setSaved(null);
       onChange?.();
@@ -101,7 +109,7 @@ export function ImageSlot({ apiClient, place, label, savedUrl: initial, onChange
 
   return (
     <div className="branding-slot operator-panel" role="group" aria-labelledby={titleId}>
-      <h3 id={titleId} className="branding-slot-title">{label}</h3>
+      <h2 id={titleId} className="branding-slot-title">{label}</h2>
       {saved ? <img className="branding-picture" src={saved} alt={label} /> : <p className="branding-none">{names.none}</p>}
       <div className="auth-field">
         <label htmlFor={`${id}-file`}>{names.choose}</label>
