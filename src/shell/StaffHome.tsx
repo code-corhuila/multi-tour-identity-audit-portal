@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { ApiClient, MountProps, Session } from '../contract';
 import { ProfileScreen } from '../profile/ProfileScreen';
+import { BrandingScreen } from '../branding/BrandingScreen';
 import { LocalizationScreen } from '../localization/LocalizationScreen';
 import { VisualIdentityScreen } from '../visualIdentity/VisualIdentityScreen';
 import { OperationHome } from '../home/OperationHome';
@@ -16,7 +17,7 @@ import '../tenants/operator.css';
 
 const text = shellMessages.staff;
 
-export interface StaffHomeProps extends Pick<MountProps, 'commercialName' | 'visualIdentity' | 'onVisualIdentityChange' | 'onLocalizationChange'> {
+export interface StaffHomeProps extends Pick<MountProps, 'commercialName' | 'visualIdentity' | 'onVisualIdentityChange' | 'onLocalizationChange' | 'logoUrl' | 'images' | 'onTenantImagesChange'> {
   identifier: string;
   session: Session;
   apiClient: ApiClient;
@@ -26,8 +27,8 @@ export interface StaffHomeProps extends Pick<MountProps, 'commercialName' | 'vis
 // "Control de la operación" (Mockup admin-operador.html): the areas of the operator. Only the ones that have a route in
 // this version are links; the rest are shown disabled. The Tenant Administrator also gets the visual identity card, which
 // opens its screen inside this same panel (portal spec 005, PT-09).
-export function StaffHome({ identifier, session, apiClient, commercialName, visualIdentity, onVisualIdentityChange, onLocalizationChange, onSignOut }: StaffHomeProps) {
-  const [view, setView] = useState<'home' | 'identity' | 'localization' | 'profile' | 'staff' | 'staff-detail' | 'staff-register' | 'audit'>('home');
+export function StaffHome({ identifier, session, apiClient, commercialName, visualIdentity, onVisualIdentityChange, onLocalizationChange, logoUrl, images, onTenantImagesChange, onSignOut }: StaffHomeProps) {
+  const [view, setView] = useState<'home' | 'identity' | 'localization' | 'branding' | 'profile' | 'staff' | 'staff-detail' | 'staff-register' | 'audit'>('home');
   const [memberId, setMemberId] = useState('');
   const area = commercialAreaHref(identifier);
   const canEditIdentity = session.roles.includes(TENANT_ADMINISTRATOR);
@@ -50,6 +51,23 @@ export function StaffHome({ identifier, session, apiClient, commercialName, visu
           commercialName={commercialName}
           visualIdentity={visualIdentity}
           onVisualIdentityChange={onVisualIdentityChange}
+          onBack={() => setView('home')}
+        />
+      </div>
+    );
+  }
+
+  if (view === 'branding' && canEditIdentity) {
+    return (
+      <div className="shell">
+        <TopBar role={text.role} onSignOut={onSignOut} />
+        <BrandingScreen
+          apiClient={apiClient}
+          session={session}
+          commercialName={commercialName}
+          logoUrl={logoUrl}
+          images={images}
+          onTenantImagesChange={onTenantImagesChange}
           onBack={() => setView('home')}
         />
       </div>
@@ -96,6 +114,7 @@ export function StaffHome({ identifier, session, apiClient, commercialName, visu
         canEditIdentity={canEditIdentity}
         onOpenIdentity={() => setView('identity')}
         onOpenLocalization={() => setView('localization')}
+        onOpenBranding={() => setView('branding')}
         onOpenProfile={() => setView('profile')}
       />}
     </StaffFrame>
