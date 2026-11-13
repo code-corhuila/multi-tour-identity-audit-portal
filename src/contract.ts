@@ -32,6 +32,11 @@ export interface MountProps {
   visualIdentity?: VisualIdentity | null;
   // Commercial name of the company, as the container read it; the visual identity screen shows it as read-only context.
   commercialName?: string;
+  // The logo and the commercial images the container read from the public profile of the company (a relative path each) and the way to tell it
+  // that they changed, so it shows them without a reload (portal spec 019, section 5). All optional, so an older container still works.
+  logoUrl?: string | null;
+  images?: { position: number; url: string }[];
+  onTenantImagesChange?: () => void;
   // Called after the colors were saved, so the container applies them to the whole page without a reload.
   onVisualIdentityChange?: (visualIdentity: VisualIdentity) => void;
   // Called after the zone or the country of the company changed, so the container may use the zone to format the dates it shows
