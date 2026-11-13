@@ -45,12 +45,31 @@ export const platformMessages = {
       PENDING: { title: 'Alta en proceso', copy: 'El alta del operador todavía no termina.' },
       FAILED: { title: 'El alta no se completó', copy: 'El alta del operador falló; revisa la auditoría.' },
     },
-    reasonLabel: 'Motivo de la inactivación',
-    reasonPlaceholder: 'Ingresa el motivo obligatorio para inactivar el operador.',
-    reasonRequired: 'Ingresa el motivo de la inactivación.',
+    // RN-IDA-PT-10: the label, the placeholder and the button follow the status (Mockup `admin-detalle-operador.html`).
+    reasonLabel: (active: boolean) => (active ? 'Motivo de la inactivación' : 'Motivo de la reactivación'),
+    reasonPlaceholder: (active: boolean) => (active ? 'Ingresa el motivo obligatorio para inactivar el operador.' : 'Ingresa el motivo obligatorio para reactivar el operador.'),
+    reasonRequired: (active: boolean) => (active ? 'Ingresa el motivo de la inactivación.' : 'Ingresa el motivo de la reactivación.'),
     reasonShown: 'Motivo registrado',
-    inactivate: 'Inactivar operador',
-    visualOnly: 'Esta acción es solo visual en esta versión: no inactiva el operador.',
+    changedBy: (who: string, when: string) => `Responsable: ${who} · ${when}`,
+    action: (active: boolean) => (active ? 'Inactivar operador' : 'Reactivar operador'),
+    // RN-IDA-PT-10: the confirmation names the tenant and lists what the Mockup lists for each direction.
+    confirmTitle: (active: boolean, name: string) => (active ? `¿Inactivar a ${name}?` : `¿Reactivar a ${name}?`),
+    confirmButton: (active: boolean) => (active ? 'Confirmar inactivación' : 'Confirmar reactivación'),
+    cancel: 'Cancelar',
+    consequences: {
+      inactivate: [
+        'Se revocan de inmediato los accesos de operación normal de sus usuarios; sus sesiones se cierran.',
+        'No se aceptan nuevas autenticaciones ni reservas; el historial y la auditoría se conservan.',
+        'El Administrador del tenant conserva un acceso restringido para atender obligaciones pendientes.',
+      ],
+      reactivate: [
+        'La reactivación es una acción explícita y queda registrada con responsable, fecha, hora y motivo.',
+        'Cada plazo operativo continúa con el tiempo restante que tenía al inactivarse el tenant.',
+      ],
+    },
+    // RN-IDA-PT-11: a 422 means the status already changed; anything else is the common refusal message.
+    alreadyChanged: 'El estado del operador ya cambió. Actualiza para ver el estado actual y vuelve a intentarlo si corresponde.',
+    reload: 'Actualizar',
     notFound: 'No encontramos este operador.',
     scopeEyebrow: 'Alcance del Administrador de plataforma',
     scopeTitle: 'Soporte administrativo, no operativo',
