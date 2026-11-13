@@ -129,7 +129,6 @@ export const messages = {
     sending: 'Registrando…',
     haveAccount: '¿Ya tienes una cuenta?',
     signIn: 'Inicia sesión',
-    created: 'Cuenta creada. Inicia sesión.',
     firstNameRequired: 'Ingresa tu nombre.',
     lastNameRequired: 'Ingresa tu apellido.',
     phoneRequired: 'Ingresa tu número de teléfono.',
@@ -145,6 +144,25 @@ export const messages = {
       password: 'La contraseña no cumple los requisitos.',
       passwordConfirmation: 'Las contraseñas no coinciden.',
     },
+  },
+  // Screens A and C of portal spec 013: the notice after registering and the form to ask for a new link.
+  verifyEmail: {
+    title: 'Verifica tu correo',
+    created: 'Creamos tu cuenta en',
+    sentTo: 'y enviamos un enlace de verificación a',
+    inactive: 'Tu cuenta permanece',
+    inactiveWord: 'inactiva',
+    untilOpened: 'hasta que abras ese enlace. El enlace vence en 24 horas.',
+    resend: 'Reenviar enlace',
+    goToSignIn: 'Ir a iniciar sesión',
+    sent: 'Si tu cuenta está pendiente de verificación, te enviamos un nuevo enlace. Revisa tu correo, también la carpeta de spam.',
+  },
+  requestLink: {
+    title: 'Pedir un nuevo enlace',
+    subtitle: 'Escribe el correo con el que creaste tu cuenta.',
+    submit: 'Enviar enlace',
+    sending: 'Enviando…',
+    backToSignIn: 'Volver a iniciar sesión',
   },
   sending: 'Ingresando…',
 } as const;

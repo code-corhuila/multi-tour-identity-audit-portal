@@ -70,7 +70,7 @@ describe('RegisterScreen', () => {
     const { onDone } = setup(request);
     fillAll();
     send();
-    await waitFor(() => expect(onDone).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(onDone).toHaveBeenCalledWith('Laura@Example.com'));
     const [path, init] = request.mock.calls[0];
     expect(path).toBe('/api/v1/security/public/tenants/acme/accounts');
     expect(init.method).toBe('POST');
