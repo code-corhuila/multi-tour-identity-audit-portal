@@ -68,5 +68,11 @@ export function useChangeLocalization(apiClient: ApiClient) {
     }
   }
 
-  return { sending, failure, saved, submit };
+  // The person chose something else: the refusal and the "saved" line of the earlier save no longer describe the screen.
+  function reset() {
+    setFailure(null);
+    setSaved(false);
+  }
+
+  return { sending, failure, saved, submit, reset };
 }

@@ -1,4 +1,5 @@
 import { AreaCard } from '../shell/AreaCard';
+import { localizationMessages } from '../localization/messages';
 import { visualIdentityMessages } from '../visualIdentity/messages';
 import { formatToday } from './formatToday';
 import { homeTestData, type HomeData } from './homeTestData';
@@ -11,6 +12,7 @@ export interface OperationHomeProps {
   commercialHref: string;
   canEditIdentity: boolean;
   onOpenIdentity: () => void;
+  onOpenLocalization: () => void;
   onOpenProfile: () => void;
   // Test numbers: absent in the production build, where the home shows dashes (RN-CAL-HOM-02).
   data?: HomeData | null;
@@ -20,7 +22,7 @@ const defaultData: HomeData | undefined = import.meta.env.DEV ? homeTestData : u
 
 // "Control de la operación" (Mockup admin-operador.html) in the slot of the staff frame. A leaf the router can drop if
 // the commercial portal builds the same page (spec 011 D-02).
-export function OperationHome({ identifier, commercialHref, canEditIdentity, onOpenIdentity, onOpenProfile, data: given }: OperationHomeProps) {
+export function OperationHome({ identifier, commercialHref, canEditIdentity, onOpenIdentity, onOpenLocalization, onOpenProfile, data: given }: OperationHomeProps) {
   const data = given === undefined ? defaultData : given;
   const value = (n: number | string | undefined) => (n === undefined ? text.none : String(n));
   const daily = [data?.createdToday, data?.pendingPayment, data?.confirmed, data?.confirmedWithBalance, data?.cancelled, data?.upcoming];
@@ -69,6 +71,7 @@ export function OperationHome({ identifier, commercialHref, canEditIdentity, onO
         <AreaCard {...cards.payments} />
         <AreaCard {...cards.operations} />
         {canEditIdentity && <AreaCard title={visualIdentityMessages.card} body={visualIdentityMessages.cardBody} onSelect={onOpenIdentity} />}
+        {canEditIdentity && <AreaCard title={localizationMessages.card} body={localizationMessages.cardBody} onSelect={onOpenLocalization} />}
       </div>
     </div>
   );
