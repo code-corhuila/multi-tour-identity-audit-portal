@@ -80,6 +80,18 @@ export function requestPasswordRecovery(client: ApiClient, identifier: string | 
   return client.request<void>(passwordRecoveryPath(identifier), { method: 'POST', body: { email }, signal });
 }
 
+export interface ResetPasswordRequest {
+  email: string;
+  code: string;
+  newPassword: string;
+  newPasswordConfirmation: string;
+}
+
+// The code and the passwords go in the body and nowhere else; no Idempotency-Key, a code works once.
+export function resetPassword(client: ApiClient, identifier: string | undefined, body: ResetPasswordRequest, signal: AbortSignal): Promise<void> {
+  return client.request<void>(`${passwordRecoveryPath(identifier)}/resets`, { method: 'POST', body, signal });
+}
+
 export function createCustomerPath(identifier: string): string {
   if (!isValidIdentifier(identifier)) throw new Error('Invalid company identifier');
   return `/api/v1/security/public/tenants/${identifier}/accounts`;
