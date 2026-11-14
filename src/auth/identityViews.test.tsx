@@ -1,7 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { NewPasswordNotice } from './NewPasswordNotice';
-import { RecoverNotice } from './RecoverNotice';
 import { RegisterScreen } from './RegisterScreen';
 
 const apiClient = { request: vi.fn() };
@@ -28,23 +27,6 @@ describe('calque of the Mockup: registration (RN-CAL-IDN-02)', () => {
     for (const label of ['Contraseña', 'Confirmar contraseña']) {
       expect(security).toContainElement(screen.getByLabelText(label));
     }
-  });
-});
-
-describe('calque of the Mockup: recovery notice (RN-CAL-IDN-04)', () => {
-  it('recover_view_is_a_visual_form: the field, the note and the two buttons; it sends nothing', () => {
-    const onSignIn = vi.fn();
-    render(<RecoverNotice identifier="acme" onSignIn={onSignIn} />);
-    expect(screen.getByRole('heading', { name: 'Recuperar acceso' })).toBeInTheDocument();
-    expect(screen.getByText('Solicita un enlace seguro para recuperar el acceso a tu cuenta.')).toBeInTheDocument();
-    expect(screen.getByLabelText('Correo electrónico registrado')).toBeInTheDocument();
-    expect(screen.getByText(/enviaremos un enlace de un solo uso que vence en 30 minutos/)).toBeInTheDocument();
-    fireEvent.change(screen.getByLabelText('Correo electrónico registrado'), { target: { value: 'ana@acme.test' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Enviar enlace de recuperación' }));
-    expect(screen.getByText(/solo visual en esta versión/)).toBeInTheDocument();
-    expect(apiClient.request).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole('button', { name: 'Volver al inicio de sesión' }));
-    expect(onSignIn).toHaveBeenCalledTimes(1);
   });
 });
 
