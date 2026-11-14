@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from 'react';
 import type { ApiClient } from '../contract';
-import { endOfDay, startOfDay, toAuditEvent, type AuditEvent } from './audit';
+import { auditPeriod, toAuditEvent, type AuditEvent } from './audit';
 import { AuditFilters, NO_FILTERS, type AuditFilterValues } from './AuditFilters';
 import { auditMessages as text } from './auditMessages';
 import { AuditDetailDialog } from './AuditDetailDialog';
@@ -16,11 +16,7 @@ const LIMIT = 20;
 export function AuditView({ apiClient }: { apiClient: ApiClient }) {
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<AuditFilterValues>(NO_FILTERS);
-  // A period that ends before it starts is not asked: the other filters still are, and the field says why (RN-IDA-PT-26).
-  const from = startOfDay(filters.fromDay);
-  const toStart = startOfDay(filters.toDay);
-  const invalidPeriod = from !== undefined && toStart !== undefined && toStart < from;
-  const period = invalidPeriod ? {} : { from, to: endOfDay(filters.toDay) };
+  const { invalidPeriod, period } = auditPeriod(filters.fromDay, filters.toDay);
   // Only what was really asked counts: an inverted period is not asked, so on its own it is not a filter that matched nothing.
   const filtered = Boolean(filters.action || filters.tenantId || period.from || period.to);
   const { state, retry } = useAuditRecords(apiClient, {
