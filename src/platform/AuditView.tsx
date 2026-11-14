@@ -1,21 +1,32 @@
-import { useEffect, useRef, useState } from 'react';
-import type { AuditEvent, AuditSource } from './audit';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { ApiClient } from '../contract';
+import { toAuditEvent, type AuditEvent } from './audit';
+import { tenantMessages as pager } from '../tenants/messages';
 import { auditMessages as text } from './auditMessages';
 import { PageHeader } from './PageHeader';
-import { useAuditEvents } from './useAuditEvents';
+import { useAuditRecords } from './useAuditRecords';
+import { useOperatorNames } from './useOperatorNames';
 import './audit.css';
 
+const LIMIT = 20;
+
 const fields = ['occurredAt', 'action', 'operator', 'change', 'actor', 'reason'] as const;
+// The extended part of the record, for the detail only (HU-IDA-002 AC2).
+const extended = ['affectedRecord', 'previousValue', 'newValue', 'channelOrModule', 'functionalReference'] as const;
+const objects: ReadonlySet<string> = new Set(['previousValue', 'newValue']);
 
 // "2026-10-12T14:32:00Z" is shown as "2026-10-12 14:32 UTC".
 const when = (iso: string) => `${iso.slice(0, 10)} ${iso.slice(11, 16)} UTC`;
 const valueOf = (event: AuditEvent, field: (typeof fields)[number]) => (field === 'occurredAt' ? when(event.occurredAt) : event[field]);
 
-export function AuditView({ source }: { source?: AuditSource }) {
-  const { state, retry } = useAuditEvents(source);
+export function AuditView({ apiClient }: { apiClient: ApiClient }) {
+  const [page, setPage] = useState(1);
+  const { state, retry } = useAuditRecords(apiClient, { page, limit: LIMIT });
+  const names = useOperatorNames(apiClient);
   const [selected, setSelected] = useState<AuditEvent | null>(null);
   const dialog = useRef<HTMLDialogElement>(null);
   const trigger = useRef<HTMLButtonElement | null>(null);
+  const rows = useMemo(() => (state.kind === 'data' ? state.page.data.map((record) => toAuditEvent(record, names)) : []), [state, names]);
 
   // The native dialog gives the modal behaviour, the focus trap and Escape (spec 008 D-01).
   useEffect(() => {
@@ -44,8 +55,6 @@ export function AuditView({ source }: { source?: AuditSource }) {
         <p>{text.introNote}</p>
       </section>
       <section className="platform-panel">
-        {/* The rows come from the test source until the audit service exists (RN-CAL-AUD-04). */}
-        {import.meta.env.DEV && <p className="platform-eyebrow">{text.testData}</p>}
         {state.kind === 'loading' && <p role="status">{text.loading}</p>}
         {state.kind === 'error' && (
           <div role="alert">
@@ -55,8 +64,9 @@ export function AuditView({ source }: { source?: AuditSource }) {
             </button>
           </div>
         )}
-        {state.kind === 'data' && state.rows.length === 0 && <p>{text.empty}</p>}
-        {state.kind === 'data' && state.rows.length > 0 && (
+        {state.kind === 'data' && rows.length === 0 && <p>{text.empty}</p>}
+        {state.kind === 'data' && rows.length > 0 && (
+          <>
           <div className="platform-table-wrap">
             <table className="platform-table">
               <thead>
@@ -69,7 +79,7 @@ export function AuditView({ source }: { source?: AuditSource }) {
                 </tr>
               </thead>
               <tbody>
-                {state.rows.map((row) => (
+                {rows.map((row) => (
                   <tr key={row.id}>
                     {fields.map((f) => (
                       <td key={f}>{valueOf(row, f)}</td>
@@ -84,6 +94,16 @@ export function AuditView({ source }: { source?: AuditSource }) {
               </tbody>
             </table>
           </div>
+          <nav className="platform-pages" aria-label={pager.pagination}>
+            <button type="button" className="platform-outline" disabled={page <= 1} onClick={() => setPage(page - 1)}>
+              {pager.previous}
+            </button>
+            <span>{pager.pageOf(state.page.meta.page, state.page.meta.totalPages)}</span>
+            <button type="button" className="platform-outline" disabled={page >= state.page.meta.totalPages} onClick={() => setPage(page + 1)}>
+              {pager.next}
+            </button>
+          </nav>
+          </>
         )}
       </section>
       <dialog ref={dialog} className="platform-audit-dialog" aria-labelledby="platform-audit-dialog-title" onClose={closed}>
@@ -97,13 +117,23 @@ export function AuditView({ source }: { source?: AuditSource }) {
           </button>
         </div>
         <dl className="platform-audit-detail-grid">
-          {selected &&
-            fields.map((f) => (
-              <div key={f}>
-                <dt>{text.columns[f]}</dt>
-                <dd>{valueOf(selected, f)}</dd>
-              </div>
-            ))}
+          {selected && (
+            <>
+              {fields.map((f) => (
+                <div key={f}>
+                  <dt>{text.columns[f]}</dt>
+                  <dd>{valueOf(selected, f)}</dd>
+                </div>
+              ))}
+              {extended.map((f) => (
+                <div key={f}>
+                  <dt>{text.detail[f]}</dt>
+                  {/* The value before and after are objects printed as text: React escapes it, nothing in it can become markup. */}
+                  <dd>{objects.has(f) && selected[f] !== text.none ? <pre>{selected[f]}</pre> : selected[f]}</dd>
+                </div>
+              ))}
+            </>
+          )}
         </dl>
       </dialog>
     </>
