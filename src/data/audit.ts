@@ -34,17 +34,34 @@ export interface AuditQuery {
   to?: string;
 }
 
-// Relative path: the container's client adds the gateway (RN-IDA-PT-08). A filter that is empty is left out, because the
-// service answers 400 to an empty action and the screen means "all" by not choosing one.
-export function auditPath({ page, limit, tenantId, action, from, to }: AuditQuery): string {
+// What the person chose to narrow the audit of the own tenant. There is no tenant here: the service takes it from the token and
+// answers 400 to a `tenantId`, so the type cannot carry one (spec 015, plan D-02).
+export type OwnAuditQuery = Omit<AuditQuery, 'tenantId'>;
+
+function queryString({ page, limit, tenantId, action, from, to }: AuditQuery): string {
   const query = new URLSearchParams({ page: String(page), limit: String(limit) });
   if (tenantId) query.set('tenantId', tenantId);
   if (action) query.set('action', action);
   if (from) query.set('from', from);
   if (to) query.set('to', to);
-  return `/api/v1/identity-audit/audit-records?${query}`;
+  return String(query);
+}
+
+// Relative path: the container's client adds the gateway (RN-IDA-PT-08). A filter that is empty is left out, because the
+// service answers 400 to an empty action and the screen means "all" by not choosing one.
+export function auditPath(query: AuditQuery): string {
+  return `/api/v1/identity-audit/audit-records?${queryString(query)}`;
+}
+
+// The same, for the audit of the tenant of the token; a tenant forced past the type is dropped here as well.
+export function ownAuditPath({ page, limit, action, from, to }: OwnAuditQuery): string {
+  return `/api/v1/identity-audit/tenant/audit-records?${queryString({ page, limit, action, from, to })}`;
 }
 
 export function listAuditRecords(client: ApiClient, query: AuditQuery, signal: AbortSignal): Promise<AuditPage> {
   return client.request<AuditPage>(auditPath(query), { signal });
+}
+
+export function listOwnAuditRecords(client: ApiClient, query: OwnAuditQuery, signal: AbortSignal): Promise<AuditPage> {
+  return client.request<AuditPage>(ownAuditPath(query), { signal });
 }

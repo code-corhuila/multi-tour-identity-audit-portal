@@ -3,6 +3,7 @@ import { PageHeader } from '../platform/PageHeader';
 import type { StaffMember, StaffSource } from './staff';
 import { staffMessages } from './messages';
 import { useStaffMembers } from './useStaffMembers';
+import type { ApiClient } from '../contract';
 import { OptionalRolesPanel } from './OptionalRolesPanel';
 import { RegionalSettingsPanel } from './RegionalSettingsPanel';
 import '../tenants/operator.css';
@@ -30,10 +31,12 @@ export interface StaffListViewProps {
   onRegister: () => void;
   onOpen: (id: string) => void;
   source?: StaffSource;
+  // The client of the container: with it the optional-roles panel offers the switches of the audit access (HU-IDA-002 AC6).
+  apiClient?: ApiClient;
 }
 
 // List of the staff frame (Mockup admin-colaboradores.html): header, band, team table and the permissions panel.
-export function StaffListView({ onRegister, onOpen, source }: StaffListViewProps) {
+export function StaffListView({ onRegister, onOpen, source, apiClient }: StaffListViewProps) {
   const { state, retry } = useStaffMembers(source);
   const [show, setShow] = useState<Show>('all');
   return (
@@ -122,7 +125,7 @@ export function StaffListView({ onRegister, onOpen, source }: StaffListViewProps
           </div>
         )}
       </section>
-      <OptionalRolesPanel />
+      <OptionalRolesPanel apiClient={apiClient} />
       <PermissionsExplained />
       <RegionalSettingsPanel />
     </>

@@ -7,5 +7,10 @@ export const STAFF_ROLES = ['TENANT_ADMINISTRATOR', 'OPERATIONAL_COLLABORATOR', 
 
 export const isStaff = (roles: string[]): boolean => roles.some((r) => STAFF_ROLES.includes(r));
 
+// Who is offered the entry "Auditoría" of the tenant. The service decides who may read (AC5); this only decides what to show. The
+// Accountant is left out until the service gives it just the economic events (portal spec 015 R3 (a); debt G-ACC of identity-audit-api spec 007).
+const TENANT_AUDIT_READERS = ['TENANT_ADMINISTRATOR', 'MANAGER', 'ANALYST'];
+export const canReadTenantAudit = (roles: string[]): boolean => roles.some((r) => TENANT_AUDIT_READERS.includes(r));
+
 // The only area of the container reachable in this version (route of multi-tour-front).
 export const commercialAreaHref = (identifier: string): string => `/t/${identifier}/areas/commercial-reservation-portal`;

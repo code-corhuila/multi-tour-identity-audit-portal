@@ -3,7 +3,7 @@ import { NavLink } from './navigation';
 import { staffFrameMessages as text } from './staffFrameMessages';
 import './staffFrame.css';
 
-export type StaffItem = 'summary' | 'staff';
+export type StaffItem = 'summary' | 'staff' | 'audit';
 
 type Entry = { label: string } & ({ kind: 'own'; item: StaffItem } | { kind: 'link' } | { kind: 'soon' });
 
@@ -19,6 +19,7 @@ const ENTRIES: readonly Entry[] = [
   { label: 'Operación', kind: 'soon' },
   { label: 'Notificaciones', kind: 'soon' },
   { label: 'Reportes', kind: 'soon' },
+  { label: 'Auditoría', kind: 'own', item: 'audit' },
   { label: 'Colaboradores', kind: 'own', item: 'staff' },
 ];
 
@@ -29,13 +30,16 @@ export interface StaffFrameProps {
   onSignOut: () => void;
   // The collaborator sees the same frame without the administrator's items (the role comes from the account).
   canManageStaff?: boolean;
+  // The roles that may read the audit of the tenant are offered its entry (spec 015 RN-IDA-PT-36).
+  canReadAudit?: boolean;
   onOpenProfile?: () => void;
   children: ReactNode;
 }
 
 // Frame shared by the staff views (spec 009 D-01, spec 011): the light sidebar of the Mockup and the content slot.
-export function StaffFrame({ current, commercialHref, onNavigate, onSignOut, canManageStaff = true, onOpenProfile, children }: StaffFrameProps) {
-  const entries = canManageStaff ? ENTRIES : ENTRIES.filter((entry) => !(entry.kind === 'own' && entry.item === 'staff'));
+export function StaffFrame({ current, commercialHref, onNavigate, onSignOut, canManageStaff = true, canReadAudit = false, onOpenProfile, children }: StaffFrameProps) {
+  const hidden = (entry: Entry) => entry.kind === 'own' && ((entry.item === 'staff' && !canManageStaff) || (entry.item === 'audit' && !canReadAudit));
+  const entries = ENTRIES.filter((entry) => !hidden(entry));
   return (
     <div className="staff-shell">
       <aside className="staff-sidebar">

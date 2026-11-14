@@ -1,3 +1,5 @@
+import type { OptionalRole } from '../data/auditAccess';
+
 // Texts of the staff users views, in Spanish as in the Mockup (admin-colaboradores.html and its sibling views).
 export const staffMessages = {
   eyebrow: 'Gestión del equipo',
@@ -58,6 +60,14 @@ export const staffMessages = {
     title: 'Roles opcionales del tenant',
     copy: 'Gerente, Contador y Analista son opcionales y de solo consulta. Habilita solo los que tu operación necesite: el formulario de registro solo ofrece los habilitados. Cada cambio queda auditado.',
     roles: ['Gerente', 'Contador', 'Analista'],
+    // The role the service names for each one the screen shows (OptionalRole of identity-audit.yaml).
+    codes: { Gerente: 'MANAGER', Contador: 'ACCOUNTANT', Analista: 'ANALYST' } as Record<string, OptionalRole>,
+    auditSwitch: 'Auditoría del tenant',
+    auditSwitchLabel: (role: string) => `Acceso a auditoría de ${role}`,
+    auditChanged: (role: string, on: boolean) => `Acceso a la auditoría de ${role} ${on ? 'habilitado' : 'retirado'}.`,
+    auditChangeFailed: (role: string) => `No pudimos cambiar el acceso a la auditoría de ${role}. Inténtalo de nuevo.`,
+    auditLoadFailed: 'No pudimos cargar el acceso a la auditoría.',
+    retry: 'Reintentar',
     changed: (role: string, on: boolean) => `${role} ${on ? 'habilitado' : 'deshabilitado'} para este tenant. Cambio auditado.`,
   },
   regional: {

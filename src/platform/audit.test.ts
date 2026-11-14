@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { AuditRecordResponse } from '../data/audit';
 import { endOfDay, startOfDay, toAuditEvent } from './audit';
+import { categoryOf } from './auditMessages';
 
 const TENANT = '3f2b8c1e-5d4a-4e7b-9a10-6c2d8e4f0a11';
 const none = new Map<string, string>();
@@ -139,5 +140,32 @@ describe('a day chosen for a period (spec 014, plan D-06)', () => {
     expect(endOfDay('2028-02-29')).toBe('2028-03-01T00:00:00Z');
     expect(endOfDay('2100-02-28')).toBe('2100-03-01T00:00:00Z');
     expect(endOfDay('2026-03-08')).toBe('2026-03-09T00:00:00Z');
+  });
+});
+
+describe('the category of an action (spec 015 section 4, RN-IDA-PT-32)', () => {
+  it('U·the_category_of_an_action_comes_from_its_table_and_an_unknown_one_is_other', () => {
+    const expected: Record<string, string> = {
+      TENANT_CREATED: 'Operadores',
+      TENANT_INACTIVATED: 'Operadores',
+      TENANT_REACTIVATED: 'Operadores',
+      ACCOUNT_BLOCKED: 'Credenciales y contraseñas',
+      ACCOUNT_SESSIONS_REVOKED: 'Credenciales y contraseñas',
+      SPECIAL_PERMISSION_GRANTED: 'Permisos especiales',
+      SPECIAL_PERMISSION_REVOKED: 'Permisos especiales',
+      OPTIONAL_ROLE_ENABLED: 'Usuarios internos',
+      OPTIONAL_ROLE_DISABLED: 'Usuarios internos',
+      AUDIT_ACCESS_ENABLED: 'Usuarios internos',
+      AUDIT_ACCESS_DISABLED: 'Usuarios internos',
+    };
+    for (const [code, category] of Object.entries(expected)) {
+      expect(categoryOf(code), code).toBe(category);
+      expect(toAuditEvent(record({ action: code }), none).category, code).toBe(category);
+    }
+    expect(categoryOf('PAYMENT_VALIDATED')).toBe('Otros');
+    // a code that is also a name of the prototype of an object is an unknown action like any other
+    expect(categoryOf('constructor')).toBe('Otros');
+    expect(categoryOf('__proto__')).toBe('Otros');
+    expect(toAuditEvent(record({ action: 'PAYMENT_VALIDATED' }), none).category).toBe('Otros');
   });
 });

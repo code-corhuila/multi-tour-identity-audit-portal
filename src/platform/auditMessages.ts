@@ -5,7 +5,7 @@ export const auditMessages = {
   introEyebrow: 'Eventos relevantes',
   introTitle: 'Las decisiones sobre operadores dejan evidencia.',
   introNote: 'Consulta altas, cambios de estado y acciones administrativas relevantes. Esta vista no expone datos operativos de los operadores.',
-  columns: { occurredAt: 'Fecha y hora', action: 'Acción', operator: 'Operador', change: 'Cambio', actor: 'Responsable', reason: 'Motivo', detail: 'Detalle' },
+  columns: { occurredAt: 'Fecha y hora', action: 'Acción', operator: 'Operador', change: 'Cambio', category: 'Categoría', actor: 'Responsable', reason: 'Motivo', detail: 'Detalle' },
   dialogEyebrow: 'Evento auditado',
   dialogTitle: 'Detalle de auditoría',
   close: 'Cerrar',
@@ -50,3 +50,19 @@ export const auditMessages = {
     AUDIT_ACCESS_DISABLED: 'Acceso a la auditoría retirado',
   } as Record<string, string>,
 } as const;
+
+// Spec 015 section 4: the group each action belongs to, in the words of the Mockup. A proposal of the screen until 02-domain
+// closes the list of audited events (gap G-1).
+const categories: Record<string, readonly string[]> = {
+  Operadores: ['TENANT_CREATED', 'TENANT_INACTIVATED', 'TENANT_REACTIVATED'],
+  'Credenciales y contraseñas': ['ACCOUNT_BLOCKED', 'ACCOUNT_SESSIONS_REVOKED'],
+  'Permisos especiales': ['SPECIAL_PERMISSION_GRANTED', 'SPECIAL_PERMISSION_REVOKED'],
+  'Usuarios internos': ['OPTIONAL_ROLE_ENABLED', 'OPTIONAL_ROLE_DISABLED', 'AUDIT_ACCESS_ENABLED', 'AUDIT_ACCESS_DISABLED'],
+};
+
+export const OTHER_CATEGORY = 'Otros';
+
+// An action the table does not know is "Otros"; `includes` on an array cannot answer for a name of the prototype of an object.
+export function categoryOf(action: string): string {
+  return Object.entries(categories).find(([, actions]) => actions.includes(action))?.[0] ?? OTHER_CATEGORY;
+}
