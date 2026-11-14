@@ -24,9 +24,11 @@ export interface SignInScreenProps {
   onCreateAccount?: () => void;
   // Called with the e-mail typed when the account is still pending, to open the new-link form (R-2: kept only on screen).
   onRequestLink?: (email: string) => void;
+  // Opens the recovery of the password inside the portal; without it the link goes to the page of the company, as before.
+  onForgotPassword?: () => void;
 }
 
-export function SignInScreen({ identifier, scope, apiClient, session, notice, onSignedIn, onCreateAccount, onRequestLink }: SignInScreenProps) {
+export function SignInScreen({ identifier, scope, apiClient, session, notice, onSignedIn, onCreateAccount, onRequestLink, onForgotPassword }: SignInScreenProps) {
   const platform = (scope ?? (identifier === undefined ? 'platform' : 'tenant')) === 'platform';
   const { sending, failure, unverified, submit, dismissPending } = useSignIn(identifier, apiClient, session);
   const [email, setEmail] = useState('');
@@ -118,10 +120,18 @@ export function SignInScreen({ identifier, scope, apiClient, session, notice, on
           error={errors.password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        {!platform && (
+        {onForgotPassword ? (
           <p className="auth-forgot">
-            <NavLink href={`/t/${identifier}/recuperar`}>{messages.signIn.forgot}</NavLink>
+            <button type="button" className="auth-link" onClick={onForgotPassword}>
+              {messages.signIn.forgot}
+            </button>
           </p>
+        ) : (
+          !platform && (
+            <p className="auth-forgot">
+              <NavLink href={`/t/${identifier}/recuperar`}>{messages.signIn.forgot}</NavLink>
+            </p>
+          )
         )}
         <p className={failure ? 'auth-feedback is-error' : 'auth-feedback is-success'} aria-live="polite" role={!failure && notice ? 'status' : undefined}>
           {failure ?? notice}

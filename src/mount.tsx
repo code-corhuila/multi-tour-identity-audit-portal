@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { CheckEmailNotice } from './auth/CheckEmailNotice';
 import { FirstPasswordScreen } from './auth/FirstPasswordScreen';
 import { readLinkToken, VERIFY_PATH } from './auth/linkToken';
+import { RecoverScreen } from './auth/RecoverScreen';
 import { RegisterScreen } from './auth/RegisterScreen';
 import { RequestLinkScreen } from './auth/RequestLinkScreen';
 import { RestrictedNotice } from './auth/RestrictedNotice';
@@ -30,7 +31,7 @@ export function AccessRoutes({ apiClient, session, identifier: link, scope, comm
   const [saved, setSaved] = useState(false);
   const identifier = link;
   // A tiny view state instead of a router: the container owns the real routes (the link is only a hint).
-  const [view, setView] = useState<'sign-in' | 'sign-up' | 'check-email' | 'request-link' | 'verify'>(() =>
+  const [view, setView] = useState<'sign-in' | 'sign-up' | 'check-email' | 'request-link' | 'verify' | 'recover'>(() =>
     isVerifyAddress(identifier) ? 'verify' : 'sign-in',
   );
   // E-mail typed at registration: the notice names it and the resend asks for a link for it.
@@ -132,6 +133,10 @@ export function AccessRoutes({ apiClient, session, identifier: link, scope, comm
       />
     );
   }
+  // The recovery of the password is for a company and for the platform alike (spec 016).
+  if (view === 'recover') {
+    return <RecoverScreen identifier={identifier} apiClient={apiClient} onSignIn={() => setView('sign-in')} />;
+  }
   if (view === 'request-link' && identifier !== undefined) {
     return <RequestLinkScreen identifier={identifier} apiClient={apiClient} initialEmail={linkEmail} onSignIn={() => setView('sign-in')} />;
   }
@@ -143,6 +148,7 @@ export function AccessRoutes({ apiClient, session, identifier: link, scope, comm
       session={session}
       notice={saved ? messages.firstPassword.saved : undefined}
       onCreateAccount={() => setView('sign-up')}
+      onForgotPassword={() => setView('recover')}
       onRequestLink={(email) => {
         setLinkEmail(email);
         setView('request-link');
