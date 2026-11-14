@@ -49,7 +49,7 @@ describe('SignInScreen at a company', () => {
     const [path, init] = request.mock.calls[0];
     expect(path).toBe('/api/v1/security/public/tenants/acme/sessions');
     expect(init.method).toBe('POST');
-    expect(init.body).toEqual({ email: 'ana@acme.co', password: 'secret-pass' });
+    expect(init.body).toEqual({ email: 'ana@acme.co', password: 'secret-pass', context: 'CUSTOMER' });
   });
 
   it('good_answer_is_handed_to_the_session', async () => {
