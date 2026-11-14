@@ -50,3 +50,21 @@ export function toAuditEvent(record: AuditRecordResponse, operatorNames: Readonl
     functionalReference: record.functionalProcessReference || text.none,
   };
 }
+
+// The start of a day chosen in a date control, in UTC, or nothing when it is no day: empty, a year of five digits (the service
+// would answer 400) or a date that does not exist, which Date.parse would roll over to another one (2026-02-30 to 2026-03-02).
+const dayStart = (day: string): number | undefined => {
+  const start = Date.parse(`${day}T00:00:00Z`);
+  return Number.isNaN(start) || !new Date(start).toISOString().startsWith(day) ? undefined : start;
+};
+
+export function startOfDay(day: string): string | undefined {
+  return dayStart(day) === undefined ? undefined : `${day}T00:00:00Z`;
+}
+
+// The end of a period chosen as a day. The service takes `to` exclusive, so the last day chosen is asked up to the start of the next
+// one, in UTC; built from the text of the day, never through a local time, so the zone of the browser changes nothing.
+export function endOfDay(day: string): string | undefined {
+  const start = dayStart(day);
+  return start === undefined ? undefined : `${new Date(start + 86_400_000).toISOString().slice(0, 19)}Z`;
+}

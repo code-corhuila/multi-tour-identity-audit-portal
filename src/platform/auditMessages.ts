@@ -14,6 +14,17 @@ export const auditMessages = {
   error: 'No pudimos cargar la auditoría. Inténtalo de nuevo.',
   retry: 'Reintentar',
   empty: 'Aún no hay eventos de auditoría.',
+  emptyFiltered: 'No hay eventos que coincidan con los filtros.',
+  filters: {
+    group: 'Filtros',
+    action: 'Acción',
+    operator: 'Operador',
+    from: 'Desde',
+    to: 'Hasta',
+    allActions: 'Todas las acciones',
+    allOperators: 'Todos los operadores',
+    invalidPeriod: 'La fecha final no puede ser anterior a la inicial.',
+  },
   detail: {
     affectedRecord: 'Registro afectado',
     previousValue: 'Valor anterior',

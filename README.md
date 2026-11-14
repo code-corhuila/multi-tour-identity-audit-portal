@@ -21,7 +21,7 @@ The access mark of the session decides the screen. It fails closed: an unknown m
 | Restricted notice | The Administrator of an inactive company | `multi-tour-security` |
 | Customer home and "Mi perfil" | Final Customer | The session (the profile shows the role; name, e-mail and phone read "No registrado" because the token does not carry them) |
 | Staff home, team and permissions | Internal users | Screens on test data; the service does not serve them yet (HU-SEC-005, HU-SEC-006) |
-| Platform panel: tenants, detail, create, audit | Platform Administrator | `multi-tour-identity-audit-api` for the tenants (HU-IDA-001); the audit view shows test data (HU-IDA-002) |
+| Platform panel: tenants, detail, create, audit | Platform Administrator | `multi-tour-identity-audit-api` for the tenants (HU-IDA-001) and for the audit (HU-IDA-002): the records across tenants, 20 per page, narrowed by action, operator and period, with the extended detail of each one |
 | Visual identity of the company | Tenant Administrator | `multi-tour-identity-audit-api` (HU-IDA-003): the primary and the secondary color; the logo and the commercial images are not built |
 
 The visual identity screen takes three optional props from the container, read from the public profile of the company: `visualIdentity`
@@ -29,7 +29,8 @@ The visual identity screen takes three optional props from the container, read f
 container that does not send them still works: the screen starts from the default colors.
 
 Test data is labelled "Datos de prueba" and is left out of the production build
-(`B·test_data_is_not_in_the_production_build`).
+(`B·test_data_is_not_in_the_production_build`). The audit screen has none: it shows only what the service lists
+(`B·audit_test_data_is_not_in_the_build`).
 
 ## The routes
 
@@ -73,8 +74,7 @@ npm run build
 
 There is no Playwright here (decision of 2026-10-23): the render test of each view proves that it loads, and the
 end-to-end criterion of a story is checked on the root composition. The portal holds no `fetch(` call and no address
-today (`grep` over `src/`), but no test enforces it yet: `B·built_files_have_no_client_token_or_gateway_url`, cited by the
-specs, is still to be written (declared debt, norm §5.4.1).
+(`grep` over `src/`), and `B·built_files_have_no_client_token_or_gateway_url` enforces it on the built files (norm §5.4.1).
 
 The CI runs `npm ci`, `npm run build` and `npm test` on every pull request to `develop` and `qa`. While GitHub Actions is
 locked for billing (since 2026-10-14), run the same three commands locally and put their result in the pull request.
@@ -82,7 +82,7 @@ locked for billing (since 2026-10-14), run the same three commands locally and p
 ## What is missing
 
 - The service behind the staff screens: internal users, permissions and optional roles (HU-SEC-005, HU-SEC-006).
-- The audit consultation (HU-IDA-002), so the audit view stops showing test data.
+- The audit of one tenant for its Tenant Administrator and the screen where it enables the audit access of its roles (HU-IDA-002 AC4 to AC6): the service answers them, but there is no screen yet. The audit view of the Platform Administrator shows the records of the services that publish events; those of the services of other owners arrive when they do.
 - Inactivating and reactivating a tenant from the panel sends nothing yet (HU-IDA-001).
 - Password recovery (HU-SEC-004).
 - The logo and the commercial images of the visual identity (HU-IDA-003); a color cannot be cleared back to the default.
