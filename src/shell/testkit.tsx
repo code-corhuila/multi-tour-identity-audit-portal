@@ -31,6 +31,11 @@ export const unmountPortal = async () => {
 const totals: Record<string, number> = { ALL: 3, ACTIVE: 2, INACTIVE: 1 };
 const listRequest = () =>
   vi.fn(async (path: string) => {
+    // The audit screen reads its own route (spec 014): one record, so the screen has something to show.
+    if (path.startsWith('/api/v1/identity-audit/audit-records')) {
+      const data = [{ auditRecordId: 'a1', tenantId: 't1', actorId: 'admin', action: 'TENANT_CREATED', affectedRecordId: 'tenants/t1', recordedAt: '2026-11-06T14:32:00Z' }];
+      return { data, meta: { page: 1, limit: 20, total: 1, totalPages: 1 } };
+    }
     const status = /status=(\w+)/.exec(path)?.[1] ?? 'ALL';
     const data = status === 'ALL' ? [{ tenantId: 't1', identifier: 'sierra-azul', commercialName: 'Sierra Azul', tenantStatus: 'ACTIVE', timeZone: 'America/Bogota', country: 'CO', createdAt: '2026-01-10T08:00:00Z' }] : [];
     return { data, meta: { page: 1, limit: 20, total: totals[status], totalPages: 1 } };

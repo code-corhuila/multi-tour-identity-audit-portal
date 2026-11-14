@@ -26,7 +26,7 @@ export function PlatformShell({ apiClient, session, onSignOut }: { apiClient: Ap
       {page.kind === 'operators' && <OperatorsView apiClient={apiClient} onCreate={toCreate} onOpen={(tenantId) => setPage({ kind: 'detail', tenantId })} />}
       {page.kind === 'create' && <CreateOperatorView apiClient={apiClient} onBack={toOperators} />}
       {page.kind === 'detail' && <OperatorDetailView apiClient={apiClient} tenantId={page.tenantId} onBack={toOperators} />}
-      {page.kind === 'audit' && <AuditView />}
+      {page.kind === 'audit' && <AuditView apiClient={apiClient} />}
     </PlatformFrame>
   );
 }
