@@ -16,3 +16,9 @@
 .platform-audit-detail-grid dd { margin: 4px 0 0; color: #172426; font-weight: 600; }
 @media (prefers-reduced-motion: reduce) { .platform-dialog-open, .platform-dialog-close { transition: none; } }
 .platform-audit-detail-grid pre { margin: 4px 0 0; max-width: 100%; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 0.82rem; font-weight: 500; }
+.platform-filters { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-start; margin-bottom: 18px; }
+.platform-field { display: grid; gap: 6px; }
+.platform-field label { color: #172426; font-size: 0.82rem; font-weight: 700; }
+.platform-field select, .platform-field input { min-height: 44px; padding: 0 12px; border: 1px solid #c8d5cf; border-radius: 10px; background: #ffffff; color: #172426; font: inherit; }
+.platform-field select:focus-visible, .platform-field input:focus-visible { outline: 3px solid #e9a23b; outline-offset: 2px; }
+.platform-field-error { margin: 0; color: #9a2d2d; font-size: 0.82rem; font-weight: 700; }
