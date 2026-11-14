@@ -46,7 +46,7 @@ describe('calque of the Mockup: the sign-in view (RN-CAL-IDN-02, -03, -05)', () 
     expect(screen.getAllByRole('textbox').length + document.querySelectorAll('input').length).toBe(before);
   });
 
-  it('request_is_the_same_for_both_tabs', async () => {
+  it('request_differs_between_the_tabs_only_by_the_side_asked', async () => {
     const request = vi.fn().mockResolvedValue(answer);
     setup('acme', request);
     fill();
@@ -57,7 +57,11 @@ describe('calque of the Mockup: the sign-in view (RN-CAL-IDN-02, -03, -05)', () 
     fill();
     fireEvent.click(screen.getByRole('button', { name: 'Iniciar sesión' }));
     await waitFor(() => expect(request).toHaveBeenCalledTimes(2));
-    expect(request.mock.calls[1]).toEqual(request.mock.calls[0]);
+    // same route and same credentials; the tab names the side (HU-SEC-008)
+    expect(request.mock.calls[0][1].body).toMatchObject({ context: 'CUSTOMER' });
+    expect(request.mock.calls[1][1].body).toMatchObject({ context: 'TEAM' });
+    expect(request.mock.calls[1][0]).toEqual(request.mock.calls[0][0]);
+    expect({ ...request.mock.calls[1][1].body, context: undefined }).toEqual({ ...request.mock.calls[0][1].body, context: undefined });
   });
 
   it('platform_link_and_back_link_go_to_the_right_route', () => {
