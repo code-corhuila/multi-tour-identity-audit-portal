@@ -6,7 +6,7 @@ import { homeTestData } from './homeTestData';
 
 afterEach(() => vi.useRealTimers());
 
-const props = { identifier: 'sierra-azul', commercialHref: '/t/sierra-azul/areas/commercial-reservation-portal', canEditIdentity: true, onOpenIdentity: vi.fn(), onOpenLocalization: vi.fn(), onOpenProfile: vi.fn() };
+const props = { identifier: 'sierra-azul', commercialHref: '/t/sierra-azul/areas/commercial-reservation-portal', canEditIdentity: true, onOpenIdentity: vi.fn(), onOpenLocalization: vi.fn(), onOpenBranding: vi.fn(), onOpenProfile: vi.fn() };
 
 describe('staff home Control de la operación (spec 011, RN-CAL-HOM-01 to 05)', () => {
   it('U·home_renders_its_mockup_parts: header, hero, the two metric groups and the four cards, in order', () => {
