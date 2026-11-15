@@ -1,20 +1,23 @@
 import { useState } from 'react';
 import type { ApiClient, MountProps, Session } from '../contract';
 import { ProfileScreen } from '../profile/ProfileScreen';
+import { BrandingScreen } from '../branding/BrandingScreen';
+import { LocalizationScreen } from '../localization/LocalizationScreen';
 import { VisualIdentityScreen } from '../visualIdentity/VisualIdentityScreen';
 import { OperationHome } from '../home/OperationHome';
 import { StaffDetailView } from '../staff/StaffDetailView';
 import { StaffListView } from '../staff/StaffListView';
 import { RegisterStaffView } from '../staff/RegisterStaffView';
+import { TenantAuditView } from '../tenantAudit/TenantAuditView';
 import { StaffFrame, type StaffItem } from '../ui/StaffFrame';
 import { shellMessages } from './messages';
-import { commercialAreaHref, TENANT_ADMINISTRATOR } from './roles';
+import { canReadTenantAudit, commercialAreaHref, TENANT_ADMINISTRATOR } from './roles';
 import { TopBar } from './TopBar';
 import '../tenants/operator.css';
 
 const text = shellMessages.staff;
 
-export interface StaffHomeProps extends Pick<MountProps, 'commercialName' | 'visualIdentity' | 'onVisualIdentityChange'> {
+export interface StaffHomeProps extends Pick<MountProps, 'commercialName' | 'visualIdentity' | 'onVisualIdentityChange' | 'onLocalizationChange' | 'logoUrl' | 'images' | 'onTenantImagesChange'> {
   identifier: string;
   session: Session;
   apiClient: ApiClient;
@@ -24,14 +27,15 @@ export interface StaffHomeProps extends Pick<MountProps, 'commercialName' | 'vis
 // "Control de la operación" (Mockup admin-operador.html): the areas of the operator. Only the ones that have a route in
 // this version are links; the rest are shown disabled. The Tenant Administrator also gets the visual identity card, which
 // opens its screen inside this same panel (portal spec 005, PT-09).
-export function StaffHome({ identifier, session, apiClient, commercialName, visualIdentity, onVisualIdentityChange, onSignOut }: StaffHomeProps) {
-  const [view, setView] = useState<'home' | 'identity' | 'profile' | 'staff' | 'staff-detail' | 'staff-register'>('home');
+export function StaffHome({ identifier, session, apiClient, commercialName, visualIdentity, onVisualIdentityChange, onLocalizationChange, logoUrl, images, onTenantImagesChange, onSignOut }: StaffHomeProps) {
+  const [view, setView] = useState<'home' | 'identity' | 'localization' | 'branding' | 'profile' | 'staff' | 'staff-detail' | 'staff-register' | 'audit'>('home');
   const [memberId, setMemberId] = useState('');
   const area = commercialAreaHref(identifier);
   const canEditIdentity = session.roles.includes(TENANT_ADMINISTRATOR);
   // The collaborators are managed by the Tenant Administrator; the other staff roles get the frame without that item.
   const canManageStaff = canEditIdentity;
-  const go = (item: StaffItem) => setView(item === 'staff' && canManageStaff ? 'staff' : 'home');
+  const canReadAudit = canReadTenantAudit(session.roles);
+  const go = (item: StaffItem) => setView(item === 'staff' && canManageStaff ? 'staff' : item === 'audit' && canReadAudit ? 'audit' : 'home');
 
   if (view === 'profile') {
     return <ProfileScreen session={session} backLabel="Volver al panel" onBack={() => setView('home')} onSignOut={onSignOut} />;
@@ -53,18 +57,47 @@ export function StaffHome({ identifier, session, apiClient, commercialName, visu
     );
   }
 
+  if (view === 'branding' && canEditIdentity) {
+    return (
+      <div className="shell">
+        <TopBar role={text.role} onSignOut={onSignOut} />
+        <BrandingScreen
+          apiClient={apiClient}
+          session={session}
+          commercialName={commercialName}
+          logoUrl={logoUrl}
+          images={images}
+          onTenantImagesChange={onTenantImagesChange}
+          onBack={() => setView('home')}
+        />
+      </div>
+    );
+  }
+
+  if (view === 'localization' && canEditIdentity) {
+    return (
+      <div className="shell">
+        <TopBar role={text.role} onSignOut={onSignOut} />
+        <LocalizationScreen apiClient={apiClient} session={session} onLocalizationChange={onLocalizationChange} onBack={() => setView('home')} />
+      </div>
+    );
+  }
+
   const onStaffView = canManageStaff && view.startsWith('staff');
+  const onAudit = view === 'audit' && canReadAudit;
   return (
     <StaffFrame
-      current={onStaffView ? 'staff' : 'summary'}
+      current={onStaffView ? 'staff' : onAudit ? 'audit' : 'summary'}
       commercialHref={area}
       canManageStaff={canManageStaff}
+      canReadAudit={canReadAudit}
       onNavigate={go}
       onOpenProfile={() => setView('profile')}
       onSignOut={onSignOut}
     >
       {onStaffView && view === 'staff' && (
         <StaffListView
+          apiClient={apiClient}
           onRegister={() => setView('staff-register')}
           onOpen={(id) => {
             setMemberId(id);
@@ -74,11 +107,14 @@ export function StaffHome({ identifier, session, apiClient, commercialName, visu
       )}
       {onStaffView && view === 'staff-detail' && <StaffDetailView id={memberId} onBack={() => setView('staff')} />}
       {onStaffView && view === 'staff-register' && <RegisterStaffView tenantName={commercialName ?? identifier} onBack={() => setView('staff')} />}
-      {!onStaffView && <OperationHome
+      {onAudit && <TenantAuditView apiClient={apiClient} administrator={canEditIdentity} />}
+      {!onStaffView && !onAudit && <OperationHome
         identifier={identifier}
         commercialHref={area}
         canEditIdentity={canEditIdentity}
         onOpenIdentity={() => setView('identity')}
+        onOpenLocalization={() => setView('localization')}
+        onOpenBranding={() => setView('branding')}
         onOpenProfile={() => setView('profile')}
       />}
     </StaffFrame>

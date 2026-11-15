@@ -1,4 +1,4 @@
-import type { ApiClient } from '../contract';
+import type { ApiClient, VisualIdentity } from '../contract';
 
 // Names and values of `TenantResponse` and `TenantStatus` in identity-audit.yaml.
 export type TenantStatus = 'PENDING' | 'ACTIVE' | 'INACTIVE' | 'FAILED';
@@ -15,6 +15,7 @@ export interface TenantResponse {
   statusChangedBy?: string | null;
   statusReason?: string | null;
   failedStep?: 'CREATE_ACCOUNT' | 'APPLY_STATUS' | null;
+  visualIdentity?: VisualIdentity | null;
   createdAt: string;
 }
 
@@ -53,4 +54,14 @@ const tenantPath = (tenantId: string) => `/api/v1/identity-audit/tenants/${encod
 
 export function getTenant(client: ApiClient, tenantId: string, signal: AbortSignal): Promise<TenantResponse> {
   return client.request<TenantResponse>(tenantPath(tenantId), { signal });
+}
+
+// RN-IDA-PT-10, -11: no Idempotency-Key, because neither route creates a resource; a repeat is already the
+// service's 422 INVALID_STATUS_TRANSITION.
+export function inactivateTenant(client: ApiClient, tenantId: string, reason: string, signal?: AbortSignal): Promise<TenantResponse> {
+  return client.request<TenantResponse>(`${tenantPath(tenantId)}/inactivate`, { method: 'POST', body: { reason }, signal });
+}
+
+export function reactivateTenant(client: ApiClient, tenantId: string, reason: string, signal?: AbortSignal): Promise<TenantResponse> {
+  return client.request<TenantResponse>(`${tenantPath(tenantId)}/reactivate`, { method: 'POST', body: { reason }, signal });
 }

@@ -22,15 +22,19 @@ export interface SignInScreenProps {
   onSignedIn?: () => void;
   // When given, the 'Crear cuenta' link calls it instead of navigating (the container owns real routes).
   onCreateAccount?: () => void;
+  // Called with the e-mail typed when the account is still pending, to open the new-link form (R-2: kept only on screen).
+  onRequestLink?: (email: string) => void;
+  // Opens the recovery of the password inside the portal; without it the link goes to the page of the company, as before.
+  onForgotPassword?: () => void;
 }
 
-export function SignInScreen({ identifier, scope, apiClient, session, notice, onSignedIn, onCreateAccount }: SignInScreenProps) {
+export function SignInScreen({ identifier, scope, apiClient, session, notice, onSignedIn, onCreateAccount, onRequestLink, onForgotPassword }: SignInScreenProps) {
   const platform = (scope ?? (identifier === undefined ? 'platform' : 'tenant')) === 'platform';
-  const { sending, failure, submit } = useSignIn(identifier, apiClient, session);
+  const { sending, failure, unverified, submit, dismissPending } = useSignIn(identifier, apiClient, session);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
-  // The tab only changes the copy: both call the same company session endpoint (Mockup login.html). `?tab=operador`
+  // Both tabs call the same company session endpoint (Mockup login.html) and differ in the side they ask for. `?tab=operador`
   // preselects it.
   const [operator, setOperator] = useState(() => new URLSearchParams(window.location.search).get('tab') === 'operador');
   const [teamProfile, setTeamProfile] = useState<TeamProfile>('admin');
@@ -47,8 +51,9 @@ export function SignInScreen({ identifier, scope, apiClient, session, notice, on
       focusField(first);
       return;
     }
-    // The profile is only checked on the operator tab; it is never sent.
-    if (await submit({ email: email.trim(), password }, !platform && operator ? teamProfile : undefined)) {
+    // The tab names the side asked of the service; the profile is only checked on the operator tab and is never sent.
+    const context = platform ? undefined : operator ? 'TEAM' : 'CUSTOMER';
+    if (await submit({ email: email.trim(), password, ...(context && { context }) }, !platform && operator ? teamProfile : undefined)) {
       setPassword('');
       onSignedIn?.();
     }
@@ -103,7 +108,10 @@ export function SignInScreen({ identifier, scope, apiClient, session, notice, on
           placeholder={messages.fields.emailPlaceholder}
           value={email}
           error={errors.email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            dismissPending();
+          }}
         />
         <PasswordField
           id="signin-password"
@@ -113,14 +121,27 @@ export function SignInScreen({ identifier, scope, apiClient, session, notice, on
           error={errors.password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        {!platform && (
+        {onForgotPassword ? (
           <p className="auth-forgot">
-            <NavLink href={`/t/${identifier}/recuperar`}>{messages.signIn.forgot}</NavLink>
+            <button type="button" className="auth-link" onClick={onForgotPassword}>
+              {messages.signIn.forgot}
+            </button>
           </p>
+        ) : (
+          !platform && (
+            <p className="auth-forgot">
+              <NavLink href={`/t/${identifier}/recuperar`}>{messages.signIn.forgot}</NavLink>
+            </p>
+          )
         )}
         <p className={failure ? 'auth-feedback is-error' : 'auth-feedback is-success'} aria-live="polite" role={!failure && notice ? 'status' : undefined}>
           {failure ?? notice}
         </p>
+        {unverified && onRequestLink && (
+          <button type="button" className="auth-link" onClick={() => onRequestLink(email.trim())}>
+            {messages.signIn.pendingAction}
+          </button>
+        )}
         <button className={platform ? 'auth-submit' : 'auth-submit auth-submit--arrow'} type="submit" disabled={sending}>
           {sending ? messages.sending : text.submit}
         </button>

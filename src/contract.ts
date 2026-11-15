@@ -10,6 +10,9 @@ export interface Session {
   access?: 'password-change' | 'restricted';
   // What the token of the session says about the person (the "Mi perfil" view reads it); each value may be absent.
   account?: { name?: string; email?: string; phone?: string };
+  // Special permissions granted to the person (e.g. 'Validar comprobantes'). The token does not carry them yet: the
+  // container fills this from a claim when one exists and, until then, the roles substitute (ADR-007, 2026-10-15).
+  permissions?: string[];
   // `identifier` is the company the answer is for; the container requires it in the general scope and ignores it in
   // the tenant and platform scopes.
   open(answer: unknown, identifier?: string): void;
@@ -29,8 +32,16 @@ export interface MountProps {
   visualIdentity?: VisualIdentity | null;
   // Commercial name of the company, as the container read it; the visual identity screen shows it as read-only context.
   commercialName?: string;
+  // The logo and the commercial images the container read from the public profile of the company (a relative path each) and the way to tell it
+  // that they changed, so it shows them without a reload (portal spec 019, section 5). All optional, so an older container still works.
+  logoUrl?: string | null;
+  images?: { position: number; url: string }[];
+  onTenantImagesChange?: () => void;
   // Called after the colors were saved, so the container applies them to the whole page without a reload.
   onVisualIdentityChange?: (visualIdentity: VisualIdentity) => void;
+  // Called after the zone or the country of the company changed, so the container may use the zone to format the dates it shows
+  // (portal spec 018, section 5). Optional, so an older container still works.
+  onLocalizationChange?: (localization: { timeZone: string; country: string }) => void;
   apiClient: ApiClient;
   session: Session;
 }

@@ -1,9 +1,15 @@
 import { useState } from 'react';
 import { createRoot } from 'react-dom/client';
+import { CheckEmailNotice } from './auth/CheckEmailNotice';
 import { FirstPasswordScreen } from './auth/FirstPasswordScreen';
+import { readLinkToken, VERIFY_PATH } from './auth/linkToken';
+import { RecoverScreen } from './auth/RecoverScreen';
 import { RegisterScreen } from './auth/RegisterScreen';
+import { ResetPasswordScreen } from './auth/ResetPasswordScreen';
+import { RequestLinkScreen } from './auth/RequestLinkScreen';
 import { RestrictedNotice } from './auth/RestrictedNotice';
 import { SignInScreen } from './auth/SignInScreen';
+import { VerifyEmailScreen } from './auth/VerifyEmailScreen';
 import type { MountProps } from './contract';
 import { isValidIdentifier } from './data/security';
 import { messages } from './messages';
@@ -15,14 +21,26 @@ import { AuthCard } from './ui/AuthCard';
 import { NavigateContext } from './ui/navigation';
 import { ensureStylesheet } from './ui/stylesheet';
 
+// The page behind the link of the e-mail: /t/{company}/verificar-correo.
+function isVerifyAddress(identifier?: string): boolean {
+  return identifier !== undefined && isValidIdentifier(identifier) && window.location.pathname.replace(/\/$/, '') === `/t/${identifier}/${VERIFY_PATH}`;
+}
+
 // The access mark of the session decides the screen (RN-SEC-PT-05, -08). It fails closed: only an absent mark
 // shows the normal sign-in, and an unknown value is treated as restricted.
-export function AccessRoutes({ apiClient, session, identifier: link, scope, commercialName, visualIdentity, onVisualIdentityChange }: MountProps) {
+export function AccessRoutes({ apiClient, session, identifier: link, scope, commercialName, visualIdentity, onVisualIdentityChange, onLocalizationChange, logoUrl, images, onTenantImagesChange, linkToken }: MountProps & { linkToken?: string }) {
   const [saved, setSaved] = useState(false);
   const identifier = link;
   // A tiny view state instead of a router: the container owns the real routes (the link is only a hint).
-  const [view, setView] = useState<'sign-in' | 'sign-up'>('sign-in');
-  const [created, setCreated] = useState(false);
+  const [view, setView] = useState<'sign-in' | 'sign-up' | 'check-email' | 'request-link' | 'verify' | 'recover' | 'reset'>(() =>
+    isVerifyAddress(identifier) ? 'verify' : 'sign-in',
+  );
+  // E-mail typed at registration: the notice names it and the resend asks for a link for it.
+  const [registered, setRegistered] = useState('');
+  // E-mail typed at a sign-in refused as pending: it only starts the new-link form (spec 013, R-2).
+  const [linkEmail, setLinkEmail] = useState('');
+  // E-mail typed asking for a recovery code: it only starts the form that resets the password (spec 016).
+  const [recoveryEmail, setRecoveryEmail] = useState('');
   // Re-render after a good sign-in so the access mark of the new session is read again.
   const [, setReads] = useState(0);
   // Every sign-out closes the session and re-reads it, so the sign-in shows again (the container's session drops the
@@ -74,6 +92,10 @@ export function AccessRoutes({ apiClient, session, identifier: link, scope, comm
           commercialName={commercialName}
           visualIdentity={visualIdentity}
           onVisualIdentityChange={onVisualIdentityChange}
+          onLocalizationChange={onLocalizationChange}
+          logoUrl={logoUrl}
+          images={images}
+          onTenantImagesChange={onTenantImagesChange}
           onSignOut={signOut}
         />
       );
@@ -85,13 +107,66 @@ export function AccessRoutes({ apiClient, session, identifier: link, scope, comm
       <RegisterScreen
         identifier={identifier}
         apiClient={apiClient}
-        onDone={() => {
-          setCreated(true);
-          setView('sign-in');
+        onDone={(email) => {
+          setRegistered(email);
+          setView('check-email');
         }}
         onSignIn={() => setView('sign-in')}
       />
     );
+  }
+  if (view === 'check-email' && identifier !== undefined) {
+    return (
+      <CheckEmailNotice
+        identifier={identifier}
+        company={commercialName ?? identifier}
+        email={registered}
+        apiClient={apiClient}
+        onSignIn={() => setView('sign-in')}
+      />
+    );
+  }
+  if (view === 'verify' && identifier !== undefined) {
+    return (
+      <VerifyEmailScreen
+        identifier={identifier}
+        apiClient={apiClient}
+        token={linkToken}
+        onSignIn={() => setView('sign-in')}
+        onRequestLink={() => {
+          setLinkEmail('');
+          setView('request-link');
+        }}
+      />
+    );
+  }
+  // The recovery of the password is for a company and for the platform alike (spec 016).
+  if (view === 'recover') {
+    return (
+      <RecoverScreen
+        identifier={identifier}
+        apiClient={apiClient}
+        onSignIn={() => setView('sign-in')}
+        onHaveCode={(email) => {
+          setRecoveryEmail(email);
+          setView('reset');
+        }}
+      />
+    );
+  }
+  if (view === 'reset') {
+    return (
+      <ResetPasswordScreen
+        identifier={identifier}
+        apiClient={apiClient}
+        initialEmail={recoveryEmail}
+        onSignIn={() => setView('sign-in')}
+        onAskAgain={() => setView('recover')}
+      />
+    );
+  }
+  if (view === 'request-link' && identifier !== undefined) {
+    return <RequestLinkScreen identifier={identifier} apiClient={apiClient} initialEmail={linkEmail} onSignIn={() => setView('sign-in')} />;
   }
   return (
     <SignInScreen
@@ -99,14 +174,15 @@ export function AccessRoutes({ apiClient, session, identifier: link, scope, comm
       scope={scope}
       apiClient={apiClient}
       session={session}
-      notice={saved ? messages.firstPassword.saved : created ? messages.signUp.created : undefined}
-      onCreateAccount={() => {
-        setCreated(false);
-        setView('sign-up');
+      notice={saved ? messages.firstPassword.saved : undefined}
+      onCreateAccount={() => setView('sign-up')}
+      onForgotPassword={() => setView('recover')}
+      onRequestLink={(email) => {
+        setLinkEmail(email);
+        setView('request-link');
       }}
       onSignedIn={() => {
         setSaved(false);
-        setCreated(false);
         setReads((n) => n + 1);
       }}
     />
@@ -116,10 +192,12 @@ export function AccessRoutes({ apiClient, session, identifier: link, scope, comm
 // The container calls this with its own client and session; the portal never creates either (Annex H).
 export function mount(element: HTMLElement, props: MountProps): () => void {
   ensureStylesheet();
+  // Read once, outside any render, so a remount of the screens cannot lose the link; it leaves the address here.
+  const linkToken = isVerifyAddress(props.identifier) ? readLinkToken() : undefined;
   const root = createRoot(element);
   root.render(
     <NavigateContext.Provider value={props.navigate}>
-      <AccessRoutes {...props} />
+      <AccessRoutes {...props} linkToken={linkToken} />
     </NavigateContext.Provider>,
   );
   return () => root.unmount();

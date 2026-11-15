@@ -3,6 +3,8 @@ import type { ApiClient } from '../contract';
 export interface SignInRequest {
   email: string;
   password: string;
+  // The side a person who is customer and team member works from (HU-SEC-008); not sent at the platform.
+  context?: 'CUSTOMER' | 'TEAM';
 }
 
 // SessionResponse of multi-tour-security openapi.yaml.
@@ -47,6 +49,49 @@ export interface CreateCustomerRequest {
   phone: string;
   password: string;
   passwordConfirmation: string;
+}
+
+export function requestEmailVerificationPath(identifier: string): string {
+  if (!isValidIdentifier(identifier)) throw new Error('Invalid company identifier');
+  return `/api/v1/security/public/tenants/${identifier}/email-verifications`;
+}
+
+// Always 202 and no body, whatever the e-mail (RN-SEC-004-06); the route takes no Idempotency-Key.
+export function requestEmailVerification(client: ApiClient, identifier: string, email: string, signal: AbortSignal): Promise<void> {
+  return client.request<void>(requestEmailVerificationPath(identifier), { method: 'POST', body: { email }, signal });
+}
+
+export function confirmEmailVerificationPath(identifier: string): string {
+  return `${requestEmailVerificationPath(identifier)}/confirmations`;
+}
+
+// The link and the password of the account; no Idempotency-Key, a link works once.
+export function confirmEmailVerification(client: ApiClient, identifier: string, token: string, password: string, signal: AbortSignal): Promise<void> {
+  return client.request<void>(confirmEmailVerificationPath(identifier), { method: 'POST', body: { token, password }, signal });
+}
+
+// The routes of the password recovery (HU-SEC-004): the company of the link, or the platform when there is none.
+export function passwordRecoveryPath(identifier: string | undefined): string {
+  if (identifier === undefined) return '/api/v1/security/public/platform/password-recoveries';
+  if (!isValidIdentifier(identifier)) throw new Error('Invalid company identifier');
+  return `/api/v1/security/public/tenants/${identifier}/password-recoveries`;
+}
+
+// Always 202 and no body, whatever the e-mail (RN-SEC-006-01); the route takes no Idempotency-Key.
+export function requestPasswordRecovery(client: ApiClient, identifier: string | undefined, email: string, signal: AbortSignal): Promise<void> {
+  return client.request<void>(passwordRecoveryPath(identifier), { method: 'POST', body: { email }, signal });
+}
+
+export interface ResetPasswordRequest {
+  email: string;
+  code: string;
+  newPassword: string;
+  newPasswordConfirmation: string;
+}
+
+// The code and the passwords go in the body and nowhere else; no Idempotency-Key, a code works once.
+export function resetPassword(client: ApiClient, identifier: string | undefined, body: ResetPasswordRequest, signal: AbortSignal): Promise<void> {
+  return client.request<void>(`${passwordRecoveryPath(identifier)}/resets`, { method: 'POST', body, signal });
 }
 
 export function createCustomerPath(identifier: string): string {

@@ -7,6 +7,8 @@ export interface StaffMember {
   tenant: string;
   // RFC 3339 in UTC.
   createdAt: string;
+  // Absent means active (Mockup: c.active !== false).
+  active?: boolean;
 }
 
 export type StaffSource = () => Promise<StaffMember[]>;

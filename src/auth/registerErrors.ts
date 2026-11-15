@@ -1,4 +1,4 @@
-import type { ApiError } from '../contract';
+import { toApiError } from '../apiError';
 import { messages } from '../messages';
 
 export type RegisterField = keyof typeof messages.signUp.fieldRefused;
@@ -16,7 +16,7 @@ const known = (field: string): field is RegisterField => field in text.fieldRefu
 // The status and the field decide the text, never the answer's message. The two 422 refusals (e-mail in use and
 // inactive company) share a status and a code, so the e-mail one is told apart by the field the service names.
 export function mapRegisterError(error: unknown): RegisterFailure {
-  const { status, traceId, details } = (error ?? {}) as ApiError;
+  const { status, traceId, details } = toApiError(error);
   const named = (details ?? []).map((d) => d.field).filter(known);
   if (status === 400 && named.length > 0) {
     return { fields: Object.fromEntries(named.map((f) => [f, text.fieldRefused[f]])) };
